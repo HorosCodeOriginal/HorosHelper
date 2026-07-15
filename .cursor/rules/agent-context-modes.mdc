@@ -1,0 +1,131 @@
+---
+description: Eigene Agent-Modus-Konventionen im Cursor-Kontext behalten
+alwaysApply: true
+---
+
+# Eigene Agent-Kontext-Modi
+
+Index für Parameter, Aliase und Verweise auf dedizierte Rules/Skills. **Details** stehen in den verlinkten Dateien — hier keine Duplikation.
+
+## Workspace-Kontext
+
+Alle von dir entworfenen Projekte gehören zur Firma **HorosCode** — Details: `horoscode.mdc` (HorosCloud = Produktname, nicht Firma).
+
+## Geladene Agent-Quellen
+
+Optionaler Session-Kontext (lokal im Template, nicht zwingend erforderlich):
+
+- **Fix · Debug · GUI · Performance Elite Team:** `.cursor/agents/sources/FIX-DEBUG-GUI-PERFORMANCE-ELITE-TEAM.agent.md`
+- Kombiniert Deep + Critical: `.cursor/agents/sources/deep-critical-team.agent.md`
+- Deep-Analysis-Team: `.cursor/agents/sources/deep-analysis-team.agent.md`
+- Kritisches Denken: `.cursor/agents/sources/critical-thinking.chatmode.md`
+- Claude-Code-System: `.cursor/agents/sources/claude-code-system.chatmode.md`
+- GitHub Actions CI/CD: `.cursor/agents/sources/github-actions-ci-cd-best-practices.instructions.md`
+
+Fehlende Quellen sind optional — Agenten arbeiten ohne diese Dateien weiter.
+
+## Modus-Index
+
+| Modus | Parameter (Auswahl) | Details in |
+|-------|---------------------|------------|
+| Session Elite Team | `/on`, `/off` | unten → Session-Umschalter |
+| Deep + Critical | `/deep`, `/critical`, `/next`, `-percent N/M` | unten → Deep + Critical |
+| Fix · Debug · GUI · Perf | `/fix`, `/debug`, `/gui`, `/perf`, `/refactor`, `/stack`, `/quick` | unten → Elite Team |
+| Lean Mode | `/lean`, `/tokens:min`, `/minimal`, `/lean:off` | unten → Lean |
+| Boost | `/boost`, `/boost:off`, `/boost:wide` | unten → Boost; Wide → `wide-ultra-logical.mdc` |
+| Wide Ultra-Logical | `/wide-ultra-logical`, `/wul`, `/wide`, `/ultra-logical`, `/wide-ultra-logical:off`, `/wul:off` | `wide-ultra-logical.mdc`, `@wide-ultra-logical` |
+| Epic-Feature-Docs | `/doc-epic`, `/feature-docs`, `/doku-episch`, `/doc:function`, `/doc-epic:off` | `doc-epic.mdc`, `@doc-epic` |
+| Modell-Routing | — | `model-policy.mdc`, `orchestrator.mdc` |
+
+Standard: Elite Team + Deep/Critical **aktiv**, bis `/off`.
+
+## Parameter
+
+### Session-Umschalter
+
+- `/on`: Fix · Debug · GUI · Performance Elite Team + Deep + Critical für aktuelle Aufgabe und Follow-ups.
+- `/off`: Kombinierten Kontext deaktivieren.
+
+### Modell-Auswahl
+
+Vollständige Hierarchie: `model-policy.mdc`, Agent-Routing: `orchestrator.mdc`.
+
+| Stufe | Slug | Wann |
+|-------|------|------|
+| **Standard** | `composer-2.5` | Alle Agents — Executor, Exploration, Implementierung, Planung, Docs, 1:1 UI — **niemals** `composer-2.5-fast` (außer explizite Anfrage von dir) |
+| **Optional** | `gpt-5.6-sol-medium`, `gpt-5.6-terra-medium` | Nur wenn User/Task-System explizit anfordert |
+| **Verboten** | `claude-*` (alle) | Nie in Task-Spawns oder Agent-Frontmatter — User-Präferenz, siehe `model-policy.mdc` |
+
+Lean Mode und Wide Ultra-Logical ändern Modell-Slugs **nicht** (Standard bleibt `composer-2.5`, kein Claude).
+
+### Deep + Critical
+
+| Parameter | Wirkung |
+|-----------|---------|
+| `/next` | Rückfrage überspringen; Standard-Split 50/50 |
+| `/deep` | Deep-Analysis-Team führt |
+| `/critical` | Kritisches Denken / Advocatus Diaboli führt |
+| `-percent <deep>/<critical>` | Gewichtung, z. B. `70/30`; `100/0` = nur Deep, `0/100` = nur Critical |
+
+Deep-% = aktive Spezialisten (von 10); Critical-% = Fragetiefe (5 Stufen). Ausgabe: `🔬 DEEP ANALYSIS [X%] / 🤔 CRITICAL THINKING [Y%] / 📊 SYNTHESE`.
+
+### Fix · Debug · GUI · Performance
+
+| Parameter | Wirkung |
+|-----------|---------|
+| `/fix` | Gezielter Bugfix, minimaler Diff |
+| `/debug` | 4-Phasen-Workflow (Einschätzung → Untersuchung → Lösung → QA) |
+| `/gui` | GUI/UX (Layout, Zustände, a11y, Interaktion) |
+| `/perf` | Performance (messen → Bottleneck → optimieren → Regression) |
+| `/refactor` | Struktur ohne Verhaltensänderung |
+| `/stack react\|dotnet\|cpp\|full` | Stack-Fokus (Standard `full` für HorosCloud) |
+| `/quick` | 30–60 min Triage; `/standard` oder `/deep-work` für 7-Phasen |
+
+Aktivierung: `/agent FIX-DEBUG-GUI-PERFORMANCE-ELITE-TEAM` oder Parameter inline.
+
+Beispiele: `/fix /stack react …`, `/debug /gui /perf …`, `/debug /deep -percent 70/30 …`
+
+### Lean Mode (`/lean`, `/tokens:min`, `/minimal`, `/lean:off`)
+
+| Bereich | Verhalten |
+|---------|-----------|
+| Antworten | Knapp; keine Einleitung, keine Abschluss-Zusammenfassung wenn Ergebnis klar |
+| Exploration | Nur Nötiges lesen/suchen |
+| Tools | Parallele Calls batchen |
+| Diffs | Kleinster sinnvoller Patch |
+| Verifikation | Lint/Build/Test — nur Ergebnis melden |
+| Orchestrator | Weniger Sub-Agenten — siehe `orchestrator.mdc` → Lean Mode |
+| Modelle | Immer `composer-2.5` — nie `composer-2.5-fast` |
+
+Beispiele: `/lean fixe den Login-Bug`, `/tokens:min /stack react …`
+
+### Boost
+
+| Parameter | Wirkung |
+|-----------|---------|
+| `/boost` | Vollständiger, kompilierbarer Code — keine halben Snippets, bis `/boost:off` |
+| `/boost:wide` | Alias für Wide Ultra-Logical |
+
+### Wide Ultra-Logical
+
+| Parameter | Alias / Off |
+|-----------|-------------|
+| `/wide-ultra-logical` | `/wul`, `/wide`, `/ultra-logical`, `/boost:wide` |
+| Deaktivieren | `/wide-ultra-logical:off`, `/wul:off` |
+
+**Details:** `wide-ultra-logical.mdc` · **Skill:** `@wide-ultra-logical` · **Orchestrator:** `orchestrator.mdc` → Wide Ultra-Logical
+
+Konflikt `/lean`: Code-Tiefe = Wide gewinnt; Chat-Kürze = Lean gewinnt. Beide gleichzeitig möglich.
+
+### Epic-Feature-Dokumentation (`/doc-epic`)
+
+| Parameter | Alias / Off |
+|-----------|-------------|
+| `/doc-epic` | `/feature-docs`, `/doku-episch`, `/doc:function` |
+| Deaktivieren | `/doc-epic:off` |
+
+**Details:** `doc-epic.mdc` · **Skill:** `@doc-epic` · **Agent:** Iroh · **Screenshots:** `@screenshot-capture` + `@screenshot-verify`
+
+Ablage: `HorosCloudV5/docs/features/<feature-slug>/` · Firmen-Attribution: HorosCode (`horoscode.mdc`)
+
+Beispiele: `/doc-epic settings-widgets-notizen-bereich-canvas-design`, `/wul /stack react …`, `/lean /fix …`

@@ -1,0 +1,50 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:shell="using:HorosHelp.UI.ViewModels.Shell"
+             x:Class="HorosHelp.UI.Views.Shell.SidebarView"
+             x:DataType="shell:SidebarViewModel">
+  <Border Background="{DynamicResource BrushSurfaceSidebar}"
+          BorderBrush="{DynamicResource BrushBorder}"
+          BorderThickness="0,0,1,0"
+          Width="{DynamicResource SidebarWidth}">
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                  VerticalScrollBarVisibility="Auto">
+      <ItemsControl ItemsSource="{Binding Items}" Margin="8">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="shell:NavItemViewModel">
+            <Button Classes="nav-item"
+                    Classes.active="{Binding IsActive}"
+                    Command="{Binding NavigateCommand}"
+                    Margin="0,2">
+              <Grid ColumnDefinitions="4,28,*">
+                <Border Grid.Column="0"
+                        Width="3"
+                        CornerRadius="2"
+                        Background="{DynamicResource BrushAccentPrimary}"
+                        IsVisible="{Binding IsActive}" />
+                <Border Grid.Column="1"
+                        Width="20"
+                        Height="20"
+                        CornerRadius="4"
+                        Margin="0,0,8,0"
+                        Background="{DynamicResource BrushSurfaceElevated}"
+                        BorderBrush="{DynamicResource BrushBorder}"
+                        BorderThickness="1">
+                  <TextBlock Text="●"
+                             FontSize="8"
+                             HorizontalAlignment="Center"
+                             VerticalAlignment="Center"
+                             Foreground="{Binding NavDotForeground}" />
+                </Border>
+                <TextBlock Grid.Column="2"
+                           Text="{Binding Label}"
+                           VerticalAlignment="Center"
+                           FontSize="13" />
+              </Grid>
+            </Button>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+  </Border>
+</UserControl>

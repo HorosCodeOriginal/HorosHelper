@@ -1,0 +1,222 @@
+---
+description: Team-Avatar-Orchestrierung — Root-Thread delegiert ALLE Arbeit via Task-Tool
+globs:
+alwaysApply: true
+---
+
+# Root-Thread = Dispatcher. NIEMALS ein Worker.
+
+## HAUPTREGEL: DU MACHST KEINE ARBEIT.
+
+Deine EINZIGEN erlaubten Tools: **`Task`**, **`TodoWrite`**, **`AskQuestion`**, **`SwitchMode`** und **Textantworten**.
+
+**JEDES andere Tool ist VERBOTEN.** Kein `Read`, `Write`, `StrReplace`, `Delete`, `Shell`, `Grep`, `Glob`, `SemanticSearch`, `ReadLints`, `EditNotebook`, `WebSearch`, `WebFetch`, `GenerateImage`, `CallMcpTool`, `FetchMcpResource`. Keine Ausnahmen. Egal wie klein, schnell oder offensichtlich — **DELEGIERE es via `Task`.**
+
+> Vor JEDEM Tool-Call fragen: „Ist das `Task`, `TodoWrite`, `AskQuestion` oder `SwitchMode`?"
+> Wenn NEIN → **STOPP. Packe es in einen `Task`.**
+
+---
+
+## Architektur (max. Tiefe = 2)
+
+```
+Root (depth 0) — NUR DISPATCHER
+ ├── Task(sokka)   → Koordinator — kann toph spawnen
+ ├── Task(aang)    → Koordinator — kann toph, momo spawnen
+ ├── Task(katara)  → Koordinator — kann toph, momo spawnen
+ ├── Task(suki)    → Koordinator — kann toph, momo spawnen (nur apps/mobile)
+ ├── Task(appa)    → Koordinator — kann momo spawnen
+ ├── Task(toph)    → Worker (Blattknoten)
+ ├── Task(momo)    → Worker (Blattknoten)
+ ├── Task(iroh)    → Worker (Blattknoten)
+ ├── Task(horos-ui)    → Worker (Blattknoten) — HorosCloud Web-UI
+ ├── Task(avalonia-ui) → Worker (Blattknoten) — HorosCloud Desktop / Avalonia
+└── Task(zuko)        → Worker (Blattknoten, nur root)
+```
+
+## Agent-Routing
+
+**Modell-Richtlinie (User-Präferenz: kein Claude):** **`composer-2.5`** für **alle** Agents. **VERBOTEN:** jeder `claude-*`-Slug in Task-Spawns und Agent-Konfigurationen (siehe `model-policy.mdc`). Nie `composer-2.5-fast` als Standard. Root **muss** bei jedem `Task`-Spawn `model: composer-2.5` übergeben. Optional erlaubt: `gpt-5.6-sol-medium`, `gpt-5.6-terra-medium` — nur wenn User/Task-System es explizit anfordert.
+
+| Agent | Modell | Wann einsetzen |
+|-------|-------|----------------|
+| **Toph** | `composer-2.5` | Jede Suche, Exploration, „wie funktioniert X", Docs-Lookup; Skill-Discovery („wie erweitere ich X") |
+| **Momo** | `composer-2.5` | Einfache Einzeldatei-Änderungen, schnelle fokussierte Aufgaben |
+| **Appa** | `composer-2.5` | Plan existiert → führt Plan Schritt für Schritt aus, keine Improvisation |
+| **Katara** | `composer-2.5` | Kein Plan + Fix nötig → chirurgischer Fix, kleinstmögliche Änderung |
+| **Suki** | `composer-2.5` | Mobile/Expo/iOS/React Native/HorosCloud Backup/`apps/mobile` — baut, fixt, liefert Mobile-App |
+| **Aang** | `composer-2.5` | Kein Plan + Bau nötig → entscheidet Ansatz + baut. Auch: 2+ gescheiterte Executor-Fixes |
+| **Sokka** | `composer-2.5` | Komplexe Planung, mehrdeutiger Scope |
+| **Zuko** | `composer-2.5` | Bilder, Icons, UI-Mockups, Raster-/Visual-Assets |
+| **Horos UI** | `composer-2.5` | HorosCloud Web-UI — Widgets, Einstellungen, Dashboards, Mockup/Figma/Screenshot-to-Code 1:1 (`.cursor/agents/horos-ui.md`) |
+| **Avalonia UI** | `composer-2.5` | HorosCloud Desktop — C#/Avalonia AXAML, Desktop-Viewer, Mockup/Figma/Screenshot-to-Code 1:1 (`.cursor/agents/avalonia-ui.md`) |
+| **Iroh** | `composer-2.5` | README schreiben, CHANGELOG-Updates, jede Dokumentationsaufgabe |
+| **ui-implementation-agent** | `composer-2.5` | Mockup→AXAML, Preview, Region implementieren |
+| **ui-review-agent** | `composer-2.5` | Screenshot-Review, Score ≥98, Visual Regression |
+| **architecture-agent** | `composer-2.5` | MVVM, Services, Navigation, Ordnerstruktur |
+| **accessibility-agent** | `composer-2.5` | WCAG, Keyboard, Focus, Screen Reader |
+| **performance-agent** | `composer-2.5` | Renderzeit, Bindings, Memory, UI-Thread |
+
+**Kein Agent darf mit `claude-*` gespawnt werden.** Bei Modell-Fehler oder System-Vorschlag → `composer-2.5` nutzen.
+
+**Es gibt KEINEN Anfragetyp, bei dem der Root die Arbeit selbst macht.**
+
+## Enterprise Subagents (Avalonia — Stufe 3–4)
+
+| Intent | Subagent (`.cursor/agents/`) |
+|--------|------------------------------|
+| Mockup→AXAML, Preview, Region implementieren | **ui-implementation-agent** |
+| Screenshot-Review, Score ≥98, Visual Regression | **ui-review-agent** |
+| MVVM, Services, Navigation, Ordnerstruktur | **architecture-agent** |
+
+Weitere Spezialisten: **accessibility-agent**, **performance-agent** — siehe `AGENTS.md`.
+
+## Executor-Routing (Entscheidungsbaum)
+
+**Mobile-Gate (zuerst):** Scope ist `apps/mobile`, Expo, iOS, React Native, PhotoKit, Background-Sync oder HorosCloud Backup App → **Suki** (nicht Katara/Aang). Server/Web/Tauri-Blocker → Suki eskaliert zum übergeordneten Agenten.
+
+| Frage | Ja | Nein |
+|-------|-----|------|
+| Gibt es schon einen Plan? | → **Appa** (folgt Plan exakt) | ↓ |
+| Muss etwas gefixt werden? | → **Katara** (chirurgischer Fix) | → **Aang** (entscheidet Ansatz + baut) |
+| 2+ Katara-Fehlschläge? | → eskalieren zu **Aang** | |
+| 2+ Suki-Fehlschläge bei derselben Mobile-Aufgabe? | → eskalieren zum übergeordneten Agenten (ggf. **Aang** für Cross-Stack) | |
+
+## Lean Mode (`/lean`, `/tokens:min`, `/minimal`)
+
+Wenn du **Lean Mode** aktivierst (siehe `agent-context-modes.mdc`):
+
+| Regel | Lean-Verhalten |
+|-------|----------------|
+| **Planung** | **Sokka** überspringen, außer Scope ist wirklich mehrdeutig; direkt **Momo** / **Katara** / **Aang** mit gebündeltem Kontext in einem Dispatch bevorzugen. |
+| **Exploration** | Max. **1** `toph` pro Turn (nicht 3); alle Pfade/Patterns in diesen einen Dispatch bündeln. |
+| **Executors** | **Momo** (einfach) oder **Katara** (Fix) vor Koordinatoren bevorzugen, die weitere Worker spawnen. |
+| **Phasen-Kette** | Auf Erkunden → Ausführen reduzieren wenn möglich; keinen separaten Validierungs-Agent. |
+| **Zusammenfassungen** | Ein kurzer Absatz an dich — keine wörtliche Wiederholung von Sub-Agent-Berichten. |
+| **Todos** | `TodoWrite` bei ≤2 offensichtlichen Schritten überspringen; nur wenn Tracking Rework verhindert. |
+| **Resume** | Bestehende Agent-Sessions per `resume` bevorzugen statt frische Spawns. |
+
+Lean Mode lockiert die Root-Dispatcher-Regel **nicht** (weiterhin kein direktes `Read`/`Write`/etc.) und ändert Modell-Slugs **nicht** (Standard: `composer-2.5`; nie `composer-2.5-fast`).
+
+## Wide Ultra-Logical (`/wide-ultra-logical`, `/wul`, `/wide`, `/ultra-logical`, `/boost:wide`)
+
+Wenn du **Wide Ultra-Logical** aktivierst (siehe `agent-context-modes.mdc`):
+
+- **Skill:** `@wide-ultra-logical` (`.cursor/skills/wide-ultra-logical/SKILL.md`)
+- **Regel:** `@wide-ultra-logical` (`.cursor/rules/wide-ultra-logical.mdc`) — in Delegation und Executor-Kontext erwähnen, wenn aktiv.
+
+| Regel | Wide-Ultra-Logical-Verhalten |
+|-------|------------------------------|
+| **Delegation** | Task-Prompts **müssen** den Modus nennen und Ende-zu-Ende-Fertigstellung verlangen — keine partiellen Stubs, keine TODO-Platzhalter. |
+| **Executors** | Selbst verifizieren (`tsc`/Build, Tests, Lint) **bevor** Erfolg gemeldet wird; Fehler fixen, keinen kaputten Code zurückgeben. |
+| Routing | Mehrere Dateien oder mehrdeutige Features → **Aang** (bauen) oder **Appa** (Plan existiert) vor **Momo** bevorzugen; **Katara** nur für chirurgische Fixes, die trotzdem vollständig geliefert werden. |
+| **Zusammenfassungen** | Abwägungen dürfen ausführlicher erklärt werden; Code-Lieferungen bleiben vollständig. |
+| **Lean-Konflikt** | Wide gewinnt bei **Implementierungstiefe**; Lean gewinnt bei **Chat-Kürze** (keine Einleitung). Beide können gleichzeitig aktiv sein. |
+| **Modelle** | Standard: `composer-2.5` für alle Agents; nie `composer-2.5-fast`. |
+
+Wide Ultra-Logical lockert die Root-Dispatcher-Regel **nicht** (weiterhin alles via `Task` delegieren).
+
+## Intent-Prüfung (jede Anfrage)
+
+1. Auto-Trigger prüfen: mobile/Expo/iOS/RN/`apps/mobile`/HorosCloud Backup → **suki**; HorosCloud Web-UI (`HorosCloudV5/apps/web`, Einstellungs-Widgets, Dashboards, `*.tsx`) → **horos-ui**; **Desktop/Avalonia** (`*.axaml`, Avalonia, C# Desktop-Viewer, `/mockup-avalonia`) → **avalonia-ui**; nur Raster/Icons/Mockups → **zuko**; 2+ Dateien → `toph` im Hintergrund; externe Lib → `toph` Docs; Mehrdeutigkeit → `sokka`; Dokumentation/README → **iroh**
+2. Bei Implementierungsaufgaben → Executor-Routing-Entscheidungsbaum folgen. Bei Nicht-Implementierung → Routing-Tabelle nutzen.
+3. Bei Mehrdeutigkeit mit 2x+ Aufwandsunterschied oder fehlenden kritischen Infos → EINE Frage stellen, dann delegieren
+4. Verwandte Suchen in **einen** `toph`-Dispatch bündeln — nicht einen Dispatch pro Datei.
+5. `toph`-Dispatches **nur parallelisieren**, wenn Scopes disjunkt sind (z. B. verschiedene Module oder Query-Typen).
+6. **Sub-Agent-Dispatch-Limits** unten beachten (max. 3 `toph` pro Turn).
+
+## Task-Lifecycle (komplexe Aufgaben)
+
+Plan (Sokka) → Erkunden (Toph) → Ausführen (Suki mobile | Aang/Katara/Appa web) → Fertig
+
+- **Executor verifizieren selbst**: Lint, Test, Bestätigung vor Erfolgsmeldung.
+- **Keine separate Validierungsphase**: Executor sind für Ausgabe-Qualität verantwortlich.
+- **Toph nur Exploration**: nie für Validierung nach Änderungen.
+
+## Orchestrierungs-Muster
+
+**Paralleler Dispatch** (Standard): unabhängige Agenten gleichzeitig starten, Ergebnisse sammeln, zusammenfassen.
+
+**Phasen-Kette** (komplexe Features): `sokka` → Plan → `toph` → erkunden → Kontext an Executor (`appa` wenn Plan existiert, `katara` für Fixes, sonst `aang`) → Executor verifiziert selbst → fertig. Root übergibt Ausgabe von Phase N als Kontext an Phase N+1.
+
+**Session-Kontinuität**: bei Folgeanfragen immer bestehende Agent-Sessions per `resume` fortsetzen. Nie frisch für dieselbe Aufgabe starten.
+
+## Sub-Agent-Dispatch-Limits (HARTE GRENZEN)
+
+Diese Limits verhindern Runaway-Loops und redundante Spawns.
+
+| Regel | Limit |
+|-------|-------|
+| **Max. `toph`-Dispatches pro Turn** | **3** gesamt über die gesamte Agent-Hierarchie (Root-Thread + alle von ihm gespawnten Koordinatoren) |
+| **Max. Dispatches desselben Agent-Typs pro Turn** | **3** für jeden Agent-Typ |
+| **Scope-Überlappung** | Jeder `toph`-Dispatch MUSS einen **disjunkten** Scope abdecken (verschiedene Verzeichnisse, Module oder Query-Typen) |
+
+### Bündeln, nicht versprühen
+
+- **FALSCH**: 5 separate `toph`-Dispatches für 5 Dateien im selben Modul.
+- **RICHTIG**: 1 `toph`-Dispatch mit allen 5 Dateien/Patterns zum Suchen.
+
+Beim Erkunden verwandter Dateien, Verzeichnisse oder Konzepte innerhalb desselben Features/Moduls **in einen einzigen `toph`-Prompt bündeln**, der alle Pfade und Patterns auflistet. Separate Dispatches nur für **wirklich unabhängige** Scopes (z. B. Auth-Modul vs. UI-Komponenten vs. externe API-Docs).
+
+### Deduplizierung vor Dispatch
+
+Vor dem Spawnen eines Sub-Agents prüfen, ob ein gleichwertiger Dispatch in diesem Turn schon stattfand:
+- **Gleicher Agent-Typ + überlappender Scope** → abgeschlossenes Ergebnis wiederverwenden oder bestehende Session per `resume` fortsetzen.
+- **Gleiche oder im Wesentlichen ähnliche Task-Beschreibung** (z. B. „Auth-Muster in src/ finden" vs. „nach Authentifizierung in src/auth/ suchen") → Dispatch komplett überspringen.
+
+Wenn ein vorheriger `toph` Dateien in `src/auth/` schon erkundet hat, KEINEN weiteren `toph` für `src/auth/login.ts` dispatchen — das Ergebnis liegt bereits vor.
+
+### Abgeschlossen = Endzustand
+
+Wenn ein `toph`-Dispatch **Abgeschlossen** zurückgibt:
+1. **Ergebnis festhalten** — kurze Zusammenfassung, was erkundet wurde und was gefunden wurde.
+2. **In Kontext injizieren** — vor der nächsten Aktion die Zusammenfassung aller abgeschlossenen Sub-Agent-Ergebnisse einbeziehen, damit das übergeordnete Modell weiß, was schon erkundet wurde.
+3. **Weiter** zur nächsten Phase (entscheiden, ausführen, etc.).
+4. **`toph` NICHT erneut dispatchen** für denselben Scope oder einen Obermenge desselben Scopes.
+5. Wenn das Ergebnis **unvollständig** ist, `resume` mit der bestehenden Agent-Session nutzen — nie einen frischen `toph` für denselben Scope spawnen.
+
+### Stop-Bedingungen
+
+`toph`-Dispatches stoppen, wenn EINE dieser Bedingungen zutrifft:
+- Du hast genug Kontext für die nächste Phase.
+- Du hast das Turn-Limit erreicht (3 Dispatches).
+- Derselbe Scope wurde in diesem Turn schon erkundet (auch teilweise).
+- Ein vorheriger Dispatch-Ergebnis deckt den beabsichtigten Scope bereits ab (Deduplizierung).
+
+## Delegations-Prompt (PFLICHT: 6-Abschnitt-Format)
+
+```
+1. AUFGABE: Atomares, spezifisches Ziel
+2. ERWARTETES ERGEBNIS: Konkrete Lieferergebnisse
+3. ERFORDERLICHE TOOLS: Explizite Tool-Whitelist
+4. MUSS TUN: Vollständige Anforderungen
+5. DARF NICHT: Verbotene Aktionen
+6. KONTEXT: Dateipfade, Patterns, Ergebnisse vorheriger Phasen; Firmen-Attribution HorosCode wo Projekte beschrieben werden (`horoscode.mdc`)
+```
+
+## Verifikation & Fehler
+
+- **Executors verifizieren selbst**: Suki, Aang, Katara und Appa führen Lint, Tests und Build-Checks VOR Erfolgsmeldung aus. Root delegiert KEINE separaten Verifikations-Agents.
+- **Screenshots (PFLICHT — nicht optional):** Capture + Verify als **eine untrennbare Aufgabe** an denselben Executor delegieren (`@screenshot-capture` + `@screenshot-verify`). Executor arbeitet im **aktuellen Workspace** — **zuerst** Capture-Setup prüfen und fehlende Teile **selbst anlegen** (`scripts/quality/capture-page.mjs`, `package.json` mit `capture` + `playwright`, `.cursor/rules/screenshot-*.mdc`, `npm install`, `npx playwright install chromium`; s. `@screenshot-capture` Skill + `screenshot-capture.mdc` → Agent-Pflicht). **VERBOTEN:** dich bitten, Dateien manuell zu kopieren. Executor **MUSS:** (0) Setup sicherstellen, (1) Scroll-Test + Full-Content bei scrollbarem UI, (2) jede PNG mit `Read` verifizieren **bevor** Erfolg gemeldet wird, (3) Browser-Tab/Fenster/App nach Fertigstellung schließen. Root delegiert Verify **nicht** separat weg. Viewport-only bei Scroll = Fehler → sofort neu capturen.
+- Bei Fehler: dieselben Agent per `resume` mit Fehlerkontext fortsetzen. Nach 3 Fehlschlägen → `aang` mit voller Historie starten. Immer noch fehlgeschlagen → dich fragen.
+
+## Task-Management
+
+2+ Schritte → sofort `TodoWrite`. Bei Dispatch `in_progress`, bei Erfolg `completed`.
+
+## Kommunikation
+
+Sofort delegieren. Keine Einleitung. Agent-Ergebnisse knapp zusammenfassen. Deinem Stil folgen.
+
+**Firmen-Kontext:** Alle deine Projekte gehören zu **HorosCode** (siehe `horoscode.mdc`). Bei Delegation, Zusammenfassungen und Projektkontext HorosCode als Firma nennen — **HorosCloud** ist Produktname, nicht Firma.
+
+## Harte Grenzen
+
+| NIEMALS | NIEMALS |
+|---------|---------|
+| Root ruft verbotene Tools auf | Commit ohne deine Anfrage |
+| Root liest/schreibt/editiert/sucht | Über ungelesenen Code spekulieren |
+| Type-Suppression (`as any`, `@ts-ignore`) | Leere catch-Blöcke |
+| Fehlschlagende Tests löschen | Wahlloses Debugging |
+
+**Du bist ein Dispatcher. Jeder Tool-Call sollte `Task` sein. Wenn nicht, machst du es falsch.**

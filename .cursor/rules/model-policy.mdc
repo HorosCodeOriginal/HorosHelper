@@ -1,0 +1,59 @@
+---
+description: Modell-Richtlinie — kein Claude in Agents; Standard composer-2.5
+alwaysApply: true
+---
+
+# Modell-Richtlinie
+
+## User-Präferenz: Kein Claude in Agents
+
+**Du willst keine Claude-Modelle in deinen Agents.** Diese Präferenz gilt workspace-weit und ist nicht verhandelbar, außer du forderst explizit ein einzelnes Claude-Modell im Hauptchat an.
+
+| Bereich | Regel |
+|---------|-------|
+| **Task-Tool-Spawns** | `model:` darf **keinen** `claude-*`-Slug enthalten |
+| **Agent-Frontmatter** (`.cursor/agents/*.md`) | `model:` muss `composer-2.5` oder erlaubtes GPT sein — nie Claude |
+| **Sub-Agents** | Toph, Momo, Katara, Appa, Aang, Suki, Sokka, Iroh, Zuko, Horos UI, Avalonia UI, ui-implementation-agent, ui-review-agent, architecture-agent, accessibility-agent, performance-agent, … |
+| **Root-Orchestrator** | Muss bei jedem `Task`-Spawn `model: composer-2.5` übergeben (siehe `orchestrator.mdc`) |
+| **Hauptchat** | Manuelle Modellwahl bleibt dir überlassen — diese Regel betrifft nur Agent-/Task-Spawns |
+
+**Workspace:** Deine Projekte gehören zur Firma **HorosCode** — siehe `horoscode.mdc` (HorosCloud = Produktname, nicht Firma).
+
+## Verboten für Agents (`claude-*`)
+
+Alle Slugs, die mit `claude-` beginnen, sind für Agent-Spawns und Agent-Konfigurationen **verboten**, u. a.:
+
+- `claude-4.6-sonnet-medium-thinking`
+- `claude-opus-4-8-thinking-high`
+- `claude-fable-5-thinking-high`
+- `claude-sonnet-5-thinking-high`
+- Jeder weitere `claude-*`-Slug, den das Task-System anbietet
+
+**NIEMALS** Claude als Standard, Fallback oder Override in Task-Spawns, Agent-Frontmatter oder Sub-Agent-Routing verwenden. Wenn ein Spawn mit Claude-Modell fehlschlägt oder das System Claude vorschlägt → `composer-2.5` nutzen und dem User kurz melden, dass Claude laut Workspace-Regel nicht für Agents erlaubt ist.
+
+## Erlaubte Modelle für Agents
+
+| Slug | Verwendung |
+|------|------------|
+| `composer-2.5` | **Standard** — alle Agents, Executor, Exploration, Implementierung, Planung, Docs, 1:1 UI |
+| `gpt-5.6-sol-medium` | Optional, wenn User/Task-System es explizit anbietet oder anfordert |
+| `gpt-5.6-terra-medium` | Optional, wenn User/Task-System es explizit anbietet oder anfordert |
+| `composer-2.5-fast` | **VERBOTEN** als Standard — nie nutzen, außer du forderst fast explizit an |
+
+Ohne explizite User-Anfrage für ein alternatives Modell: immer **`composer-2.5`**.
+
+## Agent → Modell (Task-Spawns)
+
+| Agent | Modell | Hinweise |
+|-------|--------|----------|
+| **Alle Agents** (Toph, Momo, Katara, Appa, Aang, Suki, Zuko, Sokka, Iroh, Horos UI, Avalonia UI, ui-implementation-agent, ui-review-agent, architecture-agent, accessibility-agent, performance-agent, …) | `composer-2.5` | Einheitlicher Standard — kein Claude |
+
+Root-Orchestrator **muss** bei jedem `Task`-Spawn `model: composer-2.5` übergeben. Routing-Tabelle in `orchestrator.mdc`.
+
+## Regeln
+
+- **NIEMALS** `claude-*`-Slugs in Agent-Frontmatter oder Task-Spawns verwenden.
+- **NIEMALS** standardmäßig `composer-2.5-fast` nutzen.
+- Koordinatoren erben `composer-2.5`, wenn kein manuelles Override gesetzt ist.
+- **Lean Mode** reduziert nur Ausführlichkeit und Orchestrierung; er ändert Modell-Slugs **nicht**.
+- **Wide Ultra-Logical** (`/wide-ultra-logical`, `/wul`, `/wide`, `/ultra-logical`, `/boost:wide`): vollständige Ende-zu-Ende-Implementierung mit Selbst-Verifikation; siehe `agent-context-modes.mdc` und `@wide-ultra-logical`. Erhöht Implementierungstiefe — Standard bleibt `composer-2.5`.

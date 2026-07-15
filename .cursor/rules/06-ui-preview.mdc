@@ -1,0 +1,90 @@
+---
+description: UI Preview gate — never proceed without isolated preview confirmed
+globs:
+  - "**/*.axaml"
+  - "**/Previews/**"
+alwaysApply: false
+---
+
+# UI Preview — Mandatory Gate After Every Component/Region
+
+**Firma:** HorosCode · **Produkt:** HorosCloud
+
+> **Never proceed to the next component or region until Preview is running and confirmed.**
+
+## Rule
+
+After implementing **any** component or region:
+
+1. Create isolated `*Preview.axaml`
+2. Run Preview (Viewer or `dotnet run` on preview project)
+3. Verify visual output matches intent
+4. **STOP** — show Preview to user (`12-human-approval`) before continuing
+
+## File Pattern
+
+```text
+Views/Previews/HeaderPreview.axaml
+Views/Previews/HeaderPreview.axaml.cs
+ViewModels/Previews/HeaderPreviewViewModel.cs
+```
+
+## HeaderPreview Example
+
+```xml
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:components="using:HorosCloud.Desktop.Views.Components"
+        xmlns:vm="using:HorosCloud.Desktop.ViewModels.Previews"
+        x:Class="HorosCloud.Desktop.Views.Previews.HeaderPreview"
+        x:DataType="vm:HeaderPreviewViewModel"
+        Width="1440" Height="56"
+        Background="{DynamicResource BrushBackgroundBase}"
+        Title="Preview: Header">
+  <components:HorosHeaderBar DataContext="{Binding}" />
+</Window>
+```
+
+## Design.PreviewWith (in Component)
+
+```xml
+<UserControl xmlns:previews="using:HorosCloud.Desktop.Views.Previews"
+             ...>
+  <Design.PreviewWith>
+    <previews:HeaderPreview />
+  </Design.PreviewWith>
+  <!-- component markup -->
+</UserControl>
+```
+
+## Preview ViewModel with Mock Data
+
+```csharp
+public partial class HeaderPreviewViewModel : ObservableObject
+{
+    public static HeaderPreviewViewModel DesignInstance { get; } = new()
+    {
+        AppTitle = "HorosCloud",
+        UserName = "Alex M.",
+        NotificationCount = 3
+    };
+
+    [ObservableProperty] private string _appTitle = "";
+    [ObservableProperty] private string _userName = "";
+    [ObservableProperty] private int _notificationCount;
+}
+```
+
+## Never
+
+- **Never** skip Preview because "the AXAML looks correct"
+- **Never** test only inside full MainWindow during Pass 1
+- **Never** proceed to Screenshot/Review without Preview running
+- **Never** start the next region before current Preview is approved
+
+## References
+
+- Human gate: `12-human-approval.mdc`
+- Review: `07-review-loop.mdc`
+- Skill: `@preview-first-development`, `@avalonia-preview`
+- Legacy: `@implementing-figma-designs-avalonia`

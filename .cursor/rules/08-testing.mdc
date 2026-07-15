@@ -1,0 +1,74 @@
+---
+description: Build, lint, type check, accessibility — no unit tests required
+globs:
+  - "**/*.cs"
+  - "**/*.axaml"
+  - "**/*.csproj"
+alwaysApply: false
+---
+
+# Testing — Build & Quality Gates (No Unit Tests)
+
+**Firma:** HorosCode · **Produkt:** HorosCloud
+
+Pass 1 Mockup→Code requires **build and static quality checks** — not unit test suites.
+
+## Mandatory Before "Done" Per Region
+
+| Check | Command / Action | Must pass |
+|-------|------------------|-----------|
+| Build | `dotnet build` | Exit code 0 |
+| Lint | `ReadLints` on changed files | Zero errors |
+| Type check | Compiler / IDE diagnostics | Zero errors |
+| Preview runs | Isolated `*Preview.axaml` | Renders without crash |
+| Accessibility | Manual checklist (review) | Part of 98 score |
+
+## Build Example
+
+```bash
+dotnet build HorosCloud.Desktop/HorosCloud.Desktop.csproj
+```
+
+Fix all compiler errors before screenshot review. **Never** suppress with `#pragma` or `@ts-ignore` equivalents.
+
+## Accessibility Minimum (Pass 1)
+
+```xml
+<!-- Every interactive control -->
+<Button AutomationProperties.Name="Save changes"
+        Classes="primary"
+        MinWidth="40" MinHeight="40" />
+
+<!-- Focus visible via theme -->
+<Style Selector="Button:focus-visible">
+  <Setter Property="BorderBrush" Value="{DynamicResource BrushBorderFocus}" />
+  <Setter Property="BorderThickness" Value="2" />
+</Style>
+```
+
+| Check | Criterion |
+|-------|-----------|
+| Contrast | ≥ 4.5:1 normal text, ≥ 3:1 large text |
+| Focus | Keyboard Tab shows visible focus ring |
+| Names | `AutomationProperties.Name` on buttons, inputs, nav |
+| Touch target | ≥ 40×40 px for interactive controls |
+
+## Not Required in Pass 1
+
+- Unit tests (`xUnit`, `NUnit`)
+- Integration tests
+- UI automation tests
+- Performance benchmarks
+
+## Never
+
+- **Never** report success with failing `dotnet build`
+- **Never** ignore linter errors on modified files
+- **Never** skip accessibility because "it's just Pass 1"
+- **Never** delete failing tests to pass CI (N/A for Pass 1 — but never in any pass)
+
+## References
+
+- Review scoring: `07-review-loop.mdc`
+- Completion: `09-completion.mdc`
+- Checklist: `docs/review-checklist.md`

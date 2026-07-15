@@ -1,0 +1,11 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="HorosHelp.UI.Controls.Sparkline">
+
+  <Canvas x:Name="RootCanvas" ClipToBounds="True">
+    <Polyline x:Name="Line"
+              StrokeLineCap="Round"
+              StrokeJoin="Round" />
+  </Canvas>
+
+</UserControl>

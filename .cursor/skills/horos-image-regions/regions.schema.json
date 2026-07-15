@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://horoscode.dev/schemas/horos-image-regions/1.0",
+  "title": "HorosCode Image Regions",
+  "description": "Maschinenlesbare Region-Definition für HorosCloud Raster-Assets (HorosCode)",
+  "type": "object",
+  "required": ["schemaVersion", "assetSlug", "parentFullPath", "fullWidth", "fullHeight", "regions"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Schema-Version"
+    },
+    "assetSlug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "description": "Kebab-case Ordner-Name des Assets"
+    },
+    "parentFullPath": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Workspace-relativer Pfad zum kanonischen full.{ext}"
+    },
+    "fullWidth": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Breite des Gesamtbildes in px"
+    },
+    "fullHeight": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Höhe des Gesamtbildes in px"
+    },
+    "nineSlice": {
+      "type": "boolean",
+      "default": false,
+      "description": "True wenn 9-Slice-Grid für stretchbare UI-Hintergründe"
+    },
+    "singleLayer": {
+      "type": "boolean",
+      "default": false,
+      "description": "True wenn kein sinnvoller Slice — regions kann leer sein"
+    },
+    "singleLayerReason": {
+      "type": "string",
+      "description": "Begründung wenn singleLayer true (DE oder EN)"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 Erstellungszeitpunkt"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 letzte Änderung"
+    },
+    "regions": {
+      "type": "array",
+      "description": "Liste der visuellen Bereiche",
+      "items": {
+        "$ref": "#/$defs/region"
+      }
+    }
+  },
+  "$defs": {
+    "bounds": {
+      "type": "object",
+      "required": ["x", "y", "width", "height"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "integer", "minimum": 0 },
+        "y": { "type": "integer", "minimum": 0 },
+        "width": { "type": "integer", "minimum": 1 },
+        "height": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "label": {
+      "type": "object",
+      "required": ["de", "en"],
+      "additionalProperties": false,
+      "properties": {
+        "de": { "type": "string", "minLength": 1 },
+        "en": { "type": "string", "minLength": 1 }
+      }
+    },
+    "usage": {
+      "type": "string",
+      "enum": ["icon", "bg", "overlay", "text-safe", "decorative"]
+    },
+    "sliceRole": {
+      "type": "string",
+      "enum": [
+        "top-left",
+        "top-center",
+        "top-right",
+        "mid-left",
+        "center",
+        "mid-right",
+        "bottom-left",
+        "bottom-center",
+        "bottom-right"
+      ]
+    },
+    "region": {
+      "type": "object",
+      "required": [
+        "id",
+        "slug",
+        "label",
+        "bounds",
+        "dominantHex",
+        "transparent",
+        "zIndex",
+        "usage",
+        "exportPath",
+        "parentFullPath"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^region-[a-z0-9]+(?:-[a-z0-9]+)*$",
+          "description": "Stabile Region-ID"
+        },
+        "slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+          "description": "Dateiname ohne Extension"
+        },
+        "label": { "$ref": "#/$defs/label" },
+        "bounds": { "$ref": "#/$defs/bounds" },
+        "dominantHex": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "description": "Dominante Farben der Region"
+        },
+        "transparent": {
+          "type": "boolean",
+          "description": "Enthält die Region signifikanten Alpha-Kanal"
+        },
+        "zIndex": {
+          "type": "integer",
+          "description": "Stapelreihenfolge — 0 = hinten"
+        },
+        "layer": {
+          "type": "integer",
+          "description": "Alias für zIndex (deprecated — zIndex bevorzugen)"
+        },
+        "usage": { "$ref": "#/$defs/usage" },
+        "exportPath": {
+          "type": "string",
+          "pattern": "^regions/.+\\.(png|webp|jpg|jpeg)$",
+          "description": "Relativer Pfad vom Asset-Ordner"
+        },
+        "parentFullPath": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Pfad zum full.{ext} (gleich wie Asset-Ebene)"
+        },
+        "sliceRole": { "$ref": "#/$defs/sliceRole" },
+        "notes": {
+          "type": "string",
+          "description": "Optionale Kurznotiz (DE/EN)"
+        }
+      }
+    }
+  }
+}

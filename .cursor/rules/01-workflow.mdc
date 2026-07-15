@@ -1,0 +1,64 @@
+---
+description: Avalonia Mockup→Code workflow — Analyse to next region, incremental only
+alwaysApply: true
+---
+
+# Workflow — Avalonia Mockup→Code
+
+**Firma:** HorosCode · **Produkt:** HorosCloud
+
+## Mandatory Sequence
+
+Every Desktop UI task follows this order. **Never skip a step.**
+
+```
+Analyse → Zerlegen → Bereich wählen → Implementieren → Preview
+  → Screenshot → Review (≥98) → Korrektur → Human Approval → Nächster Bereich
+```
+
+| Step | Rule | Output |
+|------|------|--------|
+| 1 Analyse | `03-mockup-analysis` | Layout grid, spacing, tokens, component list |
+| 2 Zerlegen | `01-workflow` (this) | Region list: Header, Sidebar, Content, … (`@ui-region-planner`) |
+| 3 Bereich | One region only | Single scope for current task |
+| 4 Implement | `04-component-discovery`, `05-csharp` | AXAML + ViewModel |
+| 5 Preview | `06-ui-preview` | Isolated `*Preview.axaml` running |
+| 6 Screenshot | `07-review-loop` | PNG at mockup dimensions |
+| 7 Review | `07-review-loop` | Score ≥ 98 documented |
+| 8 Korrektur | `07-review-loop` | Fix diffs, re-screenshot |
+| 9 Human Approval | `12-human-approval` | **STOP** — user confirms before next region (`@human-approval-gate`) |
+| 10 Nächster Bereich | Repeat from step 3 | Shell merge only after all regions approved |
+
+## One Region Per Task
+
+- **Never** implement Header + Sidebar + Content in one pass
+- **Never** proceed to the next region before Human Approval (`12-human-approval`)
+- **Never** merge into Shell before every region scored ≥ 98
+
+## Typical Region Order
+
+```
+Header → Sidebar → Toolbar → Content Panel → Footer → Shell Assembly
+```
+
+Dependencies flow top-down. Shell assembly is the **last** step.
+
+## Skills (read in order)
+
+**High-End:** `@ui-region-planner` → `@figma-analysis` → `@pixel-perfect-ui` → `@avalonia-preview` → `@screenshot-reviewer` → `@visual-regression` → `@human-approval-gate` → `@completion-review-board`
+
+**Legacy ergänzend:** `@avalonia-figma-to-code`, `@avalonia-design-system`, `@implementing-figma-designs-avalonia`
+
+## Command
+
+`/mockup-avalonia` → agent **avalonia-ui**
+
+## References
+
+- Details: `docs/skills.md`
+- Checklist: `docs/review-checklist.md`
+- Architecture: `docs/architecture.md`
+
+## Skills
+
+Pflicht vor Implement: `@figma-analysis` (Analyse) → `@incremental-ui` (ein Bereich). Details: `docs/skills.md`.

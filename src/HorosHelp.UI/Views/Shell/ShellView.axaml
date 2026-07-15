@@ -1,0 +1,113 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:shell="using:HorosHelp.UI.ViewModels.Shell"
+             xmlns:views="using:HorosHelp.UI.Views.Shell"
+             xmlns:services="using:HorosHelp.UI.Services"
+             x:Class="HorosHelp.UI.Views.Shell.ShellView"
+             x:DataType="shell:ShellViewModel">
+  <UserControl.Resources>
+    <services:ViewLocator x:Key="ViewLocator" />
+  </UserControl.Resources>
+
+  <Grid RowDefinitions="Auto,*,Auto"
+        Background="{DynamicResource BrushBackgroundBase}">
+    <!-- Title Bar -->
+    <Border x:Name="TitleBarHost"
+            Grid.Row="0"
+            Height="{DynamicResource TitleBarHeight}"
+            Background="{DynamicResource BrushTitleBar}"
+            BorderBrush="{DynamicResource BrushBorder}"
+            BorderThickness="0,0,0,1">
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <StackPanel Grid.Column="0"
+                    Orientation="Horizontal"
+                    Spacing="10"
+                    Margin="12,0,0,0"
+                    VerticalAlignment="Center">
+          <Border Width="24"
+                  Height="24"
+                  CornerRadius="6"
+                  Background="{DynamicResource BrushAccentPrimary}">
+            <TextBlock Text="H"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       FontWeight="Bold"
+                       Foreground="{DynamicResource BrushBackgroundBase}" />
+          </Border>
+          <TextBlock Text="HorosHelper"
+                     FontSize="14"
+                     FontWeight="SemiBold"
+                     Foreground="{DynamicResource BrushTextPrimary}"
+                     VerticalAlignment="Center" />
+        </StackPanel>
+
+        <StackPanel Grid.Column="2"
+                    Orientation="Horizontal"
+                    VerticalAlignment="Stretch">
+          <Button Classes="window-chrome"
+                  Command="{Binding MinimizeCommand}"
+                  ToolTip.Tip="Minimieren">
+            <TextBlock Text="—" FontSize="14" />
+          </Button>
+          <Button Classes="window-chrome"
+                  Command="{Binding MaximizeCommand}"
+                  ToolTip.Tip="Maximieren">
+            <TextBlock Text="□" FontSize="12" />
+          </Button>
+          <Button Classes="window-chrome close"
+                  Command="{Binding CloseCommand}"
+                  ToolTip.Tip="Schließen">
+            <TextBlock Text="✕" FontSize="12" />
+          </Button>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <!-- Main body -->
+    <Grid Grid.Row="1" ColumnDefinitions="Auto,*">
+      <views:SidebarView DataContext="{Binding Sidebar}" />
+      <Border Grid.Column="1"
+              Background="{DynamicResource BrushBackgroundBase}">
+        <ContentControl Content="{Binding CurrentViewModel}"
+                        ContentTemplate="{StaticResource ViewLocator}"
+                        HorizontalContentAlignment="Stretch"
+                        VerticalContentAlignment="Stretch" />
+      </Border>
+    </Grid>
+
+    <!-- Status Bar -->
+    <Border Grid.Row="2"
+            Height="{DynamicResource StatusBarHeight}"
+            Background="{DynamicResource BrushSurfaceElevated}"
+            BorderBrush="{DynamicResource BrushBorder}"
+            BorderThickness="0,1,0,0"
+            Padding="16,0">
+      <Grid ColumnDefinitions="*,Auto,Auto">
+        <TextBlock Grid.Column="0"
+                   Text="{Binding LastScanText}"
+                   VerticalAlignment="Center"
+                   FontSize="12"
+                   Foreground="{DynamicResource BrushTextSecondary}" />
+        <TextBlock Grid.Column="1"
+                   Text="{Binding VersionText}"
+                   VerticalAlignment="Center"
+                   Margin="0,0,16,0"
+                   FontSize="12"
+                   Foreground="{DynamicResource BrushTextMuted}" />
+        <Border Grid.Column="2"
+                Background="{DynamicResource BrushAccentPrimaryMuted}"
+                BorderBrush="{DynamicResource BrushAccentPrimary}"
+                BorderThickness="1"
+                CornerRadius="10"
+                Padding="10,2"
+                IsVisible="{Binding ShowAdminBadge}"
+                VerticalAlignment="Center">
+          <TextBlock Text="{Binding AdminBadgeText}"
+                     FontSize="11"
+                     FontWeight="SemiBold"
+                     Foreground="{DynamicResource BrushAccentPrimary}" />
+        </Border>
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

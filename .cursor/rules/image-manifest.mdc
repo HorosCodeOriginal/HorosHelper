@@ -1,0 +1,27 @@
+---
+description: Alias für @image-asset — Pflicht Asset-Ordner + Manifest + regions/ (Legacy-Name beibehalten)
+globs: **/assets/**,**/public/icons/**,**/public/images/**,**/docs/screenshots/**
+alwaysApply: false
+---
+
+# Image Manifest (Alias → Image Asset)
+
+> **Hinweis:** Diese Rule ist ein **Alias** für `@image-asset`. Vollständige Blocker und Ordner-Schema: **`.cursor/rules/image-asset.mdc`**
+
+## Kurz
+
+Jedes HorosCode-Bild braucht:
+
+```text
+{parent}/{asset-slug}/
+  full.{ext}
+  {asset-slug}.manifest.md
+  regions/
+    regions.json
+    README.md
+    …
+```
+
+**Kein Erfolg** ohne Ordner + Manifest + `regions/` (mindestens `regions.json` + README).
+
+Skills: `@horos-image-manifest` + `@horos-image-regions` · Rule: `@image-asset`

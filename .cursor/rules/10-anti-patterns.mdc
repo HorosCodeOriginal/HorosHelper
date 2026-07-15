@@ -1,0 +1,76 @@
+---
+description: Anti-patterns — never whole page, merge components, invent tokens, ignore mockup
+globs:
+  - "**/*.axaml"
+  - "**/*.cs"
+alwaysApply: false
+---
+
+# Anti-Patterns — Never Do These
+
+**Firma:** HorosCode · **Produkt:** HorosCloud
+
+## Layout & Scope
+
+| Never | Do instead |
+|-------|------------|
+| Build entire page/screen in one pass | One region per task (`01-workflow`) |
+| Merge distinct mockup components into one control | Keep mockup component boundaries |
+| Skip Preview for "simple" regions | Always `*Preview.axaml` (`06-ui-preview`) |
+| Test only in full MainWindow during Pass 1 | Isolated Preview per region |
+
+## Design Fidelity
+
+| Never | Do instead |
+|-------|------------|
+| Invent new colors not in mockup | Extract → `design-memory.md` → token |
+| Invent new spacing/radius/typography | Match mockup or document new token |
+| Use `#RRGGBB` inline in Views | `{DynamicResource Brush...}` |
+| "Improve" layout vs mockup | Pixel-perfect copy (`02-pixel-perfect`) |
+| Ignore mockup elements as "unnecessary" | Implement every visible element |
+
+## Stack Confusion
+
+| Never | Do instead |
+|-------|------------|
+| Think in Tailwind (`p-4`, `flex`, `gap-2`) | Avalonia `Padding`, `StackPanel.Spacing`, `Grid` |
+| Copy React component structure | Avalonia UserControl + MVVM |
+| Use CSS box model mental model | Avalonia layout panels + margins |
+
+## Bad Pattern Example
+
+```xml
+<!-- WRONG: Tailwind thinking, inline values, merged components -->
+<Border Padding="18" Background="#1a1a2e" CornerRadius="12">
+  <StackPanel>
+    <!-- Header + Nav + Search merged into one blob -->
+    <Grid>...</Grid>
+  </StackPanel>
+</Border>
+```
+
+## Good Pattern Example
+
+```xml
+<!-- RIGHT: Tokens, separate components, mockup structure -->
+<components:HorosHeaderBar Grid.Row="0"
+                           DataContext="{Binding Header}" />
+<components:HorosSidebar Grid.Row="1" Grid.Column="0"
+                         DataContext="{Binding Sidebar}" />
+<components:HorosContentPanel Grid.Row="1" Grid.Column="1"
+                            DataContext="{Binding Content}" />
+```
+
+## Reporting Anti-Patterns
+
+| Never | Do instead |
+|-------|------------|
+| Report success without screenshot | Score ≥ 98 with PNG evidence |
+| Proceed without Human Approval | Stop at `12-human-approval` |
+| Scope creep during review fixes | Fix only listed diffs |
+
+## References
+
+- Pixel perfect: `02-pixel-perfect.mdc`
+- Tokens: `docs/design-memory.md`
+- Workflow: `01-workflow.mdc`

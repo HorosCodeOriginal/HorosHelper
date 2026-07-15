@@ -1,0 +1,106 @@
+{
+  "schemaVersion": "1.0",
+  "assetSlug": "dashboard-mockup-05",
+  "parentFullPath": "assets/images/dashboard-mockup-05/full.png",
+  "fullWidth": 1536,
+  "fullHeight": 1024,
+  "nineSlice": false,
+  "regions": [
+    {
+      "id": "region-title-bar",
+      "slug": "title-bar",
+      "label": {
+        "de": "Title Bar",
+        "en": "Title Bar"
+      },
+      "bounds": {
+        "x": 184,
+        "y": 81,
+        "width": 1167,
+        "height": 46
+      },
+      "dominantHex": [
+        "#0e1927"
+      ],
+      "transparent": false,
+      "zIndex": 0,
+      "layer": 0,
+      "usage": "bg",
+      "exportPath": "regions/title-bar.png",
+      "parentFullPath": "assets/images/dashboard-mockup-05/full.png",
+      "notes": "Title bar with HorosHelper branding"
+    },
+    {
+      "id": "region-sidebar",
+      "slug": "sidebar",
+      "label": {
+        "de": "Sidebar",
+        "en": "Sidebar"
+      },
+      "bounds": {
+        "x": 184,
+        "y": 128,
+        "width": 199,
+        "height": 747
+      },
+      "dominantHex": [
+        "#101a26"
+      ],
+      "transparent": false,
+      "zIndex": 1,
+      "layer": 1,
+      "usage": "bg",
+      "exportPath": "regions/sidebar.png",
+      "parentFullPath": "assets/images/dashboard-mockup-05/full.png",
+      "notes": "Left navigation sidebar"
+    },
+    {
+      "id": "region-main-content",
+      "slug": "main-content",
+      "label": {
+        "de": "Main Content",
+        "en": "Main Content"
+      },
+      "bounds": {
+        "x": 384,
+        "y": 128,
+        "width": 967,
+        "height": 747
+      },
+      "dominantHex": [
+        "#15202c"
+      ],
+      "transparent": false,
+      "zIndex": 2,
+      "layer": 2,
+      "usage": "text-safe",
+      "exportPath": "regions/main-content.png",
+      "parentFullPath": "assets/images/dashboard-mockup-05/full.png",
+      "notes": "Primary dashboard content area"
+    },
+    {
+      "id": "region-status-bar",
+      "slug": "status-bar",
+      "label": {
+        "de": "Status Bar",
+        "en": "Status Bar"
+      },
+      "bounds": {
+        "x": 184,
+        "y": 875,
+        "width": 1167,
+        "height": 56
+      },
+      "dominantHex": [
+        "#0d1927"
+      ],
+      "transparent": false,
+      "zIndex": 3,
+      "layer": 3,
+      "usage": "overlay",
+      "exportPath": "regions/status-bar.png",
+      "parentFullPath": "assets/images/dashboard-mockup-05/full.png",
+      "notes": "Bottom status bar"
+    }
+  ]
+}

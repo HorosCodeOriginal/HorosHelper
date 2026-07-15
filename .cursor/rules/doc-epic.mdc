@@ -1,0 +1,59 @@
+---
+description: >-
+  Epic Feature Documentation — mehrteilige MD-Suite + HTML-Index pro Funktion.
+  Aktivieren per /doc-epic, /feature-docs, /doku-episch, /doc:function oder @doc-epic.
+alwaysApply: false
+---
+
+# Epic Feature Documentation (`/doc-epic`)
+
+Aktiv, wenn du `/doc-epic`, `/feature-docs`, `/doku-episch`, `/doc:function` oder `@doc-epic` setzt.
+Parameter-Definition: siehe `agent-context-modes.mdc` → Epic Feature Documentation.
+
+## Ziel
+
+Eine **einzelne Funktion oder ein zusammenhängendes Feature** vollständig dokumentieren — nicht als eine lange Datei, sondern als **Suite** mit Hub, Anleitung, Architektur, Datenmodell und visueller HTML-Übersicht.
+
+## Ablage
+
+```
+HorosCloudV5/docs/features/<feature-slug>/
+├── README.md                 # Hub & Navigation
+├── 01-uebersicht.md          # Was & Warum (Erklärung)
+├── 02-benutzer-anleitung.md  # Schritt-für-Schritt-Anleitung
+├── 03-einstellungen.md       # Einstellungs-Pfade & Optionen
+├── 04-architektur.md         # Komponenten, Stores, Datenfluss
+├── 05-api-datenmodell.md     # Typen, Persistenz, Sync
+├── 06-faq-troubleshooting.md # FAQ & Fehlerbilder
+├── 07-changelog-feature.md   # optional: Feature-Changelog
+└── index.html                # Epic-Visualisierung (standalone)
+```
+
+## Slug-Konvention
+
+UI-Pfad in kebab-case, Segmente mit Bindestrich:
+
+| UI-Pfad | Feature-Slug |
+|---------|----------------|
+| Einstellungen → Widgets → Notizen → Canvas-Stil | `settings-widgets-notizen-bereich-canvas-design` |
+| Einstellungen → Widgets → YouTube | `settings-widgets-youtube-playlist` |
+
+## Pflichten bei Aktivierung
+
+1. **Code zuerst** — relevante `.ts`/`.tsx`/CSS lesen, bevor geschrieben wird.
+2. **Deutsch** — für dich sichtbare Begriffe wie in der App.
+3. **Codepfade** — echte Pfade unter `HorosCloudV5/apps/web/src/...`.
+4. **Verlinken** — `HorosCloudV5/docs/README.md` um Eintrag unter „Epic Features" ergänzen.
+5. **HTML** — `index.html` mit HorosCloud-Dark-Theme, Sidebar, Mermaid, Screenshot-Platzhaltern.
+6. **Keine leeren Stubs** — jede Datei mit substanziellem Inhalt aus dem Code.
+7. **Firmen-Attribution** — in Hub/README und `index.html` (Footer oder „Über"-Abschnitt): Projekt/Feature als Arbeit von **HorosCode** kennzeichnen; HorosCloud nur als Produktname (`horoscode.mdc`).
+
+## Agent-Routing
+
+| Rolle | Agent |
+|-------|-------|
+| Dokumentation schreiben | **Iroh** |
+| Code erkunden (vor Doc) | Toph |
+| Feature implementieren | Aang/Katara/Momo |
+
+Skill-Details: `.cursor/skills/doc-epic/SKILL.md`

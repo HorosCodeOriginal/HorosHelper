@@ -1,0 +1,244 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HorosHelp.UI.ViewModels.Features"
+             xmlns:ui="using:HorosHelp.UI"
+             x:Class="HorosHelp.UI.Views.Features.StartupView"
+             x:DataType="vm:StartupViewModel">
+
+  <ScrollViewer VerticalScrollBarVisibility="Auto"
+                HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Spacing="14" Margin="24,20,24,20">
+
+      <!-- Header -->
+      <StackPanel Spacing="4">
+        <TextBlock Text="{Binding Title}"
+                   FontSize="28" FontWeight="Bold"
+                   Foreground="{DynamicResource BrushTextPrimary}" />
+        <TextBlock Text="{Binding Subtitle}"
+                   FontSize="13"
+                   Foreground="{DynamicResource BrushTextSecondary}" />
+      </StackPanel>
+
+      <!-- Recommendation banner -->
+      <Border Background="{DynamicResource BrushAccentPrimaryMuted}"
+              BorderBrush="{DynamicResource BrushAccentPrimary}"
+              BorderThickness="1"
+              CornerRadius="{DynamicResource RadiusLg}"
+              Padding="14,12">
+        <StackPanel Orientation="Horizontal" Spacing="10">
+          <Border Width="32" Height="32"
+                  CornerRadius="16"
+                  Background="{DynamicResource BrushAccentPrimaryMuted}"
+                  BorderBrush="{DynamicResource BrushAccentPrimary}"
+                  BorderThickness="1">
+            <TextBlock Text="⚡"
+                       FontSize="16"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Foreground="{DynamicResource BrushAccentPrimary}" />
+          </Border>
+          <TextBlock Text="{Binding RecommendationText}"
+                     FontSize="13" FontWeight="Medium"
+                     VerticalAlignment="Center"
+                     Foreground="{DynamicResource BrushTextPrimary}" />
+        </StackPanel>
+      </Border>
+
+      <!-- Autostart section -->
+      <Border Background="{DynamicResource BrushSurfaceElevated}"
+              CornerRadius="{DynamicResource RadiusLg}"
+              Padding="0">
+        <StackPanel>
+          <TextBlock Text="{Binding AutostartSectionTitle}"
+                     FontSize="14" FontWeight="SemiBold"
+                     Foreground="{DynamicResource BrushTextPrimary}"
+                     Margin="16,14,16,8" />
+
+          <!-- Column headers -->
+          <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto"
+                Margin="16,0,16,8">
+            <TextBlock Text="Programm"
+                       FontSize="11" FontWeight="Medium"
+                       Foreground="{DynamicResource BrushTextMuted}" />
+            <TextBlock Grid.Column="2" Text="Publisher"
+                       FontSize="11" FontWeight="Medium"
+                       Foreground="{DynamicResource BrushTextMuted}" />
+            <TextBlock Grid.Column="3" Text="Impact"
+                       FontSize="11" FontWeight="Medium"
+                       Margin="24,0,0,0"
+                       Foreground="{DynamicResource BrushTextMuted}" />
+            <TextBlock Grid.Column="4" Text="Status"
+                       FontSize="11" FontWeight="Medium"
+                       Margin="24,0,0,0"
+                       HorizontalAlignment="Right"
+                       Foreground="{DynamicResource BrushTextMuted}" />
+          </Grid>
+
+          <Border Height="1" Background="{DynamicResource BrushBorder}" />
+
+          <ItemsControl ItemsSource="{Binding StartupPrograms}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:StartupProgramItem">
+                <StackPanel>
+                  <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto"
+                        Margin="16,12">
+                    <!-- Program -->
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                      <Border Width="32" Height="32"
+                              CornerRadius="{DynamicResource RadiusMd}"
+                              Background="#1E293B">
+                        <TextBlock Text="{Binding IconGlyph}"
+                                   FontSize="14"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource BrushTextPrimary}" />
+                      </Border>
+                      <TextBlock Text="{Binding Name}"
+                                 FontSize="13" FontWeight="SemiBold"
+                                 VerticalAlignment="Center"
+                                 Foreground="{DynamicResource BrushTextPrimary}" />
+                    </StackPanel>
+
+                    <!-- Publisher -->
+                    <TextBlock Grid.Column="2"
+                               Text="{Binding Publisher}"
+                               FontSize="12"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource BrushTextSecondary}" />
+
+                    <!-- Impact badge -->
+                    <Border Grid.Column="3"
+                            CornerRadius="10"
+                            Padding="10,4"
+                            Margin="16,0,0,0"
+                            VerticalAlignment="Center"
+                            Background="{Binding ImpactBackground}"
+                            BorderBrush="{Binding ImpactBorderBrush}"
+                            BorderThickness="1">
+                      <TextBlock Text="{Binding ImpactLabel}"
+                                 FontSize="11" FontWeight="Medium"
+                                 Foreground="{Binding ImpactForeground}" />
+                    </Border>
+
+                    <!-- Toggle + admin shield -->
+                    <StackPanel Grid.Column="4"
+                                Orientation="Horizontal"
+                                Spacing="6"
+                                Margin="16,0,0,0"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Right">
+                      <TextBlock Text="{x:Static ui:AdminUiGlyphs.Shield}"
+                                 FontSize="12"
+                                 IsVisible="{Binding ShowAdminShield}"
+                                 VerticalAlignment="Center"
+                                 Foreground="{DynamicResource BrushAccentPrimary}"
+                                 ToolTip.Tip="Erfordert Administratorrechte" />
+                      <ToggleSwitch IsChecked="{Binding IsEnabled}"
+                                    IsEnabled="{Binding CanToggle}"
+                                    VerticalAlignment="Center"
+                                    OnContent=""
+                                    OffContent="">
+                        <ToggleSwitch.Styles>
+                          <Style Selector="ToggleSwitch:checked /template/ Border#SwitchKnobBounds">
+                            <Setter Property="Background" Value="{DynamicResource BrushAccentPrimary}" />
+                          </Style>
+                        </ToggleSwitch.Styles>
+                      </ToggleSwitch>
+                    </StackPanel>
+                  </Grid>
+                  <Border Height="1"
+                          Background="{DynamicResource BrushBorder}"
+                          Margin="16,0" />
+                </StackPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
+      <!-- Background processes section -->
+      <Border Background="{DynamicResource BrushSurfaceElevated}"
+              CornerRadius="{DynamicResource RadiusLg}"
+              Padding="0">
+        <StackPanel>
+          <TextBlock Text="{Binding ProcessSectionTitle}"
+                     FontSize="14" FontWeight="SemiBold"
+                     Foreground="{DynamicResource BrushTextPrimary}"
+                     Margin="16,14,16,8" />
+
+          <Grid ColumnDefinitions="Auto,*,Auto,Auto"
+                Margin="16,0,16,8">
+            <TextBlock Text="Prozess"
+                       FontSize="11" FontWeight="Medium"
+                       Foreground="{DynamicResource BrushTextMuted}" />
+            <TextBlock Grid.Column="2" Text="CPU"
+                       FontSize="11" FontWeight="Medium"
+                       Margin="24,0,0,0"
+                       Foreground="{DynamicResource BrushTextMuted}" />
+            <TextBlock Grid.Column="3" Text="RAM"
+                       FontSize="11" FontWeight="Medium"
+                       Margin="24,0,0,0"
+                       Foreground="{DynamicResource BrushTextMuted}" />
+          </Grid>
+
+          <Border Height="1" Background="{DynamicResource BrushBorder}" />
+
+          <ItemsControl ItemsSource="{Binding BackgroundProcesses}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:BackgroundProcessItem">
+                <StackPanel>
+                  <Grid ColumnDefinitions="Auto,*,140,140"
+                        Margin="16,12">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                      <Border Width="32" Height="32"
+                              CornerRadius="{DynamicResource RadiusMd}"
+                              Background="#1E293B">
+                        <TextBlock Text="{Binding IconGlyph}"
+                                   FontSize="14"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource BrushTextPrimary}" />
+                      </Border>
+                      <TextBlock Text="{Binding Name}"
+                                 FontSize="13" FontWeight="SemiBold"
+                                 VerticalAlignment="Center"
+                                 Foreground="{DynamicResource BrushTextPrimary}" />
+                    </StackPanel>
+
+                    <!-- CPU -->
+                    <StackPanel Grid.Column="2" Spacing="4" Margin="16,0,0,0" VerticalAlignment="Center">
+                      <TextBlock Text="{Binding CpuText}"
+                                 FontSize="11"
+                                 Foreground="{DynamicResource BrushTextSecondary}" />
+                      <ProgressBar Value="{Binding CpuProgress}"
+                                   Minimum="0" Maximum="100"
+                                   Height="4" CornerRadius="2"
+                                   Background="#1E293B"
+                                   Foreground="{Binding CpuBarBrush}" />
+                    </StackPanel>
+
+                    <!-- RAM -->
+                    <StackPanel Grid.Column="3" Spacing="4" Margin="16,0,0,0" VerticalAlignment="Center">
+                      <TextBlock Text="{Binding RamText}"
+                                 FontSize="11"
+                                 Foreground="{DynamicResource BrushTextSecondary}" />
+                      <ProgressBar Value="{Binding RamProgress}"
+                                   Minimum="0" Maximum="100"
+                                   Height="4" CornerRadius="2"
+                                   Background="#1E293B"
+                                   Foreground="{Binding RamBarBrush}" />
+                    </StackPanel>
+                  </Grid>
+                  <Border Height="1"
+                          Background="{DynamicResource BrushBorder}"
+                          Margin="16,0" />
+                </StackPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

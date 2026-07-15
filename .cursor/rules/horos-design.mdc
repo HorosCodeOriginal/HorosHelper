@@ -1,0 +1,96 @@
+---
+description: HorosCloud Web-UI Design-Konventionen — Tokens, Spacing, Komponenten, Barrierefreiheit (HorosCode)
+globs:
+  - "**/HorosCloudV5/apps/web/**/*.{tsx,ts,css}"
+  - "**/apps/web/**/*.{tsx,ts,css}"
+alwaysApply: false
+---
+
+# Horos Design — HorosCloud Web-UI
+
+Konventionen für **HorosCloud**-Web-UI (Firma **HorosCode**). Gilt bei Bearbeitung von React/TSX/CSS unter `HorosCloudV5/apps/web` (oder `apps/web`).
+
+**Pfad-Erkennung:** `HorosCloudV5/` liegt am **Workspace-Root** (nicht unter `.cursor/`). Globs matchen über `**/HorosCloudV5/apps/web/**` unabhängig vom Workspace-Pfad.
+
+Skill-Details: `@horos-design-system` (primär) · Komponenten-Muster: `@ui-design-brain` → `components.md`
+
+## Theme (Dark-First)
+
+| Token | Wert / Tailwind | Verwendung |
+|-------|-----------------|------------|
+| `--hc-bg-base` | `#0f172a` / `slate-900` | Seitenhintergrund, App-Shell |
+| `--hc-bg-elevated` | `#1e293b` / `slate-800` | Cards, Panels, Sidebar |
+| `--hc-bg-muted` | `#334155` / `slate-700` | Inputs, sekundäre Flächen |
+| `--hc-text-primary` | `slate-100` | Haupttext |
+| `--hc-text-secondary` | `slate-400` | Labels, Meta |
+| `--hc-border` | `slate-700` | Trennlinien, Card-Ränder |
+| `--hc-accent` | `amber-400`–`amber-500` | Primärer CTA, aktive Nav, Fokus-Akzent |
+| `--hc-success` | `emerald-500` | Erfolg |
+| `--hc-warning` | `amber-500` | Warnung |
+| `--hc-error` | `red-500` | Fehler |
+
+**Regeln:**
+
+- Kein reines `#000` für Hintergründe.
+- Ein dominanter Akzent (Amber) — keine Regenbogen-Paletten für Status ohne Semantik.
+- CSS-Variablen oder Tailwind-Theme bevorzugen; Hex nur in Token-Definitionen.
+
+## Spacing (8px-Grid)
+
+| Tailwind | px | Typisch |
+|----------|-----|---------|
+| `gap-1` / `p-1` | 4 | Icon-in-Button nur |
+| `gap-2` / `p-2` | 8 | Inline, kompakte Zeilen |
+| `gap-4` / `p-4` | 16 | Card-Padding, Form-Felder |
+| `gap-6` / `p-6` | 24 | Section-Padding |
+| `gap-8` | 32 | Zwischen Sektionen |
+
+## Typografie
+
+- Body: min. `text-sm` (14px), bevorzugt `text-base` (16px).
+- Eine `h1` pro View; hierarchisch `h1` → `h2` → `h3`.
+- `font-medium` für Labels, `font-semibold` für Section-Titles.
+- Monospace nur für Code, IDs, technische Werte.
+
+## Komponenten
+
+- **Buttons:** Verb-Labels („Speichern", nicht „OK"); max. ein primärer Button pro Sektion.
+- **Cards:** Titel → Meta → Aktion; `border` **oder** `shadow`, nicht beides stark.
+- **Forms:** Labels sichtbar (nicht nur Placeholder); Validierung on blur.
+- **Modals/Drawers:** Fokus-Falle, Escape schließt, Fokus-Rückgabe.
+- **Tabellen:** Fixierter Header bei langen Listen; Zahlen rechtsbündig.
+- **Leere Zustände:** Überschrift + kurzer Hinweis + primärer CTA.
+
+## Interaktions-Zustände (Pflicht)
+
+Jedes interaktive Element: Standard, Hover, Fokus (`ring-2 ring-amber-500/50`), Aktiv, Deaktiviert (`opacity-50 cursor-not-allowed`).
+
+## Barrierefreiheit
+
+- Kontrast WCAG AA (4.5:1 Text, 3:1 große Texte).
+- Touch-Ziele ≥ 44×44px.
+- Semantisches HTML (`button`, `nav`, `main`, `label` + `htmlFor`).
+- `prefers-reduced-motion` respektieren.
+
+## Verboten
+
+- Inline-`style={{}}` für statisches Layout (Ausnahme: dynamische Positionen z. B. Canvas).
+- `div` mit `onClick` statt `button`.
+- Generische AI-Ästhetik: lila Verläufe, Inter-only ohne Absicht, gleichgewichtige Button-Reihen.
+- HorosCloud als Firmenname in Copy (Firma = HorosCode).
+
+## Pfade
+
+- Web-App: `HorosCloudV5/apps/web/src/`
+- Geteilte UI: projektspezifisch unter `components/`, `features/`, `widgets/`
+- Feature-Docs: `HorosCloudV5/docs/features/<slug>/`
+
+## Verwandte Agenten
+
+| Aufgabe | Agent | Modell |
+|---------|-------|--------|
+| HorosCloud Web-UI implementieren | **horos-ui** | `composer-2.5` |
+| Figma/Mockup → Code 1:1 | **horos-ui** + `@mockup-to-code` | `composer-2.5` |
+| Icons, Mockups, Raster | **Zuko** | `composer-2.5` |
+| Mobile | **Suki** | `composer-2.5` |
+| Mehrdatei-Feature ohne rein UI | **Aang** | `composer-2.5` |

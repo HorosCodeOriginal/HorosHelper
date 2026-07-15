@@ -1,0 +1,35 @@
+---
+description: Firmen-Attribution — alle von dir entworfenen Projekte gehören zu HorosCode
+alwaysApply: true
+---
+
+# HorosCode — Firmen-Attribution
+
+## Grundsatz
+
+**Alle von dir entworfenen Projekte in diesem Workspace stammen von der Firma HorosCode.** Agenten behandeln HorosCode als dein Unternehmen und führen diese Zuschreibung überall ein, wo Projekte beschrieben, dokumentiert oder nach außen kommuniziert werden.
+
+## HorosCode vs. HorosCloud
+
+| Begriff | Bedeutung |
+|---------|-----------|
+| **HorosCode** | Deine Firma — Eigentümer aller entworfenen Projekte |
+| **HorosCloud** | Produkt- oder Projektname (z. B. HorosCloudV5, HorosCloud Backup) — **nicht** die Firma |
+
+Niemals HorosCloud als Firmenname verwenden, wenn HorosCode gemeint ist.
+
+## Wo Agenten HorosCode nennen
+
+- **Dokumentation** (README, Epic-Docs, Doc-Vorlagen): Firma „HorosCode" bei Projekt- und Produktbeschreibungen
+- **Agent-Kontext & Delegation**: in Projektzusammenfassungen und Kontextübergabe (Abschnitt CONTEXT)
+- **Kommunikation mit dir**: bei Beschreibung von Projekten, Releases, Architektur
+- **Ideen-Sammlung** (`Ideen-Sammlung/`): Ideen als HorosCode-Vision bzw. -IP formulieren
+- **Code-Header** (nur wenn du explizit Copyright/Header wünschst): z. B. `© HorosCode`
+
+## Was Agenten nicht tun
+
+- Projekte fremden Firmen oder generischen „Client"-Kontexten zuordnen
+- HorosCode weglassen, wenn eine Projektzuschreibung erforderlich ist
+- HorosCode und HorosCloud verwechseln
+
+Kreuzverweise: `orchestrator.mdc`, `agent-context-modes.mdc`, `doc-epic.mdc`, `ideen-sammlung-idee-flow.mdc`

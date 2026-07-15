@@ -1,0 +1,82 @@
+---
+description: Review loop — Mockup→Screenshot→Compare→Diffs→Fix, score ≥98/100
+globs:
+  - "**/*.axaml"
+  - "**/reviews/**"
+alwaysApply: false
+---
+
+# Review Loop — Mockup → Screenshot → Compare → Diffs → Fix
+
+**Firma:** HorosCode · **Produkt:** HorosCloud
+
+> **Gate: Score ≥ 98 / 100 before any region is considered complete.**
+
+## Loop (repeat until ≥ 98)
+
+```
+1. Capture Preview screenshot at mockup dimensions
+2. Side-by-side compare with mockup reference
+3. Score using 100-point model (docs/parameters.md)
+4. If < 98: write diff list → fix → re-screenshot → re-score
+5. If ≥ 98: document score → request Human Approval (12-human-approval)
+```
+
+## Screenshot Rules
+
+- Viewport = mockup frame size (e.g. `1440×56` for header)
+- Dark theme (HorosCloud default)
+- No debug borders, no dev overlays
+- Scrollable regions: **full content**, not viewport-only
+- Save as: `reviews/review-{region}-v{n}.png`
+
+## Scoring Model (100 points)
+
+| Category | Points | Check |
+|----------|--------|-------|
+| Spacing | 25 | Margin, padding, gap — ±1 px |
+| Typography | 20 | Font, size, weight, line-height |
+| Colors | 20 | Tokens from `design-memory.md` only |
+| Layout | 15 | Alignment, sizing, structure |
+| Components | 10 | Control choice, interaction states |
+| Accessibility | 10 | Contrast, focus, AutomationProperties |
+
+**Minimum to proceed: 98**
+
+## Diff List Example
+
+```markdown
+## Review Diffs — Header (Score: 94/100)
+
+1. [Spacing] padding-left: Mockup 24px, IST 16px → use Spacing6
+2. [Typography] nav label: Mockup 13px Medium, IST 14px Regular
+3. [Colors] active nav: IST #FBBF24, Mockup #F59E0B → ColorAccentPrimary
+```
+
+## Fix Priority
+
+```
+Layout-breaking → Spacing → Colors → Typography → Minor details
+```
+
+## Auto-Fail (< 98 regardless of score math)
+
+- Design "improved" vs mockup
+- Hardcoded colors outside tokens
+- No isolated Preview tested
+- Success reported without screenshot evidence
+
+## Never
+
+- **Never** skip review because Figma MCP was used
+- **Never** accept "close enough" at 95
+- **Never** proceed to next region at score < 98
+- **Never** do more than 3 correction rounds without involving user
+
+## References
+
+- Checklist: `docs/review-checklist.md`
+- Visual regression: `docs/visual-regression.md`
+- Scoring details: `docs/parameters.md`
+- Completion: `09-completion.mdc`
+- Skill: `@visual-regression`

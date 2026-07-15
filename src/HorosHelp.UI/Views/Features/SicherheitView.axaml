@@ -1,0 +1,283 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HorosHelp.UI.ViewModels.Features"
+             xmlns:controls="using:HorosHelp.UI.Controls"
+             xmlns:ui="using:HorosHelp.UI"
+             x:Class="HorosHelp.UI.Views.Features.SicherheitView"
+             x:DataType="vm:SicherheitViewModel">
+
+  <Grid RowDefinitions="Auto,14,*,14,Auto" Margin="24,20,24,20">
+
+    <!-- ═══ Header + System-Status-Banner ═══ -->
+    <Grid ColumnDefinitions="*,Auto">
+      <StackPanel Spacing="4">
+        <TextBlock Text="{Binding Title}"
+                   FontSize="28" FontWeight="Bold"
+                   Foreground="{DynamicResource BrushTextPrimary}" />
+        <TextBlock Text="{Binding Subtitle}"
+                   FontSize="13"
+                   Foreground="{DynamicResource BrushTextSecondary}" />
+      </StackPanel>
+
+      <Border Grid.Column="1"
+              Background="{DynamicResource BrushSurfaceElevated}"
+              CornerRadius="{DynamicResource RadiusLg}"
+              BorderBrush="#22C55E"
+              BorderThickness="1"
+              Padding="16,10"
+              VerticalAlignment="Center">
+        <StackPanel Orientation="Horizontal" Spacing="10">
+          <Border Width="32" Height="32"
+                  CornerRadius="16"
+                  Background="#1822C55E">
+            <TextBlock Text="⛨"
+                       FontSize="16"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Foreground="#22C55E" />
+          </Border>
+          <StackPanel Spacing="2" VerticalAlignment="Center">
+            <TextBlock Text="{Binding SystemSecureTitle}"
+                       FontSize="13" FontWeight="SemiBold"
+                       Foreground="#22C55E" />
+            <TextBlock Text="{Binding SystemSecureSub}"
+                       FontSize="11"
+                       Foreground="{DynamicResource BrushTextSecondary}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Grid>
+
+    <!-- ═══ Main Cards Area ═══ -->
+    <Grid Grid.Row="2" ColumnDefinitions="*,12,*">
+
+      <!-- ─── Left: Sicherheits-Score ─── -->
+      <Border Background="{DynamicResource BrushSurfaceElevated}"
+              CornerRadius="{DynamicResource RadiusLg}"
+              Padding="24,20">
+        <StackPanel Spacing="16" VerticalAlignment="Center">
+
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <TextBlock Text="⛨" FontSize="14" Foreground="{DynamicResource BrushAccentPrimary}" />
+            <TextBlock Text="Sicherheits-Score"
+                       FontSize="14" FontWeight="SemiBold"
+                       Foreground="{DynamicResource BrushTextPrimary}" />
+          </StackPanel>
+
+          <Grid MinWidth="188" MinHeight="188"
+                Margin="2"
+                HorizontalAlignment="Center">
+            <controls:ProgressRing Diameter="160"
+                                   StrokeThickness="14"
+                                   Value="{Binding ScoreValue}"
+                                   ProgressBrush="{DynamicResource BrushAccentPrimary}"
+                                   TrackBrush="{DynamicResource BrushBorder}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Spacing="0">
+              <TextBlock Text="{Binding ScoreText}"
+                         FontSize="42" FontWeight="Bold"
+                         HorizontalAlignment="Center"
+                         Foreground="{DynamicResource BrushTextPrimary}" />
+              <TextBlock Text="{Binding ScoreMaxText}"
+                         FontSize="14"
+                         HorizontalAlignment="Center"
+                         Foreground="{DynamicResource BrushTextSecondary}" />
+            </StackPanel>
+          </Grid>
+
+          <StackPanel Spacing="4" HorizontalAlignment="Center">
+            <TextBlock Text="{Binding ScoreStatusLabel}"
+                       FontSize="15" FontWeight="SemiBold"
+                       HorizontalAlignment="Center"
+                       Foreground="#22C55E" />
+            <TextBlock Text="{Binding ScoreStatusSub}"
+                       FontSize="12"
+                       HorizontalAlignment="Center"
+                       TextAlignment="Center"
+                       Foreground="{DynamicResource BrushTextSecondary}" />
+          </StackPanel>
+
+          <Button HorizontalAlignment="Center"
+                  Background="Transparent"
+                  BorderBrush="{DynamicResource BrushBorder}"
+                  BorderThickness="1"
+                  CornerRadius="{DynamicResource RadiusMd}"
+                  Padding="16,8">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <TextBlock Text="Details anzeigen"
+                         FontSize="12"
+                         Foreground="{DynamicResource BrushTextSecondary}" />
+              <TextBlock Text="›"
+                         FontSize="14"
+                         Foreground="{DynamicResource BrushTextMuted}" />
+            </StackPanel>
+          </Button>
+
+        </StackPanel>
+      </Border>
+
+      <!-- ─── Right: Status Cards Grid ─── -->
+      <ItemsControl Grid.Column="2" ItemsSource="{Binding StatusCards}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <UniformGrid Columns="2" Rows="3" />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:SecurityStatusCardItem">
+            <Border Background="{DynamicResource BrushSurfaceElevated}"
+                    CornerRadius="{DynamicResource RadiusLg}"
+                    Margin="0,0,8,8"
+                    Padding="14,12">
+              <Grid RowDefinitions="Auto,*,Auto">
+
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                  <Border Width="36" Height="36"
+                          CornerRadius="{DynamicResource RadiusMd}"
+                          Background="{Binding IconBackground}"
+                          Margin="0,0,10,0">
+                    <TextBlock Text="{Binding IconGlyph}"
+                               FontSize="15" FontWeight="Bold"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Foreground="White" />
+                  </Border>
+
+                  <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Title}"
+                               FontSize="13" FontWeight="SemiBold"
+                               Foreground="{DynamicResource BrushTextPrimary}" />
+                    <TextBlock Text="{Binding StatusLabel}"
+                               IsVisible="{Binding !ShowLargeValue}"
+                               FontSize="12" FontWeight="Medium"
+                               Foreground="{Binding StatusForeground}" />
+                  </StackPanel>
+
+                  <!-- LED indicator -->
+                  <Ellipse Grid.Column="2"
+                           Width="10" Height="10"
+                           IsVisible="{Binding ShowLed}"
+                           Fill="#22C55E"
+                           VerticalAlignment="Center" />
+
+                  <!-- Toggle + admin shield -->
+                  <StackPanel Grid.Column="2"
+                              IsVisible="{Binding ShowToggle}"
+                              Orientation="Horizontal"
+                              Spacing="6"
+                              VerticalAlignment="Center"
+                              HorizontalAlignment="Right">
+                    <TextBlock Text="{x:Static ui:AdminUiGlyphs.Shield}"
+                               FontSize="11"
+                               IsVisible="{Binding ShowAdminShield}"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource BrushAccentPrimary}"
+                               ToolTip.Tip="Erfordert Administratorrechte" />
+                    <Border Width="40" Height="22"
+                            CornerRadius="11"
+                            Background="{DynamicResource BrushAccentPrimary}"
+                            VerticalAlignment="Center">
+                      <Ellipse Width="16" Height="16"
+                               Fill="White"
+                               HorizontalAlignment="Right"
+                               Margin="0,0,3,0"
+                               VerticalAlignment="Center" />
+                    </Border>
+                  </StackPanel>
+                </Grid>
+
+                <!-- Large value (threats blocked) -->
+                <TextBlock Grid.Row="1"
+                           Text="{Binding LargeValue}"
+                           IsVisible="{Binding ShowLargeValue}"
+                           FontSize="32" FontWeight="Bold"
+                           Foreground="#22C55E"
+                           Margin="46,4,0,0" />
+
+                <Grid Grid.Row="2" ColumnDefinitions="*,Auto" Margin="0,8,0,0">
+                  <TextBlock Text="{Binding Description}"
+                             FontSize="11"
+                             TextWrapping="Wrap"
+                             Foreground="{DynamicResource BrushTextMuted}"
+                             VerticalAlignment="Center" />
+
+                  <!-- Sparkline -->
+                  <Canvas Grid.Column="1"
+                          Width="48" Height="20"
+                          IsVisible="{Binding ShowSparkline}"
+                          VerticalAlignment="Center">
+                    <Polyline Points="0,14 8,10 16,12 24,6 32,9 40,4 48,8"
+                              Stroke="#22C55E"
+                              StrokeThickness="1.5"
+                              StrokeLineCap="Round" />
+                  </Canvas>
+
+                  <!-- Action button -->
+                  <Button Grid.Column="1"
+                          IsVisible="{Binding ShowActionButton}"
+                          Content="{Binding ActionLabel}"
+                          FontSize="10"
+                          Padding="8,4"
+                          CornerRadius="{DynamicResource RadiusSm}"
+                          Background="Transparent"
+                          BorderBrush="{DynamicResource BrushBorder}"
+                          BorderThickness="1"
+                          Foreground="{DynamicResource BrushTextSecondary}" />
+                </Grid>
+
+              </Grid>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+
+    </Grid>
+
+    <!-- ═══ Live Protection Bar ═══ -->
+    <Border Grid.Row="4"
+            Background="{DynamicResource BrushSurfaceElevated}"
+            CornerRadius="{DynamicResource RadiusLg}"
+            Padding="16,14">
+      <Grid RowDefinitions="Auto,10,Auto">
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <TextBlock Text="♡"
+                     FontSize="14"
+                     Foreground="{DynamicResource BrushAccentPrimary}" />
+          <TextBlock Text="{Binding LiveProtectionTitle}"
+                     FontSize="13" FontWeight="SemiBold"
+                     Foreground="{DynamicResource BrushTextPrimary}" />
+        </StackPanel>
+
+        <ItemsControl Grid.Row="2" ItemsSource="{Binding LiveProtectionItems}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <UniformGrid Columns="5" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:LiveProtectionItem">
+              <StackPanel Spacing="6" HorizontalAlignment="Center">
+                <TextBlock Text="{Binding Label}"
+                           FontSize="11"
+                           HorizontalAlignment="Center"
+                           Foreground="{DynamicResource BrushTextSecondary}" />
+                <StackPanel Orientation="Horizontal"
+                            Spacing="6"
+                            HorizontalAlignment="Center">
+                  <TextBlock Text="{Binding StatusLabel}"
+                             FontSize="11" FontWeight="Medium"
+                             Foreground="{Binding StatusForeground}" />
+                  <Ellipse Width="8" Height="8" Fill="#22C55E" />
+                </StackPanel>
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </Grid>
+    </Border>
+
+  </Grid>
+</UserControl>

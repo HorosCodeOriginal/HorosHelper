@@ -1,0 +1,261 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HorosHelp.UI.ViewModels.Features"
+             xmlns:controls="using:HorosHelp.UI.Controls"
+             x:Class="HorosHelp.UI.Views.Features.NetzwerkView"
+             x:DataType="vm:NetzwerkViewModel">
+
+  <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="24,20,24,20">
+
+    <!-- Header -->
+    <StackPanel Grid.Row="0" Spacing="4" Margin="0,0,0,14">
+      <TextBlock Text="{Binding Title}"
+                 FontSize="28" FontWeight="Bold"
+                 Foreground="{DynamicResource BrushTextPrimary}" />
+      <TextBlock Text="{Binding Subtitle}"
+                 FontSize="13"
+                 Foreground="{DynamicResource BrushTextSecondary}" />
+    </StackPanel>
+
+    <!-- Adapter cards -->
+    <ItemsControl Grid.Row="1" ItemsSource="{Binding Adapters}" Margin="0,0,0,14">
+      <ItemsControl.ItemsPanel>
+        <ItemsPanelTemplate>
+          <UniformGrid Rows="1" Columns="2" />
+        </ItemsPanelTemplate>
+      </ItemsControl.ItemsPanel>
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="vm:NetworkAdapterItem">
+          <Border Background="{DynamicResource BrushSurfaceElevated}"
+                  CornerRadius="{DynamicResource RadiusLg}"
+                  Margin="0,0,8,0"
+                  Padding="18,16">
+            <StackPanel Spacing="12">
+              <StackPanel Orientation="Horizontal" Spacing="10">
+                <TextBlock Text="{Binding IconGlyph}"
+                           FontSize="18"
+                           VerticalAlignment="Center" />
+                <StackPanel Spacing="4">
+                  <TextBlock Text="{Binding Name}"
+                             FontSize="14" FontWeight="SemiBold"
+                             Foreground="{DynamicResource BrushTextPrimary}" />
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <Ellipse Width="8" Height="8"
+                             Fill="{DynamicResource BrushStatusOk}"
+                             VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding StatusText}"
+                               FontSize="12"
+                               Foreground="{DynamicResource BrushStatusOk}" />
+                  </StackPanel>
+                </StackPanel>
+              </StackPanel>
+
+              <ItemsControl ItemsSource="{Binding Details}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:NetworkDetailItem">
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,6">
+                      <TextBlock Text="{Binding Label}"
+                                 FontSize="12"
+                                 Foreground="{DynamicResource BrushTextSecondary}" />
+                      <TextBlock Grid.Column="1"
+                                 Text="{Binding Value}"
+                                 FontSize="12"
+                                 Foreground="{DynamicResource BrushTextPrimary}" />
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </Border>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+
+    <!-- Middle: Diagnose + WLAN list -->
+    <Grid Grid.Row="2" ColumnDefinitions="*,12,*" Margin="0,0,0,14">
+
+      <!-- Diagnose panel -->
+      <Border Background="{DynamicResource BrushSurfaceElevated}"
+              CornerRadius="{DynamicResource RadiusLg}"
+              Padding="18,16">
+        <StackPanel Spacing="14">
+          <TextBlock Text="{Binding DiagnoseTitle}"
+                     FontSize="14" FontWeight="SemiBold"
+                     Foreground="{DynamicResource BrushTextPrimary}" />
+
+          <!-- Tool buttons -->
+          <UniformGrid Rows="1" Columns="4">
+            <Button Command="{Binding PingCommand}"
+                    Margin="0,0,6,0"
+                    Padding="8,14"
+                    CornerRadius="{DynamicResource RadiusMd}"
+                    Background="Transparent"
+                    BorderBrush="{DynamicResource BrushAccentPrimary}"
+                    BorderThickness="1">
+              <StackPanel Spacing="6" HorizontalAlignment="Center">
+                <TextBlock Text="◎" FontSize="18"
+                           HorizontalAlignment="Center"
+                           Foreground="{DynamicResource BrushAccentPrimary}" />
+                <TextBlock Text="Ping" FontSize="11"
+                           HorizontalAlignment="Center"
+                           Foreground="{DynamicResource BrushTextPrimary}" />
+              </StackPanel>
+            </Button>
+            <Button Command="{Binding TracertCommand}"
+                    Margin="0,0,6,0"
+                    Padding="8,14"
+                    CornerRadius="{DynamicResource RadiusMd}"
+                    Background="Transparent"
+                    BorderBrush="{DynamicResource BrushAccentPrimary}"
+                    BorderThickness="1">
+              <StackPanel Spacing="6" HorizontalAlignment="Center">
+                <TextBlock Text="⋯" FontSize="18"
+                           HorizontalAlignment="Center"
+                           Foreground="{DynamicResource BrushAccentPrimary}" />
+                <TextBlock Text="Tracert" FontSize="11"
+                           HorizontalAlignment="Center"
+                           Foreground="{DynamicResource BrushTextPrimary}" />
+              </StackPanel>
+            </Button>
+            <Button Command="{Binding DnsLookupCommand}"
+                    Margin="0,0,6,0"
+                    Padding="8,14"
+                    CornerRadius="{DynamicResource RadiusMd}"
+                    Background="Transparent"
+                    BorderBrush="{DynamicResource BrushAccentPrimary}"
+                    BorderThickness="1">
+              <StackPanel Spacing="6" HorizontalAlignment="Center">
+                <TextBlock Text="⊕" FontSize="18"
+                           HorizontalAlignment="Center"
+                           Foreground="{DynamicResource BrushAccentPrimary}" />
+                <TextBlock Text="DNS-Lookup" FontSize="11"
+                           HorizontalAlignment="Center"
+                           Foreground="{DynamicResource BrushTextPrimary}" />
+              </StackPanel>
+            </Button>
+            <Button Command="{Binding RenewIpCommand}"
+                    Padding="8,14"
+                    CornerRadius="{DynamicResource RadiusMd}"
+                    Background="Transparent"
+                    BorderBrush="{DynamicResource BrushAccentPrimary}"
+                    BorderThickness="1">
+              <StackPanel Spacing="6" HorizontalAlignment="Center">
+                <TextBlock Text="↻" FontSize="18"
+                           HorizontalAlignment="Center"
+                           Foreground="{DynamicResource BrushAccentPrimary}" />
+                <TextBlock Text="IP erneuern" FontSize="11"
+                           HorizontalAlignment="Center"
+                           Foreground="{DynamicResource BrushTextPrimary}" />
+              </StackPanel>
+            </Button>
+          </UniformGrid>
+
+          <!-- Ping result -->
+          <Border Background="#0F172A"
+                  CornerRadius="{DynamicResource RadiusMd}"
+                  Padding="14,12">
+            <Grid ColumnDefinitions="Auto,*">
+              <Border Width="28" Height="28"
+                      CornerRadius="14"
+                      Background="{DynamicResource BrushStatusOk}"
+                      VerticalAlignment="Center"
+                      Margin="0,0,12,0">
+                <TextBlock Text="✓"
+                           FontSize="14" FontWeight="Bold"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Foreground="White" />
+              </Border>
+              <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                <TextBlock Text="{Binding PingResultTitle}"
+                           FontSize="13" FontWeight="SemiBold"
+                           Foreground="{DynamicResource BrushTextPrimary}" />
+                <TextBlock Text="{Binding PingResultText}"
+                           FontSize="12"
+                           Foreground="{DynamicResource BrushStatusOk}" />
+              </StackPanel>
+            </Grid>
+          </Border>
+        </StackPanel>
+      </Border>
+
+      <!-- WLAN list -->
+      <Border Grid.Column="2"
+              Background="{DynamicResource BrushSurfaceElevated}"
+              CornerRadius="{DynamicResource RadiusLg}"
+              Padding="0">
+        <StackPanel>
+          <TextBlock Text="{Binding WlanListTitle}"
+                     FontSize="14" FontWeight="SemiBold"
+                     Foreground="{DynamicResource BrushTextPrimary}"
+                     Margin="16,14,16,10" />
+          <Border Height="1" Background="{DynamicResource BrushBorder}" />
+
+          <ItemsControl ItemsSource="{Binding WlanNetworks}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:WlanNetworkItem">
+                <StackPanel>
+                  <Grid ColumnDefinitions="Auto,*,Auto"
+                        Margin="16,12">
+                    <TextBlock Text="⌁"
+                               FontSize="16"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource BrushAccentPrimary}"
+                               Margin="0,0,10,0" />
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding Ssid}"
+                               FontSize="13" FontWeight="SemiBold"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource BrushTextPrimary}" />
+                    <TextBlock Grid.Column="2"
+                               Text="{Binding StatusLabel}"
+                               FontSize="12"
+                               VerticalAlignment="Center"
+                               Foreground="{Binding StatusBrush}" />
+                  </Grid>
+                  <Border Height="1"
+                          Background="{DynamicResource BrushBorder}"
+                          Margin="16,0" />
+                </StackPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
+    </Grid>
+
+    <!-- Latency graph -->
+    <Border Grid.Row="3"
+            Background="{DynamicResource BrushSurfaceElevated}"
+            CornerRadius="{DynamicResource RadiusLg}"
+            Padding="18,16">
+      <StackPanel Spacing="10">
+        <TextBlock Text="{Binding LatencyGraphTitle}"
+                   FontSize="14" FontWeight="SemiBold"
+                   Foreground="{DynamicResource BrushTextPrimary}" />
+
+        <Grid ColumnDefinitions="36,*" Height="120">
+          <!-- Y-axis labels -->
+          <StackPanel Spacing="0" VerticalAlignment="Stretch">
+            <TextBlock Text="0ms"  FontSize="10" Foreground="{DynamicResource BrushTextMuted}" />
+            <TextBlock Text="5ms"  FontSize="10" Foreground="{DynamicResource BrushTextMuted}" Margin="0,18,0,0" />
+            <TextBlock Text="10ms" FontSize="10" Foreground="{DynamicResource BrushTextMuted}" Margin="0,18,0,0" />
+            <TextBlock Text="15ms" FontSize="10" Foreground="{DynamicResource BrushTextMuted}" Margin="0,18,0,0" />
+            <TextBlock Text="20ms" FontSize="10" Foreground="{DynamicResource BrushTextMuted}" Margin="0,18,0,0" />
+          </StackPanel>
+
+          <!-- Graph area -->
+          <controls:Sparkline Grid.Column="1"
+                              Height="120"
+                              HorizontalAlignment="Stretch"
+                              VerticalAlignment="Stretch"
+                              PointsData="{Binding LatencyGraphPoints}"
+                              StrokeBrush="{DynamicResource BrushAccentPrimary}"
+                              StrokeWidth="2" />
+        </Grid>
+      </StackPanel>
+    </Border>
+
+  </Grid>
+</UserControl>

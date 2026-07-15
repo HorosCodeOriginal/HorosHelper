@@ -1,0 +1,79 @@
+---
+description: Pre-code mockup analysis — extract layout, grid, spacing, typography, colors, components
+globs:
+  - "**/*.axaml"
+  - "**/*.png"
+  - "**/*.jpg"
+alwaysApply: false
+---
+
+# Mockup Analysis — Before First Line of Code
+
+**Firma:** HorosCode · **Produkt:** HorosCloud
+
+**Never write AXAML until analysis is complete.**
+
+## Extraction Checklist
+
+| Category | Extract | Document in |
+|----------|---------|-------------|
+| Layout | Root frame size, regions, flex/grid structure | Task comment / mini-plan |
+| Grid | Columns, rows, `*` vs fixed, alignment | Region notes |
+| Spacing | Padding, margin, gap between siblings | Token candidates |
+| Radius | Corner radius per element | `design-memory.md` if new |
+| Typography | Font, size, weight, line-height, color | Token candidates |
+| Colors | BG, surface, text, border, accent, states | `design-memory.md` if new |
+| Components | Buttons, inputs, nav, cards, icons | Component inventory |
+
+## Figma MCP (preferred)
+
+```text
+1. GetMcpTools → Figma server
+2. Load frame hierarchy + auto-layout
+3. Export spacing/typography/color per node
+4. Mark regions for incremental workflow
+```
+
+## Screenshot Fallback
+
+```text
+1. Record viewport size (e.g. 1440×900)
+2. Draw region boundaries manually
+3. Measure spacing with grid overlay
+4. Expect ~70–85% start parity — plan extra review rounds
+```
+
+## Analysis Output Template
+
+```markdown
+## Mockup Analysis — [Frame Name]
+
+**Viewport:** 1440×900 · **Theme:** Dark
+
+### Regions
+1. Header — 1440×56, fixed top
+2. Sidebar — 240×844, left
+3. Content — 1200×844, scroll
+
+### New Tokens Needed
+| Key | Value | Usage |
+|-----|-------|-------|
+| SpacingHeaderX | 24px | Header horizontal padding |
+
+### Components
+- Primary CTA button (amber, 40px height)
+- Nav item with active state (left border accent)
+```
+
+## Never
+
+- **Never** start coding with "I'll figure out spacing later"
+- **Never** guess colors — measure or read from Figma
+- **Never** skip region decomposition (`01-workflow`)
+
+## References
+
+- Workflow: `01-workflow.mdc`
+- Regions: `docs/ui-regions.md`
+- Tokens: `docs/design-memory.md`, `docs/design-tokens.md`
+- Skill: `@avalonia-figma-to-code`

@@ -1,0 +1,404 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HorosHelp.UI.ViewModels.Features"
+             x:Class="HorosHelp.UI.Views.Features.EinstellungenView"
+             x:Name="Root"
+             x:DataType="vm:EinstellungenViewModel">
+
+  <Grid RowDefinitions="Auto,*" Margin="24,20,24,20">
+
+    <!-- Header -->
+    <StackPanel Grid.Row="0" Spacing="4" Margin="0,0,0,16">
+      <TextBlock Text="{Binding Title}"
+                 FontSize="28" FontWeight="Bold"
+                 Foreground="{DynamicResource BrushTextPrimary}" />
+      <TextBlock Text="{Binding Subtitle}"
+                 FontSize="13"
+                 Foreground="{DynamicResource BrushTextSecondary}" />
+    </StackPanel>
+
+    <!-- Two-column settings layout -->
+    <Grid Grid.Row="1" ColumnDefinitions="220,*">
+
+      <!-- ═══════════ LEFT — Category Nav ═══════════ -->
+      <Border Grid.Column="0"
+              Background="{DynamicResource BrushSurfaceElevated}"
+              CornerRadius="{DynamicResource RadiusLg}"
+              Margin="0,0,14,0">
+        <StackPanel Margin="12,14" Spacing="4">
+          <ItemsControl ItemsSource="{Binding Categories}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:SettingsCategoryItem">
+                <Button Command="{Binding #Root.DataContext.SelectCategoryCommand}"
+                        CommandParameter="{Binding Key}"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Padding="0"
+                        Margin="0,0,0,4"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Stretch">
+                  <Border CornerRadius="{DynamicResource RadiusMd}"
+                          Background="{Binding ItemBackground}"
+                          BorderBrush="{Binding ItemBorderBrush}"
+                          BorderThickness="1"
+                          Padding="10,10">
+                    <Grid ColumnDefinitions="34,*">
+                      <Border Width="28" Height="28"
+                              CornerRadius="6"
+                              Background="{Binding IconBackground}"
+                              VerticalAlignment="Center">
+                        <TextBlock Text="{Binding IconGlyph}"
+                                   FontSize="13"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Foreground="{Binding IconForeground}" />
+                      </Border>
+                      <TextBlock Grid.Column="1"
+                                 Text="{Binding Name}"
+                                 FontSize="13"
+                                 FontWeight="{Binding NameWeight}"
+                                 Foreground="{Binding NameForeground}"
+                                 VerticalAlignment="Center"
+                                 Margin="8,0,0,0" />
+                    </Grid>
+                  </Border>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
+
+      <!-- ═══════════ RIGHT — Form Panel ═══════════ -->
+      <Border Grid.Column="1"
+              Background="{DynamicResource BrushSurfaceElevated}"
+              CornerRadius="{DynamicResource RadiusLg}">
+        <Grid RowDefinitions="Auto,*,Auto">
+
+          <!-- Panel title -->
+          <TextBlock Grid.Row="0"
+                     Text="{Binding ActiveCategoryTitle}"
+                     FontSize="16" FontWeight="SemiBold"
+                     Foreground="{DynamicResource BrushTextPrimary}"
+                     Margin="20,18,20,0" />
+          <Border Grid.Row="0"
+                  Height="1"
+                  Background="{DynamicResource BrushBorder}"
+                  Margin="0,50,0,0"
+                  VerticalAlignment="Bottom" />
+
+          <!-- Form content -->
+          <ScrollViewer Grid.Row="1"
+                        VerticalScrollBarVisibility="Auto"
+                        Padding="20,16,20,12">
+            <StackPanel Spacing="0">
+
+            <!-- Allgemein -->
+            <StackPanel IsVisible="{Binding ShowAllgemeinForm}" Spacing="0">
+
+              <!-- Toggle: App beim Windows-Start öffnen -->
+              <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,16">
+                <Border Width="36" Height="36" CornerRadius="8"
+                        Background="#334155" VerticalAlignment="Center">
+                  <TextBlock Text="⏻" FontSize="16"
+                             HorizontalAlignment="Center" VerticalAlignment="Center"
+                             Foreground="{DynamicResource BrushTextPrimary}" />
+                </Border>
+                <TextBlock Grid.Column="1"
+                           Text="App beim Windows-Start öffnen"
+                           FontSize="13"
+                           Foreground="{DynamicResource BrushTextPrimary}"
+                           VerticalAlignment="Center"
+                           Margin="12,0,12,0" />
+                <ToggleSwitch Grid.Column="2"
+                              IsChecked="{Binding OpenOnStartup}"
+                              OnContent="" OffContent=""
+                              VerticalAlignment="Center" />
+              </Grid>
+
+              <!-- Toggle: Minimiert in Taskleiste starten -->
+              <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,16">
+                <Border Width="36" Height="36" CornerRadius="8"
+                        Background="#334155" VerticalAlignment="Center">
+                  <TextBlock Text="—"
+                             FontSize="18" FontWeight="Bold"
+                             HorizontalAlignment="Center" VerticalAlignment="Center"
+                             Foreground="{DynamicResource BrushTextPrimary}" />
+                </Border>
+                <TextBlock Grid.Column="1"
+                           Text="Minimiert in Taskleiste starten"
+                           FontSize="13"
+                           Foreground="{DynamicResource BrushTextPrimary}"
+                           VerticalAlignment="Center"
+                           Margin="12,0,12,0" />
+                <ToggleSwitch Grid.Column="2"
+                              IsChecked="{Binding StartMinimized}"
+                              OnContent="" OffContent=""
+                              VerticalAlignment="Center" />
+              </Grid>
+
+              <!-- Theme dropdown -->
+              <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,16">
+                <Border Width="36" Height="36" CornerRadius="8"
+                        Background="#334155" VerticalAlignment="Center">
+                  <TextBlock Text="🖌"
+                             FontSize="14"
+                             HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <TextBlock Grid.Column="1"
+                           Text="Theme"
+                           FontSize="13"
+                           Foreground="{DynamicResource BrushTextPrimary}"
+                           VerticalAlignment="Center"
+                           Margin="12,0,12,0" />
+                <ComboBox Grid.Column="2"
+                          ItemsSource="{Binding ThemeOptions}"
+                          SelectedItem="{Binding SelectedTheme}"
+                          MinWidth="140"
+                          VerticalAlignment="Center" />
+              </Grid>
+
+              <!-- Sprache dropdown -->
+              <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,16">
+                <Border Width="36" Height="36" CornerRadius="8"
+                        Background="#334155" VerticalAlignment="Center">
+                  <TextBlock Text="🌐"
+                             FontSize="14"
+                             HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <TextBlock Grid.Column="1"
+                           Text="Sprache"
+                           FontSize="13"
+                           Foreground="{DynamicResource BrushTextPrimary}"
+                           VerticalAlignment="Center"
+                           Margin="12,0,12,0" />
+                <ComboBox Grid.Column="2"
+                          ItemsSource="{Binding LanguageOptions}"
+                          SelectedItem="{Binding SelectedLanguage}"
+                          MinWidth="140"
+                          VerticalAlignment="Center" />
+              </Grid>
+
+              <!-- Scan-Intervall slider -->
+              <Grid ColumnDefinitions="Auto,*" Margin="0,0,0,16">
+                <Border Width="36" Height="36" CornerRadius="8"
+                        Background="#334155" VerticalAlignment="Top" Margin="0,4,0,0">
+                  <TextBlock Text="⏱"
+                             FontSize="14"
+                             HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel Grid.Column="1" Margin="12,0,0,0" Spacing="8">
+                  <TextBlock Text="{Binding ScanIntervalText}"
+                             FontSize="13"
+                             Foreground="{DynamicResource BrushTextPrimary}" />
+                  <Slider Minimum="1" Maximum="10"
+                          Value="{Binding ScanIntervalSeconds}"
+                          TickFrequency="1"
+                          IsSnapToTickEnabled="True"
+                          Foreground="{DynamicResource BrushAccentPrimary}" />
+                </StackPanel>
+              </Grid>
+
+              <!-- Toggle: Benachrichtigungen -->
+              <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,8">
+                <Border Width="36" Height="36" CornerRadius="8"
+                        Background="#334155" VerticalAlignment="Center">
+                  <TextBlock Text="🔔"
+                             FontSize="14"
+                             HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <TextBlock Grid.Column="1"
+                           Text="Benachrichtigungen aktivieren"
+                           FontSize="13"
+                           Foreground="{DynamicResource BrushTextPrimary}"
+                           VerticalAlignment="Center"
+                           Margin="12,0,12,0" />
+                <ToggleSwitch Grid.Column="2"
+                              IsChecked="{Binding NotificationsEnabled}"
+                              OnContent="" OffContent=""
+                              VerticalAlignment="Center" />
+              </Grid>
+
+            </StackPanel>
+
+            <!-- Darstellung -->
+            <StackPanel IsVisible="{Binding ShowDarstellungForm}" Spacing="16">
+              <TextBlock Text="Darstellungseinstellungen für HorosHelper."
+                         FontSize="13"
+                         TextWrapping="Wrap"
+                         Foreground="{DynamicResource BrushTextSecondary}" />
+              <Grid ColumnDefinitions="Auto,*,Auto">
+                <Border Width="36" Height="36" CornerRadius="8" Background="#334155">
+                  <TextBlock Text="🖌" FontSize="14"
+                             HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <TextBlock Grid.Column="1" Text="Theme"
+                           FontSize="13" Foreground="{DynamicResource BrushTextPrimary}"
+                           VerticalAlignment="Center" Margin="12,0,12,0" />
+                <ComboBox Grid.Column="2"
+                          ItemsSource="{Binding ThemeOptions}"
+                          SelectedItem="{Binding SelectedTheme}"
+                          MinWidth="140" />
+              </Grid>
+              <Grid ColumnDefinitions="Auto,*,Auto">
+                <Border Width="36" Height="36" CornerRadius="8" Background="#334155">
+                  <TextBlock Text="A" FontSize="16" FontWeight="Bold"
+                             HorizontalAlignment="Center" VerticalAlignment="Center"
+                             Foreground="{DynamicResource BrushTextPrimary}" />
+                </Border>
+                <TextBlock Grid.Column="1" Text="Schriftgröße"
+                           FontSize="13" Foreground="{DynamicResource BrushTextPrimary}"
+                           VerticalAlignment="Center" Margin="12,0,12,0" />
+                <ComboBox Grid.Column="2" MinWidth="140"
+                          SelectedIndex="1">
+                  <ComboBoxItem>Klein</ComboBoxItem>
+                  <ComboBoxItem>Normal</ComboBoxItem>
+                  <ComboBoxItem>Groß</ComboBoxItem>
+                </ComboBox>
+              </Grid>
+            </StackPanel>
+
+            <!-- Scans -->
+            <StackPanel IsVisible="{Binding ShowScansForm}" Spacing="16">
+              <TextBlock Text="Konfiguration der automatischen System-Scans."
+                         FontSize="13" TextWrapping="Wrap"
+                         Foreground="{DynamicResource BrushTextSecondary}" />
+              <Grid ColumnDefinitions="Auto,*">
+                <Border Width="36" Height="36" CornerRadius="8" Background="#334155" Margin="0,4,0,0">
+                  <TextBlock Text="⏱" FontSize="14"
+                             HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel Grid.Column="1" Margin="12,0,0,0" Spacing="8">
+                  <TextBlock Text="{Binding ScanIntervalText}"
+                             FontSize="13" Foreground="{DynamicResource BrushTextPrimary}" />
+                  <Slider Minimum="1" Maximum="60"
+                          Value="{Binding ScanIntervalSeconds}"
+                          TickFrequency="1"
+                          IsSnapToTickEnabled="True"
+                          Foreground="{DynamicResource BrushAccentPrimary}" />
+                </StackPanel>
+              </Grid>
+              <Grid ColumnDefinitions="Auto,*,Auto">
+                <Border Width="36" Height="36" CornerRadius="8" Background="#334155">
+                  <TextBlock Text="⊙" FontSize="16"
+                             HorizontalAlignment="Center" VerticalAlignment="Center"
+                             Foreground="{DynamicResource BrushTextPrimary}" />
+                </Border>
+                <TextBlock Grid.Column="1" Text="Scan beim Start ausführen"
+                           FontSize="13" Foreground="{DynamicResource BrushTextPrimary}"
+                           VerticalAlignment="Center" Margin="12,0,12,0" />
+                <ToggleSwitch Grid.Column="2" IsChecked="True"
+                              OnContent="" OffContent="" />
+              </Grid>
+            </StackPanel>
+
+            <!-- Datenschutz -->
+            <StackPanel IsVisible="{Binding ShowDatenschutzForm}" Spacing="16">
+              <TextBlock Text="Steuern Sie, welche Daten HorosHelper verwendet."
+                         FontSize="13" TextWrapping="Wrap"
+                         Foreground="{DynamicResource BrushTextSecondary}" />
+              <Grid ColumnDefinitions="Auto,*,Auto">
+                <Border Width="36" Height="36" CornerRadius="8" Background="#334155">
+                  <TextBlock Text="📊" FontSize="14"
+                             HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <TextBlock Grid.Column="1" Text="Anonyme Nutzungsstatistiken senden"
+                           FontSize="13" Foreground="{DynamicResource BrushTextPrimary}"
+                           VerticalAlignment="Center" Margin="12,0,12,0" />
+                <ToggleSwitch Grid.Column="2" IsChecked="False"
+                              OnContent="" OffContent="" />
+              </Grid>
+              <Grid ColumnDefinitions="Auto,*,Auto">
+                <Border Width="36" Height="36" CornerRadius="8" Background="#334155">
+                  <TextBlock Text="✦" FontSize="14"
+                             HorizontalAlignment="Center" VerticalAlignment="Center"
+                             Foreground="{DynamicResource BrushAccentPrimary}" />
+                </Border>
+                <TextBlock Grid.Column="1" Text="Copilot-Daten lokal verarbeiten"
+                           FontSize="13" Foreground="{DynamicResource BrushTextPrimary}"
+                           VerticalAlignment="Center" Margin="12,0,12,0" />
+                <ToggleSwitch Grid.Column="2" IsChecked="True"
+                              OnContent="" OffContent="" />
+              </Grid>
+            </StackPanel>
+
+            <!-- Über -->
+            <StackPanel IsVisible="{Binding ShowUeberForm}" Spacing="12">
+              <TextBlock Text="{Binding AppVersion}"
+                         FontSize="20" FontWeight="Bold"
+                         Foreground="{DynamicResource BrushTextPrimary}" />
+              <TextBlock Text="{Binding BuildInfo}"
+                         FontSize="13"
+                         Foreground="{DynamicResource BrushTextSecondary}" />
+              <Border Background="#0F172A"
+                      CornerRadius="{DynamicResource RadiusMd}"
+                      BorderBrush="{DynamicResource BrushBorder}"
+                      BorderThickness="1"
+                      Padding="14,12"
+                      Margin="0,8,0,0">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="HorosHelper"
+                             FontSize="14" FontWeight="SemiBold"
+                             Foreground="{DynamicResource BrushAccentPrimary}" />
+                  <TextBlock Text="System-Optimierung und Diagnose für Windows."
+                             FontSize="12" TextWrapping="Wrap"
+                             Foreground="{DynamicResource BrushTextSecondary}" />
+                  <TextBlock Text="© HorosCode"
+                             FontSize="11"
+                             Foreground="{DynamicResource BrushTextMuted}"
+                             Margin="0,6,0,0" />
+                </StackPanel>
+              </Border>
+            </StackPanel>
+
+            </StackPanel>
+
+          </ScrollViewer>
+
+          <!-- Save button -->
+          <Border Grid.Row="2"
+                  BorderBrush="{DynamicResource BrushBorder}"
+                  BorderThickness="0,1,0,0"
+                  Padding="20,14,20,18">
+            <Button Command="{Binding SaveCommand}"
+                    HorizontalAlignment="Right"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    Padding="24,12"
+                    CornerRadius="{DynamicResource RadiusMd}"
+                    Foreground="#0F172A"
+                    BorderThickness="0">
+              <Button.Background>
+                <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,0%">
+                  <GradientStop Color="#F59E0B" Offset="0" />
+                  <GradientStop Color="#D97706" Offset="1" />
+                </LinearGradientBrush>
+              </Button.Background>
+              <Button.Styles>
+                <Style Selector="Button:pointerover /template/ ContentPresenter">
+                  <Setter Property="Background">
+                    <Setter.Value>
+                      <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,0%">
+                        <GradientStop Color="#FBBF24" Offset="0" />
+                        <GradientStop Color="#F59E0B" Offset="1" />
+                      </LinearGradientBrush>
+                    </Setter.Value>
+                  </Setter>
+                </Style>
+              </Button.Styles>
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="💾" FontSize="14" Foreground="#0F172A" />
+                <TextBlock Text="Änderungen speichern"
+                           FontSize="14" FontWeight="SemiBold"
+                           Foreground="#0F172A" />
+              </StackPanel>
+            </Button>
+          </Border>
+
+        </Grid>
+      </Border>
+
+    </Grid>
+  </Grid>
+</UserControl>

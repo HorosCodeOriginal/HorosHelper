@@ -1,0 +1,227 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HorosHelp.UI.ViewModels.Features"
+             xmlns:ui="using:HorosHelp.UI"
+             x:Class="HorosHelp.UI.Views.Features.BackupView"
+             x:DataType="vm:BackupViewModel">
+
+  <Grid RowDefinitions="Auto,14,*,14,Auto,14,Auto" Margin="24,20,24,20">
+
+    <!-- ═══ Header ═══ -->
+    <StackPanel Spacing="4">
+      <TextBlock Text="{Binding Title}"
+                 FontSize="28" FontWeight="Bold"
+                 Foreground="{DynamicResource BrushTextPrimary}" />
+      <TextBlock Text="{Binding Subtitle}"
+                 FontSize="13"
+                 Foreground="{DynamicResource BrushTextSecondary}" />
+    </StackPanel>
+
+    <!-- ═══ Top Row: Timeline + Profiles ═══ -->
+    <Grid Grid.Row="2" ColumnDefinitions="*,12,*">
+
+      <!-- ─── Wiederherstellungspunkte ─── -->
+      <Border Background="{DynamicResource BrushSurfaceElevated}"
+              CornerRadius="{DynamicResource RadiusLg}"
+              Padding="20,18">
+        <Grid RowDefinitions="Auto,*,Auto">
+
+          <TextBlock Text="Wiederherstellungspunkte"
+                     FontSize="14" FontWeight="SemiBold"
+                     Foreground="{DynamicResource BrushTextPrimary}"
+                     Margin="0,0,0,16" />
+
+          <ItemsControl Grid.Row="1" ItemsSource="{Binding RestorePoints}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:RestorePointItem">
+                <Grid ColumnDefinitions="24,*" Margin="0,0,0,0">
+                  <StackPanel Grid.Column="0" Width="24" HorizontalAlignment="Center">
+                    <Ellipse Width="{Binding DotSize}" Height="{Binding DotSize}"
+                             Fill="{DynamicResource BrushAccentPrimary}"
+                             HorizontalAlignment="Center" />
+                    <Border Width="2" Height="28"
+                            Background="{DynamicResource BrushAccentPrimary}"
+                            Opacity="0.35"
+                            HorizontalAlignment="Center"
+                            IsVisible="{Binding ShowConnector}" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="1" Margin="10,0,0,12" Spacing="6">
+                    <TextBlock FontSize="13" Foreground="{DynamicResource BrushTextPrimary}">
+                      <Run Text="{Binding DateTimeLabel}" />
+                      <Run Text=" — " Foreground="{DynamicResource BrushTextMuted}" />
+                      <Run Text="{Binding Reason}" Foreground="{DynamicResource BrushTextSecondary}" />
+                    </TextBlock>
+                    <Border HorizontalAlignment="Left"
+                            CornerRadius="8" Padding="8,2"
+                            Background="{DynamicResource BrushAccentPrimary}"
+                            IsVisible="{Binding IsCurrent}">
+                      <TextBlock Text="Aktuell" FontSize="10" FontWeight="SemiBold" Foreground="#0F172A" />
+                    </Border>
+                  </StackPanel>
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+
+          <Button Grid.Row="2"
+                  Command="{Binding CreateRestorePointCommand}"
+                  HorizontalAlignment="Stretch"
+                  HorizontalContentAlignment="Center"
+                  Padding="0,10"
+                  Margin="0,8,0,0"
+                  CornerRadius="{DynamicResource RadiusMd}"
+                  Background="Transparent"
+                  BorderBrush="{DynamicResource BrushAccentPrimary}"
+                  BorderThickness="1"
+                  Foreground="{DynamicResource BrushAccentPrimary}">
+            <StackPanel Spacing="4">
+              <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                <TextBlock Text="{x:Static ui:AdminUiGlyphs.Shield}"
+                           FontSize="13"
+                           IsVisible="{Binding ShowRestorePointAdminHint}"
+                           VerticalAlignment="Center" />
+                <TextBlock Text="+" FontSize="14" />
+                <TextBlock Text="Wiederherstellungspunkt erstellen" FontSize="12" />
+              </StackPanel>
+              <TextBlock Text="{Binding RestorePointAdminHint}"
+                         FontSize="10"
+                         Foreground="{DynamicResource BrushTextMuted}"
+                         HorizontalAlignment="Center"
+                         IsVisible="{Binding ShowRestorePointAdminHint}" />
+            </StackPanel>
+          </Button>
+
+        </Grid>
+      </Border>
+
+      <!-- ─── Backup-Profile ─── -->
+      <Border Grid.Column="2"
+              Background="{DynamicResource BrushSurfaceElevated}"
+              CornerRadius="{DynamicResource RadiusLg}"
+              Padding="20,18">
+        <Grid RowDefinitions="Auto,*">
+
+          <TextBlock Text="Backup-Profile"
+                     FontSize="14" FontWeight="SemiBold"
+                     Foreground="{DynamicResource BrushTextPrimary}"
+                     Margin="0,0,0,14" />
+
+          <ItemsControl Grid.Row="1" ItemsSource="{Binding BackupProfiles}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <UniformGrid Columns="2" Rows="2" />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:BackupProfileItem">
+                <Border Background="#0F172A"
+                        CornerRadius="{DynamicResource RadiusMd}"
+                        BorderBrush="{DynamicResource BrushBorder}"
+                        BorderThickness="1"
+                        Margin="0,0,8,8"
+                        Padding="14,12">
+                  <StackPanel Spacing="8">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                      <Border Width="32" Height="32"
+                              CornerRadius="{DynamicResource RadiusSm}"
+                              Background="{Binding IconBackground}">
+                        <TextBlock Text="{Binding IconGlyph}"
+                                   FontSize="14"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+                      </Border>
+                      <TextBlock Text="{Binding Name}"
+                                 FontSize="13" FontWeight="SemiBold"
+                                 Foreground="{DynamicResource BrushTextPrimary}"
+                                 VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <TextBlock Text="{Binding LastBackupText}"
+                               FontSize="11"
+                               Foreground="{DynamicResource BrushTextSecondary}" />
+
+                    <Grid ColumnDefinitions="*,Auto">
+                      <StackPanel Orientation="Horizontal" Spacing="4">
+                        <TextBlock Text="{Binding StatusIcon}"
+                                   FontSize="11"
+                                   Foreground="{Binding StatusForeground}"
+                                   VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding StatusLabel}"
+                                   FontSize="11" FontWeight="Medium"
+                                   Foreground="{Binding StatusForeground}"
+                                   VerticalAlignment="Center" />
+                      </StackPanel>
+                      <TextBlock Grid.Column="1"
+                                 Text="{Binding Size}"
+                                 FontSize="11"
+                                 Foreground="{DynamicResource BrushTextMuted}"
+                                 VerticalAlignment="Center" />
+                    </Grid>
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+
+        </Grid>
+      </Border>
+
+    </Grid>
+
+    <!-- ═══ Amber CTA ═══ -->
+    <Button Grid.Row="4"
+            Command="{Binding StartNewBackupCommand}"
+            HorizontalAlignment="Center"
+            HorizontalContentAlignment="Center"
+            VerticalContentAlignment="Center"
+            Padding="48,14"
+            CornerRadius="{DynamicResource RadiusLg}"
+            Foreground="#0F172A"
+            BorderThickness="0">
+      <Button.Background>
+        <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,0%">
+          <GradientStop Color="#F59E0B" Offset="0" />
+          <GradientStop Color="#D97706" Offset="1" />
+        </LinearGradientBrush>
+      </Button.Background>
+      <Button.Styles>
+        <Style Selector="Button:pointerover /template/ ContentPresenter">
+          <Setter Property="Background">
+            <Setter.Value>
+              <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,0%">
+                <GradientStop Color="#FBBF24" Offset="0" />
+                <GradientStop Color="#F59E0B" Offset="1" />
+              </LinearGradientBrush>
+            </Setter.Value>
+          </Setter>
+        </Style>
+      </Button.Styles>
+      <StackPanel Orientation="Horizontal" Spacing="10">
+        <TextBlock Text="⛁" FontSize="18" Foreground="#0F172A" />
+        <TextBlock Text="Neues Backup starten"
+                   FontSize="15" FontWeight="SemiBold"
+                   Foreground="#0F172A" />
+      </StackPanel>
+    </Button>
+
+    <!-- ═══ Status Bar ═══ -->
+    <Border Grid.Row="6"
+            Background="{DynamicResource BrushSurfaceElevated}"
+            CornerRadius="{DynamicResource RadiusLg}"
+            BorderBrush="{DynamicResource BrushBorder}"
+            BorderThickness="1"
+            Padding="16,12"
+            HorizontalAlignment="Stretch">
+      <StackPanel Orientation="Horizontal"
+                  Spacing="8"
+                  HorizontalAlignment="Center">
+        <Ellipse Width="8" Height="8" Fill="#22C55E" VerticalAlignment="Center" />
+        <TextBlock FontSize="12" Foreground="{DynamicResource BrushTextSecondary}">
+          <Run Text="{Binding LastBackupStatus}" />
+          <Run Text="{Binding LastBackupResult}" Foreground="#22C55E" FontWeight="SemiBold" />
+        </TextBlock>
+      </StackPanel>
+    </Border>
+
+  </Grid>
+</UserControl>

@@ -1,0 +1,17 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="HorosHelp.UI.Controls.ProgressRing"
+             ClipToBounds="False"
+             HorizontalAlignment="Center"
+             VerticalAlignment="Center">
+
+  <Canvas x:Name="RootCanvas" ClipToBounds="False">
+    <Path x:Name="TrackPath"
+          Fill="Transparent"
+          StrokeLineCap="Round" />
+    <Path x:Name="ProgressPath"
+          Fill="Transparent"
+          StrokeLineCap="Round" />
+  </Canvas>
+
+</UserControl>

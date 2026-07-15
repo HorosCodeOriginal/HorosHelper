@@ -1,0 +1,351 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HorosHelp.UI.ViewModels.Features"
+             x:Class="HorosHelp.UI.Views.Features.CopilotView"
+             x:Name="Root"
+             x:DataType="vm:CopilotViewModel">
+
+  <Grid ColumnDefinitions="*,300" Margin="24,20,24,20">
+
+    <!-- ═══════════ LEFT — Chat Panel ═══════════ -->
+    <Border Grid.Column="0"
+            Background="{DynamicResource BrushSurfaceElevated}"
+            CornerRadius="{DynamicResource RadiusLg}"
+            Margin="0,0,14,0">
+      <Grid RowDefinitions="Auto,*,Auto,Auto,Auto">
+
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="20,18,20,0">
+          <StackPanel Spacing="4">
+            <TextBlock Text="{Binding Title}"
+                       FontSize="22" FontWeight="Bold"
+                       Foreground="{DynamicResource BrushTextPrimary}" />
+            <TextBlock Text="{Binding Subtitle}"
+                       FontSize="12"
+                       Foreground="{DynamicResource BrushTextSecondary}" />
+          </StackPanel>
+          <Border Grid.Column="1"
+                  Width="36" Height="36"
+                  CornerRadius="18"
+                  BorderBrush="{DynamicResource BrushAccentPrimary}"
+                  BorderThickness="1.5"
+                  VerticalAlignment="Top">
+            <TextBlock Text="🛡"
+                       FontSize="16"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center" />
+          </Border>
+        </Grid>
+
+        <Border Grid.Row="0"
+                Height="1"
+                Background="{DynamicResource BrushBorder}"
+                Margin="0,68,0,0"
+                VerticalAlignment="Bottom" />
+
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      Padding="20,14,20,8">
+          <ItemsControl ItemsSource="{Binding Messages}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:ChatMessageItem">
+                <Panel>
+
+                <!-- Assistant message (left) -->
+                <StackPanel IsVisible="{Binding !IsUser}"
+                            Orientation="Horizontal"
+                            Spacing="8"
+                            Margin="0,0,80,14"
+                            HorizontalAlignment="Left">
+                  <Border Width="28" Height="28"
+                          CornerRadius="14"
+                          Background="#33F59E0B"
+                          BorderBrush="{DynamicResource BrushAccentPrimary}"
+                          BorderThickness="1"
+                          VerticalAlignment="Top">
+                    <TextBlock Text="✦"
+                               FontSize="13"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource BrushAccentPrimary}" />
+                  </Border>
+                  <Border Background="{Binding BubbleBackground}"
+                          CornerRadius="12"
+                          Padding="14,10"
+                          MaxWidth="520">
+                    <StackPanel Spacing="6">
+                      <TextBlock Text="{Binding Text}"
+                                 FontSize="13"
+                                 TextWrapping="Wrap"
+                                 LineHeight="20"
+                                 Foreground="{DynamicResource BrushTextPrimary}" />
+                      <TextBlock Text="{Binding Time}"
+                                 FontSize="10"
+                                 Foreground="{DynamicResource BrushTextMuted}"
+                                 HorizontalAlignment="Right" />
+                    </StackPanel>
+                  </Border>
+                </StackPanel>
+
+                <!-- User message (right) -->
+                <StackPanel IsVisible="{Binding IsUser}"
+                            Margin="80,0,0,14"
+                            HorizontalAlignment="Right">
+                  <Border Background="{Binding BubbleBackground}"
+                          CornerRadius="12"
+                          Padding="14,10"
+                          MaxWidth="420"
+                          HorizontalAlignment="Right">
+                    <StackPanel Spacing="6">
+                      <TextBlock Text="{Binding Text}"
+                                 FontSize="13"
+                                 TextWrapping="Wrap"
+                                 Foreground="{DynamicResource BrushTextPrimary}" />
+                      <StackPanel Orientation="Horizontal"
+                                  Spacing="6"
+                                  HorizontalAlignment="Right">
+                        <TextBlock Text="{Binding Time}"
+                                   FontSize="10"
+                                   Foreground="{DynamicResource BrushTextMuted}" />
+                        <TextBlock Text="✓✓"
+                                   FontSize="10"
+                                   Foreground="#3B82F6"
+                                   IsVisible="{Binding ShowReadReceipt}" />
+                      </StackPanel>
+                    </StackPanel>
+                  </Border>
+                </StackPanel>
+
+                </Panel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+
+        <ScrollViewer Grid.Row="2"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Disabled"
+                      Padding="20,0,20,0">
+          <ItemsControl ItemsSource="{Binding ActionCards}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <StackPanel Orientation="Horizontal" Spacing="10" />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:ActionCardItem">
+                <Button Command="{Binding #Root.DataContext.ExecuteActionCommand}"
+                        CommandParameter="{Binding}"
+                        Background="#1AF59E0B"
+                        BorderBrush="{DynamicResource BrushAccentPrimary}"
+                        BorderThickness="1"
+                        CornerRadius="{DynamicResource RadiusMd}"
+                        Padding="14,12"
+                        MinWidth="200"
+                        MaxWidth="220"
+                        HorizontalContentAlignment="Left">
+                  <Button.Styles>
+                    <Style Selector="Button:pointerover /template/ ContentPresenter">
+                      <Setter Property="Background" Value="#28F59E0B" />
+                    </Style>
+                  </Button.Styles>
+                  <Grid RowDefinitions="Auto,Auto,Auto">
+                    <TextBlock Text="{Binding IconGlyph}"
+                               FontSize="18"
+                               Margin="0,0,0,6" />
+                    <TextBlock Grid.Row="1"
+                               Text="{Binding Title}"
+                               FontSize="13" FontWeight="SemiBold"
+                               Foreground="{DynamicResource BrushTextPrimary}"
+                               Margin="0,0,0,4" />
+                    <Grid Grid.Row="2" ColumnDefinitions="*,Auto">
+                      <TextBlock Text="{Binding Description}"
+                                 FontSize="11"
+                                 TextWrapping="Wrap"
+                                 LineHeight="16"
+                                 Foreground="{DynamicResource BrushTextSecondary}" />
+                      <TextBlock Grid.Column="1"
+                                 Text="↗"
+                                 FontSize="12"
+                                 Foreground="{DynamicResource BrushAccentPrimary}"
+                                 VerticalAlignment="Bottom"
+                                 Margin="6,0,0,0" />
+                    </Grid>
+                  </Grid>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+
+        <Border Grid.Row="3"
+                Background="#141E293B"
+                CornerRadius="20"
+                Padding="16,10"
+                Margin="20,10,20,0"
+                IsVisible="{Binding IsTyping}">
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <TextBlock Text="Denke nach"
+                       FontSize="12"
+                       Foreground="{DynamicResource BrushTextSecondary}"
+                       VerticalAlignment="Center" />
+            <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+              <Ellipse Width="6" Height="6" Fill="{DynamicResource BrushAccentPrimary}" />
+              <Ellipse Width="6" Height="6" Fill="{DynamicResource BrushAccentPrimary}" Opacity="0.7" />
+              <Ellipse Width="6" Height="6" Fill="{DynamicResource BrushAccentPrimary}" Opacity="0.4" />
+            </StackPanel>
+            <TextBlock Text="🚀"
+                       FontSize="14"
+                       VerticalAlignment="Center"
+                       Margin="4,0,0,0" />
+          </StackPanel>
+        </Border>
+
+        <Border Grid.Row="4"
+                BorderBrush="{DynamicResource BrushBorder}"
+                BorderThickness="0,1,0,0"
+                Padding="16,14,16,16"
+                Margin="0,10,0,0">
+          <Grid ColumnDefinitions="*,Auto">
+            <Border Background="#0F172A"
+                    CornerRadius="{DynamicResource RadiusMd}"
+                    BorderBrush="{DynamicResource BrushBorder}"
+                    BorderThickness="1"
+                    Padding="12,0"
+                    Margin="0,0,10,0">
+              <TextBox Text="{Binding InputText}"
+                       PlaceholderText="Nachricht eingeben…"
+                       Background="Transparent"
+                       BorderThickness="0"
+                       Foreground="{DynamicResource BrushTextPrimary}"
+                       FontSize="13"
+                       Padding="0,12"
+                       VerticalAlignment="Center"
+                       KeyDown="OnInputKeyDown">
+                <TextBox.Styles>
+                  <Style Selector="TextBox /template/ Border#PART_BorderElement">
+                    <Setter Property="BorderThickness" Value="0" />
+                    <Setter Property="Background" Value="Transparent" />
+                  </Style>
+                </TextBox.Styles>
+              </TextBox>
+            </Border>
+            <Button Grid.Column="1"
+                    Command="{Binding SendCommand}"
+                    CornerRadius="{DynamicResource RadiusMd}"
+                    Padding="16,12"
+                    Foreground="#0F172A"
+                    BorderThickness="0">
+              <Button.Background>
+                <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,0%">
+                  <GradientStop Color="#F59E0B" Offset="0" />
+                  <GradientStop Color="#D97706" Offset="1" />
+                </LinearGradientBrush>
+              </Button.Background>
+              <TextBlock Text="➤" FontSize="14" Foreground="#0F172A" />
+            </Button>
+          </Grid>
+        </Border>
+
+      </Grid>
+    </Border>
+
+
+    <!-- ═══════════ RIGHT — System-Kontext ═══════════ -->
+    <Border Grid.Column="1"
+            Background="{DynamicResource BrushSurfaceElevated}"
+            CornerRadius="{DynamicResource RadiusLg}">
+      <Grid RowDefinitions="Auto,*">
+
+        <Grid Grid.Row="0" Margin="16,14,16,0">
+          <TextBlock Text="System-Kontext"
+                     FontSize="14" FontWeight="SemiBold"
+                     Foreground="{DynamicResource BrushTextPrimary}" />
+        </Grid>
+        <Border Grid.Row="0"
+                Height="1"
+                Background="{DynamicResource BrushBorder}"
+                Margin="0,42,0,0"
+                VerticalAlignment="Bottom" />
+
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      Padding="14,10,14,14">
+          <ItemsControl ItemsSource="{Binding SystemContextCards}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:SystemContextCardItem">
+                <Border Background="#0F172A"
+                        CornerRadius="{DynamicResource RadiusMd}"
+                        BorderBrush="{DynamicResource BrushBorder}"
+                        BorderThickness="1"
+                        Padding="14,12"
+                        Margin="0,0,0,10">
+                  <StackPanel Spacing="6">
+
+                    <TextBlock Text="{Binding Label}"
+                               FontSize="11"
+                               Foreground="{DynamicResource BrushTextMuted}" />
+
+                    <Grid ColumnDefinitions="*,Auto">
+                      <TextBlock Text="{Binding Value}"
+                                 FontSize="22" FontWeight="Bold"
+                                 Foreground="{DynamicResource BrushTextPrimary}" />
+                      <TextBlock Grid.Column="1"
+                                 Text="{Binding SubValue}"
+                                 FontSize="11"
+                                 Foreground="{DynamicResource BrushTextSecondary}"
+                                 VerticalAlignment="Bottom"
+                                 Margin="0,0,0,4" />
+                    </Grid>
+
+                    <Canvas Height="28" ClipToBounds="True"
+                            IsVisible="{Binding ShowSparkline}"
+                            Margin="0,2,0,0">
+                      <Polyline Points="0,20 18,14 36,22 54,10 72,16 90,8 108,14 126,6 144,18 162,12 180,20"
+                                Stroke="{DynamicResource BrushAccentPrimary}"
+                                StrokeThickness="1.5"
+                                StrokeLineCap="Round" />
+                    </Canvas>
+
+                    <ProgressBar IsVisible="{Binding ShowProgress}"
+                                 Value="{Binding ProgressValue}"
+                                 Minimum="0" Maximum="100"
+                                 Height="4"
+                                 CornerRadius="2"
+                                 Background="#1E293B"
+                                 Foreground="{DynamicResource BrushAccentPrimary}"
+                                 Margin="0,4,0,0" />
+
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="6"
+                                IsVisible="{Binding ShowStatusRow}">
+                      <TextBlock Text="{Binding StatusIcon}"
+                                 FontSize="12"
+                                 Foreground="{Binding StatusBrush}" />
+                      <TextBlock Text="{Binding StatusText}"
+                                 FontSize="11"
+                                 Foreground="{Binding StatusBrush}" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="4"
+                                IsVisible="{Binding ShowLoadingDots}">
+                      <Ellipse Width="5" Height="5" Fill="{DynamicResource BrushAccentPrimary}" />
+                      <Ellipse Width="5" Height="5" Fill="{DynamicResource BrushAccentPrimary}" Opacity="0.7" />
+                      <Ellipse Width="5" Height="5" Fill="{DynamicResource BrushAccentPrimary}" Opacity="0.4" />
+                      <Ellipse Width="5" Height="5" Fill="{DynamicResource BrushAccentPrimary}" Opacity="0.2" />
+                      <Ellipse Width="5" Height="5" Fill="{DynamicResource BrushAccentPrimary}" Opacity="0.1" />
+                    </StackPanel>
+
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+
+      </Grid>
+    </Border>
+
+  </Grid>
+</UserControl>

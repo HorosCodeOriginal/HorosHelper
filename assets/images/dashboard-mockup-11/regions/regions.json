@@ -1,0 +1,106 @@
+{
+  "schemaVersion": "1.0",
+  "assetSlug": "dashboard-mockup-11",
+  "parentFullPath": "assets/images/dashboard-mockup-11/full.png",
+  "fullWidth": 1536,
+  "fullHeight": 1024,
+  "nineSlice": false,
+  "regions": [
+    {
+      "id": "region-title-bar",
+      "slug": "title-bar",
+      "label": {
+        "de": "Title Bar",
+        "en": "Title Bar"
+      },
+      "bounds": {
+        "x": 184,
+        "y": 81,
+        "width": 1167,
+        "height": 46
+      },
+      "dominantHex": [
+        "#0a1018"
+      ],
+      "transparent": false,
+      "zIndex": 0,
+      "layer": 0,
+      "usage": "bg",
+      "exportPath": "regions/title-bar.png",
+      "parentFullPath": "assets/images/dashboard-mockup-11/full.png",
+      "notes": "title-bar region"
+    },
+    {
+      "id": "region-sidebar",
+      "slug": "sidebar",
+      "label": {
+        "de": "Sidebar",
+        "en": "Sidebar"
+      },
+      "bounds": {
+        "x": 184,
+        "y": 128,
+        "width": 199,
+        "height": 747
+      },
+      "dominantHex": [
+        "#0f1824"
+      ],
+      "transparent": false,
+      "zIndex": 1,
+      "layer": 1,
+      "usage": "bg",
+      "exportPath": "regions/sidebar.png",
+      "parentFullPath": "assets/images/dashboard-mockup-11/full.png",
+      "notes": "sidebar region"
+    },
+    {
+      "id": "region-main-content",
+      "slug": "main-content",
+      "label": {
+        "de": "Main Content",
+        "en": "Main Content"
+      },
+      "bounds": {
+        "x": 384,
+        "y": 128,
+        "width": 967,
+        "height": 747
+      },
+      "dominantHex": [
+        "#141a1f"
+      ],
+      "transparent": false,
+      "zIndex": 2,
+      "layer": 2,
+      "usage": "text-safe",
+      "exportPath": "regions/main-content.png",
+      "parentFullPath": "assets/images/dashboard-mockup-11/full.png",
+      "notes": "main-content region"
+    },
+    {
+      "id": "region-status-bar",
+      "slug": "status-bar",
+      "label": {
+        "de": "Status Bar",
+        "en": "Status Bar"
+      },
+      "bounds": {
+        "x": 184,
+        "y": 875,
+        "width": 1167,
+        "height": 56
+      },
+      "dominantHex": [
+        "#0d151e"
+      ],
+      "transparent": false,
+      "zIndex": 3,
+      "layer": 3,
+      "usage": "overlay",
+      "exportPath": "regions/status-bar.png",
+      "parentFullPath": "assets/images/dashboard-mockup-11/full.png",
+      "notes": "status-bar region"
+    }
+  ]
+}

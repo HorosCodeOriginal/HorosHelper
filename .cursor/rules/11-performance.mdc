@@ -1,0 +1,69 @@
+---
+description: Performance priority — Design > Correctness > Maintainability > Performance
+globs:
+  - "**/*.axaml"
+  - "**/*.cs"
+alwaysApply: false
+---
+
+# Performance — Priority Order
+
+**Firma:** HorosCode · **Produkt:** HorosCloud
+
+## Priority Stack (Pass 1 Mockup→Code)
+
+```
+1. Design fidelity (98/100)     ← highest
+2. Correctness (builds, binds)
+3. Maintainability (reuse, tokens)
+4. Performance optimization   ← lowest in Pass 1
+```
+
+**Never** sacrifice mockup fidelity for performance in Pass 1.
+
+## When Performance Matters (Pass 2+)
+
+After all regions approved and Shell assembled:
+
+| Technique | When |
+|-----------|------|
+| `VirtualizingStackPanel` | Lists with 50+ items |
+| Compiled bindings (`x:DataType`) | All new AXAML |
+| Avoid deep visual trees | Profile shows layout cost |
+| `WhenAnyValue` debounce | Search/filter ViewModels |
+| Lazy-load heavy views | Tab panels not visible at start |
+
+## Compiled Binding Example
+
+```xml
+<UserControl x:DataType="vm:DashboardViewModel"
+             xmlns:vm="using:HorosCloud.Desktop.ViewModels">
+  <TextBlock Text="{Binding Title}" />
+  <!-- Compile-time binding check -->
+</UserControl>
+```
+
+## Virtualization Example
+
+```xml
+<ListBox ItemsSource="{Binding Items}">
+  <ListBox.ItemsPanel>
+    <ItemsPanelTemplate>
+      <VirtualizingStackPanel />
+    </ItemsPanelTemplate>
+  </ListBox.ItemsPanel>
+</ListBox>
+```
+
+## Never in Pass 1
+
+- **Never** skip mockup-accurate layout for "better performance"
+- **Never** remove visual elements to reduce tree depth
+- **Never** premature-optimize bindings before review passes
+- **Never** delay Preview/Review for micro-optimizations
+
+## References
+
+- Fidelity: `02-pixel-perfect.mdc`
+- Completion: `09-completion.mdc`
+- Parameters: `docs/parameters.md`

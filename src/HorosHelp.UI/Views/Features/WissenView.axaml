@@ -1,0 +1,393 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HorosHelp.UI.ViewModels.Features"
+             x:Class="HorosHelp.UI.Views.Features.WissenView"
+             x:Name="Root"
+             x:DataType="vm:WissenViewModel">
+
+  <!-- ── Root: header + search + breadcrumb + 3-col content ── -->
+  <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="24,20,24,20">
+
+    <!-- ══ HEADER ══ -->
+    <StackPanel Grid.Row="0" Spacing="4" Margin="0,0,0,16">
+      <TextBlock Text="{Binding Title}"
+                 FontSize="28" FontWeight="Bold"
+                 Foreground="{DynamicResource BrushTextPrimary}" />
+      <TextBlock Text="{Binding Subtitle}"
+                 FontSize="13"
+                 Foreground="{DynamicResource BrushTextSecondary}" />
+    </StackPanel>
+
+    <!-- ══ SEARCH BAR ══ -->
+    <Border Grid.Row="1"
+            Background="{DynamicResource BrushSurfaceElevated}"
+            BorderBrush="{DynamicResource BrushBorderFocus}"
+            BorderThickness="1"
+            CornerRadius="{DynamicResource RadiusMd}"
+            Padding="14,0"
+            Margin="0,0,0,12">
+      <Grid ColumnDefinitions="Auto,*">
+        <TextBlock Grid.Column="0"
+                   Text="⊙"
+                   FontSize="16"
+                   Foreground="{DynamicResource BrushTextMuted}"
+                   VerticalAlignment="Center"
+                   Margin="0,0,10,0" />
+        <TextBox Grid.Column="1"
+                 Text="{Binding SearchQuery}"
+                 Watermark="Einstellungen durchsuchen..."
+                 Background="Transparent"
+                 BorderBrush="Transparent"
+                 BorderThickness="0"
+                 Foreground="{DynamicResource BrushTextPrimary}"
+                 FontSize="14"
+                 Padding="0,13"
+                 VerticalAlignment="Center">
+          <TextBox.Styles>
+            <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+              <Setter Property="BorderThickness" Value="0" />
+              <Setter Property="Background" Value="Transparent" />
+            </Style>
+            <Style Selector="TextBox /template/ Border#PART_BorderElement">
+              <Setter Property="BorderThickness" Value="0" />
+              <Setter Property="Background" Value="Transparent" />
+            </Style>
+          </TextBox.Styles>
+        </TextBox>
+      </Grid>
+    </Border>
+
+    <!-- ══ BREADCRUMB ══ -->
+    <StackPanel Grid.Row="2"
+                Orientation="Horizontal"
+                Spacing="6"
+                Margin="0,0,0,12">
+      <TextBlock Text="{Binding BreadcrumbRoot}"
+                 FontSize="13"
+                 Foreground="{DynamicResource BrushTextMuted}" />
+      <TextBlock Text="›"
+                 FontSize="13"
+                 Foreground="{DynamicResource BrushTextMuted}" />
+      <TextBlock Text="{Binding BreadcrumbCategory}"
+                 FontSize="13" FontWeight="SemiBold"
+                 Foreground="{DynamicResource BrushAccentPrimary}" />
+      <TextBlock Text="›"
+                 FontSize="13"
+                 Foreground="{DynamicResource BrushTextMuted}" />
+      <TextBlock Text="{Binding BreadcrumbArticle}"
+                 FontSize="13"
+                 Foreground="{DynamicResource BrushTextSecondary}" />
+    </StackPanel>
+
+    <!-- ══ 3-COLUMN LAYOUT ══ -->
+    <Grid Grid.Row="3" ColumnDefinitions="210,*,310">
+
+      <!-- ════════════ LEFT: Kategorien ════════════ -->
+      <Border Grid.Column="0"
+              Background="{DynamicResource BrushSurfaceElevated}"
+              CornerRadius="{DynamicResource RadiusLg}"
+              Margin="0,0,10,0">
+        <StackPanel Margin="12,14,12,14" Spacing="4">
+
+          <TextBlock Text="Kategorien"
+                     FontSize="13" FontWeight="SemiBold"
+                     Foreground="{DynamicResource BrushTextPrimary}"
+                     Margin="4,0,0,8" />
+
+          <ItemsControl ItemsSource="{Binding Categories}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:KnowledgeCategoryItem">
+                <Button Command="{Binding #Root.DataContext.SelectCategoryCommand}"
+                        CommandParameter="{Binding Id}"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Padding="0"
+                        Margin="0,0,0,4"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Stretch">
+                <Border CornerRadius="{DynamicResource RadiusMd}"
+                        Background="{Binding ItemBackground}"
+                        BorderBrush="{Binding ItemBorderBrush}"
+                        BorderThickness="1"
+                        Padding="10,10"
+                        Margin="0,0,0,0">
+                  <Grid ColumnDefinitions="34,*">
+
+                    <!-- Category icon box -->
+                    <Border Width="28" Height="28"
+                            CornerRadius="6"
+                            Background="{Binding IconBackground}"
+                            VerticalAlignment="Center">
+                      <TextBlock Text="{Binding IconGlyph}"
+                                 FontSize="13"
+                                 HorizontalAlignment="Center"
+                                 VerticalAlignment="Center"
+                                 Foreground="{Binding IconForeground}" />
+                    </Border>
+
+                    <!-- Name + count -->
+                    <StackPanel Grid.Column="1"
+                                VerticalAlignment="Center"
+                                Spacing="1"
+                                Margin="8,0,0,0">
+                      <TextBlock Text="{Binding Name}"
+                                 FontSize="13"
+                                 FontWeight="{Binding NameWeight}"
+                                 Foreground="{Binding NameForeground}" />
+                      <TextBlock Text="{Binding ArticleCountText}"
+                                 FontSize="11"
+                                 Foreground="{DynamicResource BrushTextMuted}" />
+                    </StackPanel>
+
+                  </Grid>
+                </Border>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+
+        </StackPanel>
+      </Border>
+      <!-- ════════════ END LEFT ════════════ -->
+
+
+      <!-- ════════════ MIDDLE: Artikel ════════════ -->
+      <Border Grid.Column="1"
+              Background="{DynamicResource BrushSurfaceElevated}"
+              CornerRadius="{DynamicResource RadiusLg}"
+              Margin="0,0,10,0">
+        <Grid RowDefinitions="Auto,*">
+
+          <!-- Panel header -->
+          <Grid Grid.Row="0" Margin="14,14,14,0">
+            <TextBlock Text="{Binding ArticlesHeader}"
+                       FontSize="13" FontWeight="SemiBold"
+                       Foreground="{DynamicResource BrushTextPrimary}" />
+          </Grid>
+          <!-- Header separator -->
+          <Border Grid.Row="0"
+                  Height="1"
+                  Background="{DynamicResource BrushBorder}"
+                  Margin="0,40,0,0"
+                  VerticalAlignment="Bottom" />
+
+          <!-- Article list -->
+          <ScrollViewer Grid.Row="1"
+                        VerticalScrollBarVisibility="Auto"
+                        HorizontalScrollBarVisibility="Disabled"
+                        Padding="12,10,12,12">
+            <ItemsControl ItemsSource="{Binding Articles}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:KnowledgeArticleItem">
+                  <Button Command="{Binding #Root.DataContext.SelectArticleCommand}"
+                          CommandParameter="{Binding Id}"
+                          Background="Transparent"
+                          BorderThickness="0"
+                          Padding="0"
+                          Margin="0,0,0,6"
+                          HorizontalAlignment="Stretch"
+                          HorizontalContentAlignment="Stretch">
+                  <Border CornerRadius="{DynamicResource RadiusMd}"
+                          Background="{Binding ItemBackground}"
+                          BorderBrush="{Binding ItemBorderBrush}"
+                          BorderThickness="1"
+                          Padding="12,10"
+                          Margin="0,0,0,0">
+                    <Grid ColumnDefinitions="*,Auto">
+
+                      <!-- Title + subtitle -->
+                      <StackPanel Grid.Column="0"
+                                  Spacing="3"
+                                  VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Title}"
+                                   FontSize="13" FontWeight="SemiBold"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource BrushTextPrimary}" />
+                        <TextBlock Text="{Binding Subtitle}"
+                                   FontSize="11"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource BrushTextSecondary}" />
+                      </StackPanel>
+
+                      <!-- Favorite star -->
+                      <TextBlock Grid.Column="1"
+                                 Text="{Binding StarGlyph}"
+                                 FontSize="16"
+                                 Foreground="{Binding StarForeground}"
+                                 VerticalAlignment="Center"
+                                 Margin="8,0,0,0" />
+
+                    </Grid>
+                  </Border>
+                  </Button>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+
+        </Grid>
+      </Border>
+      <!-- ════════════ END MIDDLE ════════════ -->
+
+
+      <!-- ════════════ RIGHT: Detail Panel ════════════ -->
+      <Border Grid.Column="2"
+              Background="{DynamicResource BrushSurfaceElevated}"
+              CornerRadius="{DynamicResource RadiusLg}">
+        <Grid RowDefinitions="*,Auto">
+
+          <!-- Scrollable content -->
+          <ScrollViewer Grid.Row="0"
+                        VerticalScrollBarVisibility="Auto"
+                        HorizontalScrollBarVisibility="Disabled"
+                        Padding="16,16,16,10">
+            <StackPanel Spacing="12">
+
+              <!-- Title row + amber star -->
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="{Binding DetailTitle}"
+                           FontSize="16" FontWeight="Bold"
+                           TextWrapping="Wrap"
+                           Foreground="{DynamicResource BrushTextPrimary}" />
+                <TextBlock Grid.Column="1"
+                           Text="★"
+                           FontSize="18"
+                           Foreground="{DynamicResource BrushAccentPrimary}"
+                           VerticalAlignment="Top"
+                           Margin="8,0,0,0" />
+              </Grid>
+
+              <!-- Description -->
+              <TextBlock Text="{Binding DetailDescription}"
+                         FontSize="13"
+                         TextWrapping="Wrap"
+                         LineHeight="20"
+                         Foreground="{DynamicResource BrushTextSecondary}" />
+
+              <!-- Steps header -->
+              <TextBlock Text="Schritt-für-Schritt-Anleitung"
+                         FontSize="13" FontWeight="SemiBold"
+                         Foreground="{DynamicResource BrushTextPrimary}"
+                         Margin="0,4,0,0" />
+
+              <!-- Steps -->
+              <ItemsControl ItemsSource="{Binding DetailSteps}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:ArticleStepItem">
+                    <Grid ColumnDefinitions="36,*" Margin="0,0,0,10">
+
+                      <!-- Amber numbered circle -->
+                      <Border MinWidth="26" MinHeight="26"
+                              Width="26" Height="26"
+                              CornerRadius="13"
+                              BorderBrush="{DynamicResource BrushAccentPrimary}"
+                              BorderThickness="1.5"
+                              Background="Transparent"
+                              VerticalAlignment="Top"
+                              Margin="0,0,0,0">
+                        <TextBlock Text="{Binding Number}"
+                                   FontSize="11" FontWeight="SemiBold"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource BrushAccentPrimary}" />
+                      </Border>
+
+                      <!-- Step text -->
+                      <TextBlock Grid.Column="1"
+                                 Text="{Binding Text}"
+                                 FontSize="13"
+                                 TextWrapping="Wrap"
+                                 LineHeight="20"
+                                 Foreground="{DynamicResource BrushTextSecondary}"
+                                 VerticalAlignment="Top"
+                                 Margin="0,2,0,0" />
+
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+
+              <!-- Tip box -->
+              <Border CornerRadius="{DynamicResource RadiusMd}"
+                      Background="#1AF59E0B"
+                      BorderBrush="{DynamicResource BrushAccentPrimary}"
+                      BorderThickness="1"
+                      Padding="12,10">
+                <Grid ColumnDefinitions="Auto,*">
+                  <TextBlock Grid.Column="0"
+                             Text="①"
+                             FontSize="14"
+                             Foreground="{DynamicResource BrushAccentPrimary}"
+                             VerticalAlignment="Top"
+                             Margin="0,1,8,0" />
+                  <TextBlock Grid.Column="1"
+                             Text="{Binding DetailTip}"
+                             FontSize="12"
+                             TextWrapping="Wrap"
+                             LineHeight="18"
+                             Foreground="{DynamicResource BrushTextSecondary}" />
+                </Grid>
+              </Border>
+
+            </StackPanel>
+          </ScrollViewer>
+
+          <!-- ── CTA: Direkt öffnen ── -->
+          <Border Grid.Row="1"
+                  BorderBrush="{DynamicResource BrushBorder}"
+                  BorderThickness="0,1,0,0"
+                  Padding="16,12,16,16">
+            <Button Command="{Binding OpenDirectlyCommand}"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    Padding="0,13"
+                    CornerRadius="{DynamicResource RadiusMd}"
+                    Foreground="#0F172A"
+                    BorderThickness="0">
+              <Button.Background>
+                <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,0%">
+                  <GradientStop Color="#F59E0B" Offset="0" />
+                  <GradientStop Color="#D97706" Offset="1" />
+                </LinearGradientBrush>
+              </Button.Background>
+              <Button.Styles>
+                <Style Selector="Button:pointerover /template/ ContentPresenter">
+                  <Setter Property="Background">
+                    <Setter.Value>
+                      <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,0%">
+                        <GradientStop Color="#FBBF24" Offset="0" />
+                        <GradientStop Color="#F59E0B" Offset="1" />
+                      </LinearGradientBrush>
+                    </Setter.Value>
+                  </Setter>
+                </Style>
+                <Style Selector="Button:pressed /template/ ContentPresenter">
+                  <Setter Property="Background">
+                    <Setter.Value>
+                      <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,0%">
+                        <GradientStop Color="#D97706" Offset="0" />
+                        <GradientStop Color="#B45309" Offset="1" />
+                      </LinearGradientBrush>
+                    </Setter.Value>
+                  </Setter>
+                </Style>
+              </Button.Styles>
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="⧉" FontSize="14" Foreground="#0F172A" />
+                <TextBlock Text="Direkt öffnen"
+                           FontSize="14" FontWeight="SemiBold"
+                           Foreground="#0F172A" />
+              </StackPanel>
+            </Button>
+          </Border>
+
+        </Grid>
+      </Border>
+      <!-- ════════════ END RIGHT ════════════ -->
+
+    </Grid>
+    <!-- ══ END 3-COLUMN LAYOUT ══ -->
+
+  </Grid>
+</UserControl>

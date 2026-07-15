@@ -1,0 +1,55 @@
+---
+description: Pixel-perfect design fidelity — never improve, modernize, or simplify mockups
+globs:
+  - "**/*.axaml"
+  - "**/*.cs"
+alwaysApply: false
+---
+
+# Pixel Perfect — Design Negativregeln
+
+**Firma:** HorosCode · **Produkt:** HorosCloud
+
+> **The mockup is the truth.** Fidelity target: **98 / 100**.
+
+## Never Do This
+
+- **Never** "improve" the layout — rearrange, remove, or add elements not in the mockup
+- **Never** modernize visuals — rounded corners, shadows, gradients the mockup lacks
+- **Never** simplify — merge buttons, collapse sections, hide "clutter"
+- **Never** substitute colors, fonts, or spacing with "close enough" values
+- **Never** use personal taste as justification for any visual change
+- **Never** skip a visible mockup element because it seems redundant
+
+## Always Do This
+
+- Match **exact** spacing (±1 px tolerance at review)
+- Match **exact** typography: family, size, weight, line-height
+- Match **exact** colors via tokens from `docs/design-memory.md`
+- Match **exact** border-radius, borders, shadows when present in mockup
+- Copy **exact** label text from mockup in Pass 1
+
+## Token Rule
+
+Do not invent hex values inline in AXAML:
+
+```xml
+<!-- WRONG -->
+<Border Background="#1E293B" Padding="18" />
+
+<!-- RIGHT -->
+<Border Background="{DynamicResource BrushSurfaceDefault}"
+        Padding="{DynamicResource Spacing4}" />
+```
+
+New mockup values → add to `docs/design-memory.md` first, then `DesignTokens.axaml`.
+
+## Allowed Deviation
+
+Only with **explicit user approval** in chat — document what changed and why.
+
+## References
+
+- Tokens: `docs/design-memory.md`
+- Review: `07-review-loop.mdc`
+- Anti-patterns: `10-anti-patterns.mdc`

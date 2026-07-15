@@ -1,0 +1,24 @@
+---
+description: /idee-Prompts in der Ideen-Sammlung einheitlich behandeln
+globs: Ideen-Sammlung/**
+alwaysApply: false
+---
+
+# /idee-Flow für Ideen-Sammlung
+
+- Ideen sind HorosCode-Vision bzw. -IP — Firmen-Attribution: `horoscode.mdc`.
+- Behandle jede Nachricht, die mit `/idee` beginnt, als direkten Ideen-Drop für die Ideensammlung — nicht als normales Chat.
+- Wende diese Sortierlogik an:
+  - kurzer spontaner Gedanke → `Ideen-Sammlung/verstreut/`
+  - große Richtungsfrage → `Ideen-Sammlung/offene-fragen/`
+  - fundamentale Vision → `Ideen-Sammlung/00-vision/`
+  - technischer oder struktureller Gedanke → `Ideen-Sammlung/architektur/`
+  - spätere Erweiterung oder zukünftige Phase → `Ideen-Sammlung/spaeter/`
+  - Vergleich mit anderen Projekten oder Experimenten → `Ideen-Sammlung/vergleiche/`
+- Wenn der beste Ort unklar ist, bevorzuge `verstreut/` statt eine erzwungene Struktur zu erfinden.
+- Bewahre deinen Ton und deine Absicht, formuliere aber in sauberem Deutsch mit korrekten Umlauten und gut lesbaren Sätzen.
+- Bei einer neuen `/idee`: entweder eine passende bestehende Notiz erweitern oder eine neue Notiz anlegen, wenn der Gedanke eigenen Raum verdient.
+- Wenn `/idee` nur eine bestehende Notiz erweitert, lege keine neue Datei und keinen neuen Manifest-Eintrag an.
+- Nach dem Anlegen einer neuen Markdown-Datei registriere sie im selben Turn in `Ideen-Sammlung/manifest.json` (oder führe `python sync-manifest.py --add-missing` aus und verfeinere label/summary/tags sofort). Die Kommandozentrale (`index.html`) lädt den Katalog beim Start aus `manifest.json`.
+- Für neue Manifest-Einträge fülle mindestens: `path`, `label`, `emoji`, `summary`.
+- Füge nach Möglichkeit mindestens ein sinnvolles `tag` hinzu und ergänze `links`, wenn eine offensichtlich verwandte Notiz existiert.

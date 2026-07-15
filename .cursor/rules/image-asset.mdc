@@ -1,0 +1,75 @@
+---
+description: Pflicht Asset-Ordner + Manifest + regions/ für jedes HorosCode-Bild — kein Erfolg ohne strukturierte Zerlegung
+globs: **/assets/**,**/public/icons/**,**/public/images/**,**/docs/screenshots/**
+alwaysApply: false
+---
+
+# Image Asset (Ordner + Manifest + Regions)
+
+**Gilt für Executors**, wenn **HorosCode** / **HorosCloud** Raster-Assets erzeugt, optimiert, freigestellt oder eingebettet werden.
+
+## Pflicht-Kette
+
+1. **Asset-Ordner** — `{parent}/{asset-slug}/` mit `full.{ext}` als canonical Master
+2. **Manifest** — `{asset-slug}.manifest.md` im Ordner (`@horos-image-manifest`)
+3. **Regions** — `regions/regions.json` + `regions/README.md` + Slices (`@horos-image-regions`)
+4. **Verify** — `Read` auf Manifest, `full`, mindestens 1 Region (oder single-layer in README)
+
+**VERBOTEN:** „Bild gespeichert" oder „fertig" ohne Ordner + Manifest + `regions/`. Bild + Ordner-Struktur = **eine untrennbare Aufgabe**.
+
+## BLOCKER
+
+| Bedingung | Aktion |
+|-----------|--------|
+| Kein `{parent}/{asset-slug}/` Ordner | **Kein Erfolg** melden |
+| Kein `full.{ext}` im Ordner | **Kein Erfolg** melden |
+| Kein `{asset-slug}.manifest.md` im Ordner | **Kein Erfolg** melden |
+| Kein `regions/regions.json` | **Kein Erfolg** melden |
+| Kein `regions/README.md` | **Kein Erfolg** melden |
+| Multi-Area-Bild ohne Region-Slices (≥2 sinnvolle Bereiche) | Regionen identifizieren + croppen |
+| Manifest mit offenen Platzhaltern | Nacharbeiten, erneut `Read` |
+| Weniger als 5 Hex-Farben im Haupt-Manifest | Dominant-Color-Script ausführen |
+| Kein Einbindungs-Snippet | `<img>` / `<picture>` / Layered Regions ausfüllen |
+| Kein `Read` auf full + Region | Verify vor Erfolg |
+
+## Speicher-Schema (Kurz)
+
+```text
+{parent}/{asset-slug}/
+  full.{ext}
+  {asset-slug}.manifest.md
+  regions/
+    regions.json
+    README.md
+    {region-slug}.{ext}
+    {region-slug}.manifest.md
+```
+
+Beispiel: `public/images/hero-backup/full.webp` → `public/images/hero-backup/hero-backup.manifest.md` → `public/images/hero-backup/regions/…`
+
+**Migration Legacy:** Flache Dateien `hero-backup.webp` → bei nächster Bearbeitung nach `hero-backup/full.webp` verschieben.
+
+Details → **`@horos-image-manifest`**, **`@horos-image-regions`**
+
+## Auslöser-Skills
+
+| Skill | Zeitpunkt |
+|-------|-----------|
+| `@cursor-image-generation` | Nach GenerateImage → `{slug}/full` + regions |
+| `@horos-image-regions` | Identify → crop → json + Slices |
+| `@horos-web-image-optimize` | full + regions optimieren; Manifest/json aktualisieren |
+| `@horos-image-embed` | Nach jedem Pipeline-Schritt |
+| `@generating-images` | Nach OpenAI-Output |
+| `@bria-ai` / `@remove-background` | Nach Cutout — oft neue Layer-Regionen |
+| **Zuko** | Immer in Bild-Workflow integriert |
+
+## Verweise
+
+| Thema | Datei |
+|-------|-------|
+| Manifest-Workflow | `@horos-image-manifest` / `.cursor/skills/horos-image-manifest/SKILL.md` |
+| Regions-Workflow | `@horos-image-regions` / `.cursor/skills/horos-image-regions/SKILL.md` |
+| JSON Schema | `.cursor/skills/horos-image-regions/regions.schema.json` |
+| End-to-End Pipeline | `@horos-image-embed` |
+| Orchestrator | `orchestrator.mdc` |
+| Firma | `horoscode.mdc` — HorosCode, nicht HorosCloud als Firma |

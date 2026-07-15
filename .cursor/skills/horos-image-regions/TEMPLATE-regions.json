@@ -1,0 +1,98 @@
+{
+  "schemaVersion": "1.0",
+  "assetSlug": "{{ASSET_SLUG}}",
+  "parentFullPath": "{{WORKSPACE_RELATIVE_PATH_TO_FULL}}",
+  "fullWidth": {{FULL_WIDTH}},
+  "fullHeight": {{FULL_HEIGHT}},
+  "nineSlice": false,
+  "singleLayer": false,
+  "singleLayerReason": "",
+  "createdAt": "{{CREATED_AT_ISO}}",
+  "updatedAt": "{{UPDATED_AT_ISO}}",
+  "regions": [
+    {
+      "id": "region-background",
+      "slug": "background",
+      "label": {
+        "de": "Hintergrund",
+        "en": "Background"
+      },
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": {{FULL_WIDTH}},
+        "height": {{FULL_HEIGHT}}
+      },
+      "dominantHex": ["#{{DOMINANT_BG_1}}", "#{{DOMINANT_BG_2}}"],
+      "transparent": false,
+      "zIndex": 0,
+      "usage": "bg",
+      "exportPath": "regions/background.{{EXT}}",
+      "parentFullPath": "{{WORKSPACE_RELATIVE_PATH_TO_FULL}}",
+      "notes": "{{REGION_NOTES_OR_EMPTY}}"
+    },
+    {
+      "id": "region-icon-shield",
+      "slug": "icon-shield",
+      "label": {
+        "de": "Schild-Icon",
+        "en": "Shield icon"
+      },
+      "bounds": {
+        "x": {{ICON_X}},
+        "y": {{ICON_Y}},
+        "width": {{ICON_WIDTH}},
+        "height": {{ICON_HEIGHT}}
+      },
+      "dominantHex": ["#{{DOMINANT_ICON_1}}", "#{{DOMINANT_ICON_2}}"],
+      "transparent": true,
+      "zIndex": 10,
+      "usage": "icon",
+      "exportPath": "regions/icon-shield.{{EXT}}",
+      "parentFullPath": "{{WORKSPACE_RELATIVE_PATH_TO_FULL}}",
+      "notes": "Zentrales Motiv — für object-contain Einbindung"
+    },
+    {
+      "id": "region-glow-amber",
+      "slug": "glow-amber",
+      "label": {
+        "de": "Amber-Glow",
+        "en": "Amber glow"
+      },
+      "bounds": {
+        "x": {{GLOW_X}},
+        "y": {{GLOW_Y}},
+        "width": {{GLOW_WIDTH}},
+        "height": {{GLOW_HEIGHT}}
+      },
+      "dominantHex": ["#f59e0b", "#fbbf24"],
+      "transparent": true,
+      "zIndex": 5,
+      "usage": "overlay",
+      "exportPath": "regions/glow-amber.{{EXT}}",
+      "parentFullPath": "{{WORKSPACE_RELATIVE_PATH_TO_FULL}}",
+      "notes": "mix-blend-screen oder opacity für Glow-Effekt"
+    },
+    {
+      "id": "region-text-area",
+      "slug": "text-area",
+      "label": {
+        "de": "Textfläche",
+        "en": "Text safe area"
+      },
+      "bounds": {
+        "x": {{TEXT_X}},
+        "y": {{TEXT_Y}},
+        "width": {{TEXT_WIDTH}},
+        "height": {{TEXT_HEIGHT}}
+      },
+      "dominantHex": ["#{{DOMINANT_TEXT_AREA}}"],
+      "transparent": false,
+      "zIndex": 1,
+      "usage": "text-safe",
+      "exportPath": "regions/text-area.{{EXT}}",
+      "parentFullPath": "{{WORKSPACE_RELATIVE_PATH_TO_FULL}}",
+      "notes": "Bereich für Headline/Copy — oft keine separate PNG nötig, nur bounds für Layout"
+    }
+  ]
+}

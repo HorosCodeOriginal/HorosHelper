@@ -1,0 +1,88 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HorosHelp.UI.ViewModels.Dialogs"
+             x:Class="HorosHelp.UI.Views.Dialogs.UacPromptView"
+             x:DataType="vm:UacPromptViewModel"
+             Width="420">
+
+  <Border Background="{DynamicResource BrushSurfaceElevated}"
+          CornerRadius="{DynamicResource RadiusLg}"
+          BorderBrush="{DynamicResource BrushBorder}"
+          BorderThickness="1"
+          Padding="24,22">
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*,Auto">
+
+      <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,0,0,16">
+        <Border Width="40" Height="40"
+                CornerRadius="{DynamicResource RadiusMd}"
+                Background="{DynamicResource BrushAccentPrimaryMuted}">
+          <TextBlock Text="{Binding ShieldGlyph}"
+                     FontSize="20"
+                     HorizontalAlignment="Center"
+                     VerticalAlignment="Center" />
+        </Border>
+        <StackPanel VerticalAlignment="Center" Spacing="2">
+          <TextBlock Text="{Binding Title}"
+                     FontSize="16" FontWeight="SemiBold"
+                     Foreground="{DynamicResource BrushTextPrimary}" />
+          <TextBlock Text="{Binding Message}"
+                     FontSize="12"
+                     Foreground="{DynamicResource BrushTextSecondary}"
+                     TextWrapping="Wrap" />
+        </StackPanel>
+      </StackPanel>
+
+      <TextBlock Grid.Row="1"
+                 Text="{Binding BodyText}"
+                 FontSize="13"
+                 Foreground="{DynamicResource BrushTextSecondary}"
+                 TextWrapping="Wrap"
+                 Margin="0,0,0,12" />
+
+      <Border Grid.Row="2"
+              Background="#0F172A"
+              CornerRadius="{DynamicResource RadiusMd}"
+              BorderBrush="{DynamicResource BrushBorder}"
+              BorderThickness="1"
+              Padding="12,10"
+              Margin="0,0,0,20">
+        <TextBlock Text="{Binding ActionDescription}"
+                   FontSize="12"
+                   Foreground="{DynamicResource BrushTextPrimary}"
+                   TextWrapping="Wrap" />
+      </Border>
+
+      <StackPanel Grid.Row="5"
+                  Orientation="Horizontal"
+                  Spacing="10"
+                  HorizontalAlignment="Right">
+        <Button Command="{Binding CancelCommand}"
+                Padding="16,8"
+                CornerRadius="{DynamicResource RadiusMd}"
+                Background="Transparent"
+                BorderBrush="{DynamicResource BrushBorder}"
+                BorderThickness="1"
+                Foreground="{DynamicResource BrushTextSecondary}">
+          <TextBlock Text="{Binding CancelLabel}" FontSize="12" />
+        </Button>
+        <Button Command="{Binding ConfirmCommand}"
+                Padding="16,8"
+                CornerRadius="{DynamicResource RadiusMd}"
+                Foreground="#0F172A"
+                BorderThickness="0">
+          <Button.Background>
+            <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,0%">
+              <GradientStop Color="#F59E0B" Offset="0" />
+              <GradientStop Color="#D97706" Offset="1" />
+            </LinearGradientBrush>
+          </Button.Background>
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <TextBlock Text="{Binding ShieldGlyph}" FontSize="12" Foreground="#0F172A" />
+            <TextBlock Text="{Binding ConfirmLabel}" FontSize="12" FontWeight="SemiBold" Foreground="#0F172A" />
+          </StackPanel>
+        </Button>
+      </StackPanel>
+
+    </Grid>
+  </Border>
+</UserControl>

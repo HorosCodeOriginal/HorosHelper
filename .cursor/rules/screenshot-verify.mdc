@@ -1,0 +1,85 @@
+---
+description: Screenshot-Verify BLOCKER — Read auf jede PNG PFLICHT vor „fertig"
+globs: **/docs/screenshots/**,**/scripts/quality/**,**/*screenshot*
+alwaysApply: false
+---
+
+# Screenshot-Verifikation / Visuelle Prüfung
+
+**Gilt für Executor** (Momo, Aang, Katara, Suki, Appa, …), wenn Screenshots erstellt, ersetzt oder gespeichert werden. **Capture-Methoden:** `@screenshot-capture` (Skill) · Auslöser-Regel: `screenshot-capture.mdc`
+
+**Voraussetzung:** Capture-Setup **MUSS** vom Agent im aktuellen Workspace angelegt sein, bevor Verify relevant wird (`@screenshot-capture` → „Agent-Pflicht: Setup"). **VERBOTEN:** dich bitten, Setup-Dateien manuell zu kopieren.
+
+## Wer Verify ausführt
+
+**Der Agent, der Screenshots erstellt, MUSS Verify selbst ausführen.**
+
+- Root-Orchestrator delegiert Verify **nicht** separat weg.
+- Capture + Verify = **eine untrennbare Aufgabe** an denselben Executor.
+- **VERBOTEN:** Capture abschließen und Verify an anderen Agent oder später verschieben.
+
+## Verify ist BLOCKER (nicht optional)
+
+**Kein** „fertig", „erledigt", „Screenshot gespeichert", „✓" oder Task-Abschluss **ohne vorherige `Read` jeder erzeugten/ersetzten PNG**.
+
+| Status | Bedingung |
+|--------|-----------|
+| **Erlaubt** | Jede PNG mit `Read` geöffnet, Checkliste abgearbeitet, alle Punkte bestanden |
+| **VERBOTEN** | Erfolg melden ohne `Read` auf jede PNG |
+| **VERBOTEN** | Verify überspringen mit „wird später geprüft" |
+| **VERBOTEN** | Nur Dateipfad/Dateigröße prüfen ohne visuelles `Read` |
+
+## Pflicht vor „fertig"
+
+1. **Bild lesen** — `Read` auf **jede** erzeugte/ersetzte `.png` (Tool zeigt das Bild visuell). **Pflicht, nicht optional.**
+2. **Anwendungsoberfläche** — richtige Seite/Widget sichtbar? **Nicht** Login, Fehler, leerer SPA-Shell, Lade-Spinner.
+3. **Vollständigkeit** — ist die **komplette UI** des Zielbereichs sichtbar? Fehlen abgeschnittene Scroll-Bereiche unten/rechts?
+4. **Scroll-Check im Bild** — bei Features mit langem Inhalt: Ist der **gesamte** scrollbare Bereich erfasst? Viewport-only (~1080p Höhe) bei langem Feature = **sofort neu capturen**.
+5. **Datei plausibel** — sinnvolle Größe (>5 KB typisch); Pfad + Dateiname passen zu `docs/screenshots/…`. Bei Full-Page: **Bildhöhe in Pixeln** muss zum Scroll-Test passen (`docScrollHeight` aus `screenshot-capture.mdc` — nicht nur ~720/1080px bei langem Feature). Breite ≈ gesetzter Viewport (z. B. 1280px).
+6. **Keine Lazy-Load-Artefakte** — keine leeren Bild-Platzhalter, Skeleton-Blöcke oder unfertige Abschnitte, die im Scroll-Test noch Inhalt erwarten ließen → Warm-up-Scroll fehlt → neu capturen (`screenshot-capture.mdc`).
+7. **Kein Sticky-Duplikat** — Navigation/Header erscheint nicht mehrfach gestapelt im Bild (Sticky-Workaround aus `screenshot-capture.mdc` anwenden und erneut capturen).
+8. **Ersetzen** — wenn alte PNG existiert: altes und neues Bild lesen; sichtbarer Unterschied muss zur Aufgabe passen.
+9. **`/hide`-Schwärzung** — nach Schwärzen: sensible Bereiche wirklich schwarz und nicht lesbar; kein Klartext in E-Mail, Token, Passwort-Feldern.
+
+## Abgelehnt (Capture sofort wiederholen)
+
+| Sichtbar im Bild | Aktion |
+|------------------|--------|
+| Login / Gate / 401 | Auth fixen → `screenshot-capture.mdc` Auth |
+| Leere Seite, Lade-Spinner, Fehler-Hinweis | Seite laden lassen, Selector/URL prüfen, erneut versuchen |
+| Falsches Widget / falscher Tab | Skript oder Navigation korrigieren |
+| **Nur Header**, Footer abgeschnitten | Full-Page/Container-Capture fehlt → neu capturen |
+| **Halbe Seite**, Scroll-Inhalt fehlt unten/rechts | Warm-up-Scroll + `fullPage` oder Container-Expand — **nicht** mit abgeschnittenem Bild abschließen |
+| **Viewport-only (~1080p)** bei langem/scrollbarem Feature | **Regelverstoß** — Scroll-Test + Warm-up + Full-Content erneut (`screenshot-capture.mdc`) |
+| Scrollbar sichtbar, Inhalt unten abgeschnitten | Container-Expand oder fullPage — sofort neu |
+| Leere Lazy-Load-Platzhalter, Skeleton-UI | Warm-up-Scroll fehlt — neu capturen |
+| Header/Nav mehrfach im Bild | Sticky neutralisieren (`screenshot-capture.mdc`) — neu capturen |
+
+**Niemals** „Screenshot erstellt ✓" ohne visuelle Bestätigung per `Read`.
+
+## Auth zuerst
+
+Vor Capture bei **geschützten Routen:** Agent legt bei Bedarf `scripts/quality/screenshot-auth.mjs` im **aktuellen Workspace** an und führt es aus (`screenshot-capture.mdc` → Agent-Pflicht Setup + Auth). Beispiel HorosCloud-Produkt HorosCloudV5: `HC_SCREENSHOT_PASSWORD`, `users.json` oder `refreshJti`. Skript bricht bei fehlender Auth ab — **nicht** trotzdem speichern und Erfolg melden.
+
+## Automatisiert (Playwright o.ä.)
+
+Nach Lauf: **jede** Ausgabe-PNG mit `Read` öffnen, Checkliste abarbeiten, erst dann Task abschließen. Automatisierung ersetzt **nicht** das visuelle `Read`.
+
+## Deine Screenshots
+
+Beim Ablegen in `docs/screenshots/`: gespeicherte Kopie lesen — Ordner, Namenskonvention und sichtbarer Inhalt müssen zu deiner Anfrage passen.
+
+## Kurz-Checkliste (BLOCKER)
+
+- [ ] Capture-Setup vom Agent im Workspace sichergestellt (`screenshot-capture.mdc`)
+- [ ] **Jede PNG mit `Read` angesehen** (Pflicht)
+- [ ] Echte **Anwendungsoberfläche** (kein Login / Leer / Fehler / Lade-Spinner)
+- [ ] **Komplette UI** sichtbar (kein abgeschnittener Scroll-Bereich)
+- [ ] Kein Viewport-only bei scrollbarem Inhalt
+- [ ] Full-Page: Bildhöhe plausibel zum Scroll-Test (nicht nur Viewport-Höhe)
+- [ ] Keine Lazy-Load-Platzhalter / Sticky-Duplikate
+- [ ] Richtiger UI-Bereich / Widget / Tab
+- [ ] Bei Ersetzen: Alt vs. Neu verglichen
+- [ ] Bei `/hide`: Schwärzung verifiziert
+- [ ] **Erst dann** Erfolg melden
+- [ ] Browser-Tab / Fenster / App geschlossen (`screenshot-capture.mdc`)

@@ -1,0 +1,281 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HorosHelp.UI.ViewModels.Features"
+             xmlns:controls="using:HorosHelp.UI.Controls"
+             xmlns:ui="using:HorosHelp.UI"
+             x:Class="HorosHelp.UI.Views.Features.ProblemFixerView"
+             x:DataType="vm:ProblemFixerViewModel">
+
+  <!-- ────────────────────────────────────────────────────────────────
+       Root: two-column layout  (left: title + scan ring + cards | right: repair log)
+  ─────────────────────────────────────────────────────────────────── -->
+  <Grid ColumnDefinitions="*,310" Margin="24,20,24,20">
+
+    <!-- ═══════════ LEFT COLUMN ═══════════ -->
+    <StackPanel Grid.Column="0" Margin="0,0,14,0" Spacing="12">
+
+      <!-- Header -->
+      <StackPanel Spacing="4" Margin="0,0,0,4">
+        <TextBlock Text="{Binding Title}"
+                   FontSize="28" FontWeight="Bold"
+                   Foreground="{DynamicResource BrushTextPrimary}" />
+        <TextBlock Text="{Binding Subtitle}"
+                   FontSize="13"
+                   TextWrapping="Wrap"
+                   Foreground="{DynamicResource BrushTextSecondary}" />
+      </StackPanel>
+
+      <!-- ── Scan Progress Card ── -->
+      <Border Background="{DynamicResource BrushSurfaceElevated}"
+              CornerRadius="{DynamicResource RadiusLg}"
+              Padding="24,28">
+        <StackPanel Spacing="0" HorizontalAlignment="Center">
+
+          <!-- Progress ring via shared ProgressRing -->
+          <Grid MinWidth="164" MinHeight="164"
+                Margin="2"
+                HorizontalAlignment="Center">
+
+            <controls:ProgressRing Diameter="140"
+                                   StrokeThickness="12"
+                                   Value="{Binding ScanProgress}"
+                                   ProgressBrush="{DynamicResource BrushAccentPrimary}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+
+            <!-- Percentage label -->
+            <TextBlock Text="{Binding ScanProgressText}"
+                       FontSize="34" FontWeight="Bold"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Foreground="{DynamicResource BrushTextPrimary}" />
+          </Grid>
+
+          <!-- Scan status text (separate row below ring) -->
+          <StackPanel Spacing="4" Margin="0,18,0,0">
+            <TextBlock Text="{Binding ScanStatusText}"
+                       FontSize="15" FontWeight="SemiBold"
+                       HorizontalAlignment="Center"
+                       Foreground="{DynamicResource BrushTextPrimary}" />
+            <TextBlock Text="{Binding ScanSubText}"
+                       FontSize="12"
+                       HorizontalAlignment="Center"
+                       Foreground="{DynamicResource BrushTextSecondary}" />
+          </StackPanel>
+
+        </StackPanel>
+      </Border>
+
+      <!-- ── Problem Cards ── -->
+      <ItemsControl ItemsSource="{Binding ProblemCards}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:ProblemCardItem">
+            <Border Background="{DynamicResource BrushSurfaceElevated}"
+                    CornerRadius="{DynamicResource RadiusLg}"
+                    Margin="0,0,0,10"
+                    Padding="14,12">
+              <StackPanel Spacing="8">
+
+                <!-- Card header row: icon + text + badge + chevron -->
+                <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
+
+                  <!-- Icon box -->
+                  <Border Width="40" Height="40"
+                          CornerRadius="{DynamicResource RadiusMd}"
+                          Background="{Binding IconBackground}"
+                          Margin="0,0,12,0"
+                          VerticalAlignment="Center">
+                    <TextBlock Text="{Binding IconGlyph}"
+                               FontSize="17" FontWeight="Bold"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Foreground="White" />
+                  </Border>
+
+                  <!-- Title + subtitle -->
+                  <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                    <TextBlock Text="{Binding Title}"
+                               FontSize="14" FontWeight="SemiBold"
+                               Foreground="{DynamicResource BrushTextPrimary}" />
+                    <TextBlock Text="{Binding Subtitle}"
+                               FontSize="12"
+                               Foreground="{DynamicResource BrushTextSecondary}" />
+                  </StackPanel>
+
+                  <!-- Status badge + chevron -->
+                  <StackPanel Grid.Column="2"
+                              Orientation="Horizontal"
+                              Spacing="10"
+                              VerticalAlignment="Center">
+                    <Border CornerRadius="10"
+                            Padding="10,4"
+                            Background="{Binding StatusBackground}"
+                            BorderBrush="{Binding StatusBorderBrush}"
+                            BorderThickness="1">
+                      <TextBlock Text="{Binding StatusLabel}"
+                                 FontSize="11" FontWeight="Medium"
+                                 Foreground="{Binding StatusForeground}" />
+                    </Border>
+                    <TextBlock Text="∨"
+                               FontSize="13"
+                               Foreground="{DynamicResource BrushTextSecondary}"
+                               VerticalAlignment="Center" />
+                  </StackPanel>
+                </Grid>
+
+                <!-- Progress bar (optional) -->
+                <ProgressBar IsVisible="{Binding ShowProgress}"
+                             Value="{Binding ProgressValue}"
+                             Minimum="0" Maximum="1"
+                             Height="4"
+                             CornerRadius="2"
+                             Background="#1E293B"
+                             Foreground="{Binding ProgressFill}" />
+
+              </StackPanel>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+
+    </StackPanel>
+    <!-- ═══════════ END LEFT COLUMN ═══════════ -->
+
+
+    <!-- ═══════════ RIGHT COLUMN — Reparatur-Protokoll ═══════════ -->
+    <Border Grid.Column="1"
+            Background="{DynamicResource BrushSurfaceElevated}"
+            CornerRadius="{DynamicResource RadiusLg}"
+            VerticalAlignment="Stretch">
+      <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- Panel header -->
+        <Grid Grid.Row="0"
+              ColumnDefinitions="*,Auto"
+              Margin="16,14,16,0">
+          <TextBlock Text="Reparatur-Protokoll"
+                     FontSize="14" FontWeight="SemiBold"
+                     Foreground="{DynamicResource BrushTextPrimary}"
+                     VerticalAlignment="Center" />
+          <TextBlock Grid.Column="1"
+                     Text="⎘"
+                     FontSize="16"
+                     Foreground="{DynamicResource BrushTextMuted}"
+                     VerticalAlignment="Center" />
+        </Grid>
+        <!-- Header separator -->
+        <Border Grid.Row="0"
+                Height="1"
+                Background="{DynamicResource BrushBorder}"
+                Margin="0,42,0,0"
+                VerticalAlignment="Bottom" />
+
+        <!-- Log entries -->
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      Padding="16,8,16,4">
+          <ItemsControl ItemsSource="{Binding LogEntries}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:LogEntryItem">
+                <Grid ColumnDefinitions="65,*,20" Margin="0,5">
+                  <!-- Timestamp -->
+                  <TextBlock Text="{Binding Time}"
+                             FontSize="11"
+                             FontFamily="Consolas,Courier New"
+                             Foreground="{DynamicResource BrushAccentPrimary}"
+                             VerticalAlignment="Center" />
+                  <!-- Message -->
+                  <TextBlock Grid.Column="1"
+                             Text="{Binding Message}"
+                             FontSize="12"
+                             TextWrapping="Wrap"
+                             Foreground="{DynamicResource BrushTextSecondary}"
+                             VerticalAlignment="Center"
+                             Margin="4,0" />
+                  <!-- Status icon -->
+                  <TextBlock Grid.Column="2"
+                             Text="{Binding StatusIcon}"
+                             FontSize="13"
+                             HorizontalAlignment="Center"
+                             VerticalAlignment="Center"
+                             Foreground="{Binding StatusBrush}" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+
+        <!-- CTA area -->
+        <Border Grid.Row="2"
+                BorderBrush="{DynamicResource BrushBorder}"
+                BorderThickness="0,1,0,0"
+                Padding="16,14,16,16">
+          <StackPanel Spacing="8">
+
+            <!-- "Jetzt reparieren" button -->
+            <Button Command="{Binding RepairCommand}"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    Padding="0,13"
+                    CornerRadius="{DynamicResource RadiusMd}"
+                    Foreground="#0F172A"
+                    BorderThickness="0">
+              <Button.Background>
+                <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,0%">
+                  <GradientStop Color="#F59E0B" Offset="0" />
+                  <GradientStop Color="#D97706" Offset="1" />
+                </LinearGradientBrush>
+              </Button.Background>
+              <Button.Styles>
+                <Style Selector="Button:pointerover /template/ ContentPresenter">
+                  <Setter Property="Background">
+                    <Setter.Value>
+                      <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,0%">
+                        <GradientStop Color="#FBBF24" Offset="0" />
+                        <GradientStop Color="#F59E0B" Offset="1" />
+                      </LinearGradientBrush>
+                    </Setter.Value>
+                  </Setter>
+                </Style>
+                <Style Selector="Button:pressed /template/ ContentPresenter">
+                  <Setter Property="Background">
+                    <Setter.Value>
+                      <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,0%">
+                        <GradientStop Color="#D97706" Offset="0" />
+                        <GradientStop Color="#B45309" Offset="1" />
+                      </LinearGradientBrush>
+                    </Setter.Value>
+                  </Setter>
+                </Style>
+              </Button.Styles>
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="{x:Static ui:AdminUiGlyphs.Shield}"
+                           FontSize="14"
+                           Foreground="#0F172A"
+                           IsVisible="{Binding ShowRepairAdminShield}"
+                           VerticalAlignment="Center" />
+                <TextBlock Text="⚒" FontSize="15" Foreground="#0F172A" />
+                <TextBlock Text="Jetzt reparieren"
+                           FontSize="14" FontWeight="SemiBold"
+                           Foreground="#0F172A" />
+              </StackPanel>
+            </Button>
+
+            <!-- Subtext -->
+            <TextBlock Text="Behebt gefundene Probleme sicher und automatisch."
+                       FontSize="11"
+                       HorizontalAlignment="Center"
+                       TextAlignment="Center"
+                       TextWrapping="Wrap"
+                       Foreground="{DynamicResource BrushTextMuted}" />
+          </StackPanel>
+        </Border>
+
+      </Grid>
+    </Border>
+    <!-- ═══════════ END RIGHT COLUMN ═══════════ -->
+
+  </Grid>
+</UserControl>

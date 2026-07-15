@@ -1,0 +1,43 @@
+---
+description: Screenshot-Capture für HorosCode-Anwendungen — Full-Page/Full-Content PFLICHT bei Scroll
+globs: **/docs/screenshots/**,**/scripts/quality/**,**/*screenshot*
+alwaysApply: false
+---
+
+# Screenshot-Capture (Auslöser)
+
+**Gilt für Executor**, wenn Screenshots von **HorosCode**-Produkten (z. B. HorosCloud) erstellt werden.
+
+## Pflicht-Kette
+
+1. **Capture** — vollständiger Workflow: **`@screenshot-capture`** (Skill: `.cursor/skills/screenshot-capture/SKILL.md`)
+2. **Verify** — jede PNG mit `Read` prüfen: **`screenshot-verify.mdc`**
+
+**VERBOTEN:** „Screenshot gespeichert" oder „fertig" ohne Verify. Capture + Verify = **eine untrennbare Aufgabe**.
+
+## Agent-Pflicht (Kurz)
+
+Vor erstem Capture im Workspace **selbst** prüfen und anlegen (dich nicht bitten):
+
+| Prüfpunkt | Pfad |
+|-----------|------|
+| Capture-Skript | `scripts/quality/capture-page.mjs` |
+| npm `capture` + Playwright | `package.json` |
+| Regeln (empfohlen) | `.cursor/rules/screenshot-capture.mdc`, `screenshot-verify.mdc` |
+
+Dann: `npm install` → `npx playwright install chromium` → Auth falls nötig → Capture → **Read-Verify** → Browser schließen.
+
+**Details:** Setup-Schritte, Scroll-Test, Warm-up, Sticky-Workaround, Container-Expand, Auth, Entscheidungsbaum → **`@screenshot-capture`**
+
+## Grundprinzip
+
+Scrollbarer Inhalt → **Full-Content Pflicht**, nicht Viewport-only. `fullPage: true` allein reicht oft nicht (Lazy-Load, innerer Scroll-Container).
+
+## Verweise
+
+| Thema | Datei |
+|-------|-------|
+| Vollständiger Capture-Workflow | `@screenshot-capture` / `.cursor/skills/screenshot-capture/SKILL.md` |
+| PNG-Verifikation (Read-Pflicht) | `screenshot-verify.mdc` |
+| Epic-Docs mit Screenshots | `doc-epic.mdc`, `@doc-epic` |
+| Orchestrator-Delegation | `orchestrator.mdc` |

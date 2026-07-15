@@ -1,0 +1,65 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <Style Selector="Button.nav-item">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="12,8" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Left" />
+    <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource RadiusMd}" />
+    <Setter Property="MinHeight" Value="{DynamicResource NavItemHeight}" />
+  </Style>
+
+  <Style Selector="Button.nav-item:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource BrushSurfaceElevated}" />
+  </Style>
+
+  <Style Selector="Button.nav-item.active">
+    <Setter Property="Foreground" Value="{DynamicResource BrushAccentPrimary}" />
+    <Setter Property="Background" Value="{DynamicResource BrushAccentPrimaryMuted}" />
+  </Style>
+
+  <Style Selector="Button.window-chrome">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Width" Value="46" />
+    <Setter Property="Height" Value="32" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
+    <Setter Property="CornerRadius" Value="0" />
+  </Style>
+
+  <Style Selector="Button.window-chrome:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource BrushSurfaceElevated}" />
+  </Style>
+
+  <Style Selector="Button.window-chrome.close:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="#E81123" />
+    <Setter Property="Foreground" Value="White" />
+  </Style>
+
+  <!-- ToggleSwitch — Amber when checked -->
+  <Style Selector="ToggleSwitch:checked /template/ Border#SwitchKnobBounds">
+    <Setter Property="Background" Value="{DynamicResource BrushAccentPrimary}" />
+  </Style>
+
+  <Style Selector="ToggleSwitch:checked /template/ Border#SwitchKnob">
+    <Setter Property="Background" Value="White" />
+  </Style>
+
+  <!-- Slider — Amber track and thumb -->
+  <Style Selector="Slider">
+    <Setter Property="Foreground" Value="{DynamicResource BrushAccentPrimary}" />
+  </Style>
+
+  <Style Selector="Slider /template/ Thumb#PART_Thumb">
+    <Setter Property="Background" Value="{DynamicResource BrushAccentPrimary}" />
+  </Style>
+
+  <Style Selector="Slider /template/ RepeatButton#PART_DecreaseButton">
+    <Setter Property="Background" Value="{DynamicResource BrushAccentPrimary}" />
+  </Style>
+
+</Styles>

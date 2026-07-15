@@ -1,0 +1,76 @@
+---
+description: Human approval gate — STOP after each region, show Preview, wait for user OK
+alwaysApply: false
+---
+
+# Human Approval — Mandatory Gate Per Region
+
+**Firma:** HorosCode · **Produkt:** HorosCloud
+
+> **After every region: STOP. Show Preview + Screenshot. Wait for explicit user approval before continuing.**
+
+## When to Stop
+
+Stop and request approval **after**:
+
+1. Preview is running (`06-ui-preview`)
+2. Screenshot review scored ≥ 98 (`07-review-loop`)
+3. Build and lint pass (`08-testing`)
+
+**Never** auto-continue to the next region.
+
+## What to Present
+
+```markdown
+## Region Ready for Approval: Header
+
+**Preview:** Views/Previews/HeaderPreview.axaml
+**Screenshot:** reviews/review-header-v2.png
+**Score:** 98/100
+
+### Summary
+- 1440×56 header with logo, nav, user menu
+- All tokens from design-memory.md
+- Build: OK
+
+**Awaiting your approval to proceed to Sidebar.**
+```
+
+Include:
+- Preview file path
+- Screenshot path or inline image
+- Review score
+- Brief summary of what was built
+
+## Valid User Responses
+
+| User says | Action |
+|-----------|--------|
+| "OK" / "Approved" / "Weiter" | Proceed to next region |
+| "Fix X" / feedback | Apply fixes → re-review → ask again |
+| "Stop" / "Pause" | Halt workflow, document state |
+| Silence | **Do not proceed** — wait for explicit approval |
+
+## Never
+
+- **Never** assume approval because review scored ≥ 98
+- **Never** start Sidebar while Header awaits approval
+- **Never** batch multiple regions before showing any to user
+- **Never** merge into Shell without per-region approvals
+- **Never** skip this gate for "small" or "simple" regions
+
+## Workflow Position
+
+```
+… → Review ≥98 → [THIS GATE] → Nächster Bereich
+```
+
+Defined in `01-workflow.mdc` step 9.
+
+## References
+
+- Workflow: `01-workflow.mdc`
+- Preview: `06-ui-preview.mdc`
+- Review: `07-review-loop.mdc`
+- Skill: `@human-approval-gate`
+- Checklist: `docs/review-checklist.md`

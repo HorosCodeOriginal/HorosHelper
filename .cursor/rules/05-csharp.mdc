@@ -1,0 +1,96 @@
+---
+description: C# Avalonia MVVM stack — never Web, React, or Tailwind patterns
+globs:
+  - "**/*.cs"
+  - "**/*.axaml"
+  - "**/*.csproj"
+alwaysApply: false
+---
+
+# C# / Avalonia / MVVM — Tech Stack
+
+**Firma:** HorosCode · **Produkt:** HorosCloud
+
+## Required Stack
+
+| Layer | Technology |
+|-------|------------|
+| UI markup | **AXAML** (Avalonia 11+) |
+| Language | **C#** |
+| Pattern | **MVVM** |
+| ViewModels | **CommunityToolkit.Mvvm** (`ObservableObject`, `[ObservableProperty]`) |
+| Styles | ResourceDictionary + `{DynamicResource}` |
+| Tokens | `docs/design-memory.md` → `DesignTokens.axaml` |
+
+## Never Use in Desktop UI Tasks
+
+- **Never** React, JSX, TSX, Next.js
+- **Never** Tailwind classes or CSS-in-JS mental models
+- **Never** HTML elements (`<div>`, `<span>`)
+- **Never** `@tanstack/react-query`, Zustand, or web state libraries
+- **Never** inline `#RRGGBB` in Views — use tokens
+
+## ViewModel Example
+
+```csharp
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+
+namespace HorosCloud.Desktop.ViewModels.Previews;
+
+public partial class HeaderPreviewViewModel : ObservableObject
+{
+    [ObservableProperty]
+    private string _appTitle = "HorosCloud";
+
+    [ObservableProperty]
+    private string _userName = "Alex M.";
+
+    [RelayCommand]
+    private void OpenNotifications() { /* Pass 1: no-op */ }
+}
+```
+
+## AXAML Binding Example
+
+```xml
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="HorosCloud.Desktop.Views.Components.HorosHeaderBar"
+             x:DataType="vm:HeaderViewModel">
+  <Grid ColumnDefinitions="*,Auto" Height="56"
+        Background="{DynamicResource BrushSurfaceDefault}">
+    <TextBlock Grid.Column="0" Text="{Binding AppTitle}"
+               VerticalAlignment="Center"
+               Margin="{DynamicResource Spacing6},0" />
+    <Button Grid.Column="1" Content="{Binding UserName}"
+            Command="{Binding OpenProfileCommand}" />
+  </Grid>
+</UserControl>
+```
+
+## Project Structure
+
+```text
+Views/
+  Components/     ← reusable UserControls
+  Previews/       ← isolated region previews
+ViewModels/
+  Previews/       ← preview ViewModels with mock data
+Styles/
+  DesignTokens.axaml
+  ControlThemes.axaml
+  Components.axaml
+```
+
+## Alternatives (only if project explicitly uses them)
+
+WinUI 3, WPF, .NET MAUI — **never** assume; default is **Avalonia**.
+
+## References
+
+- Agent: `00-agent.mdc`
+- Preview: `06-ui-preview.mdc`
+- Parameters: `docs/parameters.md`
+- C# standards: `docs/coding-standards.md`
+- Avalonia patterns: `docs/avalonia-patterns.md`

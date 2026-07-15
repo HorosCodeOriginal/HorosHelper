@@ -1,0 +1,88 @@
+---
+description: Component discovery — Search, Reuse, Extend, Create (never duplicate)
+globs:
+  - "**/*.axaml"
+  - "**/*.cs"
+alwaysApply: false
+---
+
+# Component Discovery — Search → Reuse → Extend → Create
+
+**Firma:** HorosCode · **Produkt:** HorosCloud
+
+**Never create a new component before searching the codebase.**
+
+## Decision Tree
+
+```
+1. SEARCH  — Glob/Grep existing *.axaml, Styles/, Components/
+2. REUSE   — Exact match exists → use as-is with bindings
+3. EXTEND  — Close match → add property/style variant
+4. CREATE  — No match AND 2+ repetitions in mockup → new UserControl
+5. INLINE  — One-off layout element → keep in region AXAML (no over-abstract)
+```
+
+## Search Commands
+
+```text
+Glob: **/*.axaml
+Grep: HorosButton, HorosCard, HorosNavItem, UserControl
+Grep: BrushSurface, Spacing, Radius
+```
+
+## Reuse Example
+
+Mockup shows a primary button → existing `HorosButton` with `Variant="Primary"`:
+
+```xml
+<components:HorosButton Variant="Primary"
+                      Content="{Binding SaveLabel}"
+                      Command="{Binding SaveCommand}" />
+```
+
+## Extend Example
+
+Mockup nav item needs badge → extend `HorosNavItem`, do not fork:
+
+```xml
+<!-- HorosNavItem.axaml — add optional BadgeCount -->
+<components:HorosNavItem Label="{Binding Label}"
+                         Icon="{Binding Icon}"
+                         BadgeCount="{Binding UnreadCount}"
+                         IsActive="{Binding IsActive}" />
+```
+
+## Create Example
+
+Mockup shows a unique KPI card repeated 4× → new UserControl:
+
+```xml
+<!-- Views/Components/HorosKpiCard.axaml -->
+<UserControl x:Class="HorosCloud.Desktop.Views.Components.HorosKpiCard"
+             x:DataType="vm:KpiCardViewModel">
+  <Border Background="{DynamicResource BrushSurfaceDefault}"
+          CornerRadius="{DynamicResource RadiusMd}"
+          Padding="{DynamicResource Spacing4}">
+    <StackPanel Spacing="4">
+      <TextBlock Text="{Binding Label}"
+                 Classes="text-muted" />
+      <TextBlock Text="{Binding Value}"
+                 Classes="text-heading" />
+    </StackPanel>
+  </Border>
+</UserControl>
+```
+
+## Never
+
+- **Never** duplicate `HorosButton` as `PrimaryButton`, `ActionButton`, …
+- **Never** copy-paste identical AXAML blocks 3+ times without extracting
+- **Never** import Web/React components into Avalonia
+- **Never** create abstractions for single-use layout elements
+
+## References
+
+- Catalog: `docs/component-catalog.md`
+- Tokens/styles: `@avalonia-design-system`
+- Pass 1 patterns: `@implementing-figma-designs-avalonia`
+- Inventory: `docs/design-memory.md` → Components section

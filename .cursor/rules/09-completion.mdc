@@ -1,0 +1,59 @@
+---
+description: Completion gate — never report Done before all reviews and approvals pass
+globs:
+  - "**/*.axaml"
+  - "**/*.cs"
+alwaysApply: false
+---
+
+# Completion — Never "Done" Before All Gates Pass
+
+**Firma:** HorosCode · **Produkt:** HorosCloud
+
+## Region Is NOT Complete Until ALL Are True
+
+- [ ] Mockup analysis documented (`03-mockup-analysis`)
+- [ ] AXAML + ViewModel implemented for **one region only**
+- [ ] Isolated Preview running (`06-ui-preview`)
+- [ ] Screenshot captured at mockup dimensions
+- [ ] Review score **≥ 98 / 100** documented (`07-review-loop`)
+- [ ] All diff items from review fixed
+- [ ] `dotnet build` passes (`08-testing`)
+- [ ] `ReadLints` clean on changed files
+- [ ] Tokens only from `docs/design-memory.md`
+- [ ] **Human Approval received** (`12-human-approval`)
+
+## Shell / App Is NOT Complete Until
+
+- [ ] Every region individually completed (all gates above)
+- [ ] Shell assembly reviewed with same 98 gate
+- [ ] Final full-app screenshot vs mockup
+- [ ] User approved final assembly
+
+## Never Say "Done" When
+
+- Preview was not run
+- Screenshot score is missing or < 98
+- Human Approval was not requested or received
+- Build or lint fails
+- Next region was started without approval
+- "Mostly matches" is the best description
+
+## Completion Report Template
+
+```markdown
+## Region Complete: Header
+
+- Preview: Views/Previews/HeaderPreview.axaml ✓
+- Screenshot: reviews/review-header-v2.png ✓
+- Score: 98/100 ✓
+- Build: dotnet build OK ✓
+- Human Approval: [pending / approved by user]
+```
+
+## References
+
+- Workflow: `01-workflow.mdc`
+- Human gate: `12-human-approval.mdc`
+- Skill: `@completion-review-board`
+- Checklist: `docs/review-checklist.md`

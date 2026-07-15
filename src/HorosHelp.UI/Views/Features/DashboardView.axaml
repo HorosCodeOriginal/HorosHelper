@@ -1,0 +1,221 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HorosHelp.UI.ViewModels.Features"
+             xmlns:controls="using:HorosHelp.UI.Controls"
+             x:Class="HorosHelp.UI.Views.Features.DashboardView"
+             x:DataType="vm:DashboardViewModel">
+
+  <!-- ──────────────────────────────────────────────────────────────────────
+       Layout: Header / KPI-Row / Bottom (Donut + Warnungen)
+  ─────────────────────────────────────────────────────────────────────── -->
+  <Grid RowDefinitions="Auto,14,Auto,14,*" Margin="24,20,24,20">
+
+    <!-- ═══ ROW 0 — Header ═══ -->
+    <StackPanel Spacing="4">
+      <TextBlock Text="{Binding Title}"
+                 FontSize="28" FontWeight="Bold"
+                 Foreground="{DynamicResource BrushTextPrimary}" />
+      <TextBlock Text="{Binding Subtitle}"
+                 FontSize="13"
+                 Foreground="{DynamicResource BrushTextSecondary}" />
+    </StackPanel>
+
+    <!-- ═══ ROW 2 — KPI Cards (4 equal columns) ═══ -->
+    <ItemsControl Grid.Row="2" ItemsSource="{Binding KpiCards}">
+      <ItemsControl.ItemsPanel>
+        <ItemsPanelTemplate>
+          <UniformGrid Rows="1" />
+        </ItemsPanelTemplate>
+      </ItemsControl.ItemsPanel>
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="vm:KpiCardItem">
+          <Border Background="{DynamicResource BrushSurfaceElevated}"
+                  CornerRadius="{DynamicResource RadiusLg}"
+                  Margin="0,0,8,0"
+                  Padding="16,14">
+            <StackPanel Spacing="4">
+
+              <!-- Label + Status-Dot -->
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="{Binding Label}"
+                           FontSize="12" FontWeight="Medium"
+                           Foreground="{DynamicResource BrushTextSecondary}"
+                           VerticalAlignment="Center" />
+                <Ellipse Width="8" Height="8"
+                         Fill="{Binding DotBrush}"
+                         VerticalAlignment="Center" />
+              </Grid>
+
+              <!-- Value (large) -->
+              <TextBlock Text="{Binding Value}"
+                         FontSize="36" FontWeight="Bold"
+                         Foreground="{Binding ValueBrush}"
+                         Margin="0,4,0,0" />
+
+              <!-- Unit label -->
+              <TextBlock Text="{Binding Unit}"
+                         FontSize="12"
+                         Foreground="{DynamicResource BrushTextSecondary}" />
+
+              <!-- Sparkline — CPU + Netzwerk -->
+              <controls:Sparkline Height="28"
+                                  IsVisible="{Binding ShowSparkline}"
+                                  PointsData="{Binding SparklineData}"
+                                  StrokeBrush="#22C55E"
+                                  StrokeWidth="1.5"
+                                  Margin="0,6,0,0" />
+
+              <!-- Progress bar — RAM + Festplatte -->
+              <ProgressBar IsVisible="{Binding ShowProgress}"
+                           Value="{Binding ProgressValue}"
+                           Minimum="0" Maximum="100"
+                           Height="4"
+                           CornerRadius="2"
+                           Background="#334155"
+                           Foreground="{Binding ProgressBrush}"
+                           Margin="0,8,0,2" />
+
+              <!-- Detail text (GB info) -->
+              <TextBlock Text="{Binding DetailText}"
+                         IsVisible="{Binding ShowDetail}"
+                         FontSize="11"
+                         Foreground="{DynamicResource BrushTextMuted}" />
+
+            </StackPanel>
+          </Border>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+
+    <!-- ═══ ROW 4 — Bottom: Donut (left) + Warnungen (right) ═══ -->
+    <Grid Grid.Row="4" ColumnDefinitions="*,12,*">
+
+      <!-- ─── Left: Gesundheits-Score Donut ─── -->
+      <Border Background="{DynamicResource BrushSurfaceElevated}"
+              CornerRadius="{DynamicResource RadiusLg}"
+              Padding="24,28,24,28">
+        <StackPanel HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Spacing="0">
+
+          <!-- Ring (track + arc via shared ProgressRing) -->
+          <Grid MinWidth="188" MinHeight="188"
+                Margin="2"
+                HorizontalAlignment="Center">
+
+            <controls:ProgressRing Diameter="160"
+                                   StrokeThickness="14"
+                                   Value="{Binding HealthScoreValue}"
+                                   ProgressBrush="{DynamicResource BrushAccentPrimary}"
+                                   TrackBrush="{DynamicResource BrushBorder}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+
+            <!-- Center: score -->
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Spacing="0">
+              <TextBlock Text="{Binding HealthScoreValue, StringFormat={}{0:F0}}"
+                         FontSize="48" FontWeight="Bold"
+                         HorizontalAlignment="Center"
+                         Foreground="{DynamicResource BrushTextPrimary}" />
+              <TextBlock Text="/100"
+                         FontSize="14"
+                         HorizontalAlignment="Center"
+                         Foreground="{DynamicResource BrushTextSecondary}" />
+            </StackPanel>
+
+          </Grid>
+
+          <!-- Labels below ring -->
+          <StackPanel Spacing="4" Margin="0,20,0,0">
+            <TextBlock Text="{Binding HealthScoreLabel}"
+                       FontSize="15" FontWeight="SemiBold"
+                       HorizontalAlignment="Center"
+                       Foreground="{DynamicResource BrushTextPrimary}" />
+            <TextBlock Text="{Binding HealthScoreSubText}"
+                       FontSize="12"
+                       HorizontalAlignment="Center"
+                       Foreground="{DynamicResource BrushTextSecondary}" />
+          </StackPanel>
+
+        </StackPanel>
+      </Border>
+
+      <!-- ─── Right: Warnungs-Panel ─── -->
+      <Border Grid.Column="2"
+              Background="{DynamicResource BrushSurfaceElevated}"
+              CornerRadius="{DynamicResource RadiusLg}"
+              BorderBrush="{DynamicResource BrushAccentPrimary}"
+              BorderThickness="1">
+
+        <Grid RowDefinitions="Auto,*">
+
+          <!-- Panel header -->
+          <Border Grid.Row="0"
+                  BorderBrush="{DynamicResource BrushBorder}"
+                  BorderThickness="0,0,0,1"
+                  Padding="16,14,16,14">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBlock Text="⚠"
+                         FontSize="16"
+                         Foreground="{DynamicResource BrushAccentPrimary}"
+                         VerticalAlignment="Center" />
+              <TextBlock Text="{Binding WarningsTitle}"
+                         FontSize="15" FontWeight="SemiBold"
+                         Foreground="{DynamicResource BrushAccentPrimary}"
+                         VerticalAlignment="Center" />
+            </StackPanel>
+          </Border>
+
+          <!-- Warning items -->
+          <ItemsControl Grid.Row="1" ItemsSource="{Binding Warnings}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:WarningItem">
+                <Border BorderBrush="{DynamicResource BrushBorder}"
+                        BorderThickness="0,0,0,1"
+                        Padding="16,14">
+                  <Grid ColumnDefinitions="Auto,*,Auto">
+
+                    <!-- Amber dot -->
+                    <Ellipse Width="8" Height="8"
+                             Fill="#F59E0B"
+                             VerticalAlignment="Center"
+                             Margin="0,0,12,0" />
+
+                    <!-- Title + subtitle -->
+                    <StackPanel Grid.Column="1"
+                                VerticalAlignment="Center"
+                                Spacing="3">
+                      <TextBlock Text="{Binding Title}"
+                                 FontSize="13" FontWeight="SemiBold"
+                                 Foreground="{DynamicResource BrushTextPrimary}" />
+                      <TextBlock Text="{Binding Subtitle}"
+                                 FontSize="11"
+                                 Foreground="{DynamicResource BrushTextSecondary}"
+                                 TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <!-- Chevron -->
+                    <TextBlock Grid.Column="2"
+                               Text="›"
+                               FontSize="20"
+                               Foreground="{DynamicResource BrushTextMuted}"
+                               VerticalAlignment="Center"
+                               Margin="12,0,0,0" />
+
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+
+        </Grid>
+      </Border>
+      <!-- ─── End Warnungs-Panel ─── -->
+
+    </Grid>
+    <!-- ═══ End Bottom Row ═══ -->
+
+  </Grid>
+</UserControl>

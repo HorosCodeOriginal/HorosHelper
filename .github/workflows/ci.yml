@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore
+        run: dotnet restore HorosHelp.sln
+
+      - name: Build
+        run: dotnet build HorosHelp.sln --no-restore -c Release
+
+      - name: Test
+        run: dotnet test HorosHelp.sln --no-build -c Release --verbosity normal
+
+      - name: Publish (Release win-x64)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: dotnet publish src/HorosHelp.App/HorosHelp.App.csproj -c Release -r win-x64 --self-contained false -o artifacts/publish/win-x64
+
+      - name: Upload publish artifact
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: HorosHelper-win-x64
+          path: artifacts/publish/win-x64/

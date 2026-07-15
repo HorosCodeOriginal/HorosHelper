@@ -1,0 +1,63 @@
+---
+description: >-
+  Vollständige logische Implementierung — kein Stub-Code, Randfälle, Selbst-Verifikation.
+  Aktivieren per /wide-ultra-logical, /wul, /wide, /ultra-logical oder @wide-ultra-logical.
+alwaysApply: false
+---
+
+# Wide Ultra-Logical / Vollständige logische Implementierung
+
+Aktiv, wenn du `/wide-ultra-logical`, `/wul`, `/wide`, `/ultra-logical` oder `/boost:wide` setzt.
+Parameter-Definition und Konflikte mit `/lean`: siehe `agent-context-modes.mdc`.
+
+## Fertigstellungs-Richtlinie
+
+- Implementiere angeforderte Features **vollständig**. Nicht bei der Hälfte stoppen, keine Platzhalter, keine „später"-Ausreden.
+- Wenn ein harter Blocker (fehlende Credentials, unklare API) verhindert, dass alles fertig wird: **genau** benennen, was erledigt ist und was blockiert — kein Skelett als Ersatz.
+
+## Code-Qualität
+
+```typescript
+// ❌ BAD — partial stub
+function saveNote(note: Note) {
+  // TODO: validation
+  api.post('/notes', note);
+}
+
+// ✅ GOOD — complete path
+function saveNote(note: Note): Promise<Note> {
+  if (!note.title?.trim()) {
+    throw new ValidationError('title required');
+  }
+  return api.post<Note>('/notes', note);
+}
+```
+
+- Kein `// ... unverändert lassen`, keine fehlenden Imports/Exports.
+- Keine ungenutzten `if (false)`-Zweige oder `TODO`-Kommentare statt Implementierung.
+- Discriminated unions / Enums: exhaustive `switch` mit `never` im `default` (TypeScript).
+
+## Logik & Randfälle
+
+- Null/undefined, leere Arrays, leere Strings, Netzwerk- und Auth-Fehler explizit behandeln.
+- Bestehende Projekt-Muster lesen und wiederverwenden — keine parallele Erfindung.
+- Scope klein halten pro Schritt ist OK; **jeder** gelieferte Schritt muss logisch abgeschlossen sein.
+
+## Verifikation (vor „fertig")
+
+1. Typecheck / Build (`tsc`, `npm run build`, oder projektübliches Kommando).
+2. Relevante Tests ausführen oder ergänzen.
+3. Lint auf geänderte Dateien.
+4. Bei Fehlern: fixen und erneut prüfen — nicht mit bekannten Fehlern abschließen.
+5. **C#/WPF:** zusätzliche Runtime-Checkliste im Skill-Anhang.
+
+## Kommunikation
+
+- Abwägungen und Architekturentscheidungen dürfen ausführlicher erklärt werden.
+- Code in Antworten und Diffs trotzdem **vollständig** — keine Auslassungs-Snippets.
+
+## Modelle
+
+- **`composer-2.5`** für Ausführung — **niemals** `composer-2.5-fast` als Standard (siehe `model-policy.mdc`).
+
+Skill-Details: `.cursor/skills/wide-ultra-logical/SKILL.md`

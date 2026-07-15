@@ -1,0 +1,142 @@
+---
+description: Mockup/Figma → HorosCloud Web-UI 1:1 — horos-ui Agent, Skill-Kette, Figma MCP bevorzugt (HorosCode)
+globs:
+  - "**/HorosCloudV5/apps/web/**/*.{tsx,ts,css}"
+  - "**/apps/web/**/*.{tsx,ts,css}"
+alwaysApply: false
+---
+
+# Mockup → Code (HorosCloud)
+
+Routing-Rule für **HorosCode** / **HorosCloud**, wenn Mockups oder Figma-Frames als **Web-App-UI** (React/TSX) nachgebaut werden sollen.
+
+> **Modell:** Alle Agents nutzen **`composer-2.5`** — siehe `model-policy.mdc`.
+
+## Auslöser (Intent)
+
+Diese Rule gilt, wenn der User (oder der Task-Kontext) sinngemäß folgendes meint:
+
+- „Mockup nachcoden“, „Mockup umsetzen“, „Design 1:1“
+- „Figma to code“, „Figma Frame implementieren“, „Figma → React“
+- „1:1 UI“, „pixelgenau“, „Design nachbauen“
+- Figma-URL, Frame-Link oder Figma MCP Selection für **HorosCloud Web**
+
+**Nicht** auslösen für: „Icon generieren“, „Hero-Bild“, „Mockup **zeichnen**“ (Raster) → siehe Zuko unten.
+
+## Agent-Routing
+
+| Aufgabe | Agent | Modell | Nicht |
+|---------|-------|--------|-------|
+| Figma/Mockup → HorosCloud Web-UI (Layout, Komponenten, States) | **horos-ui** | **`composer-2.5`** | ~~Zuko~~ |
+| Icon, Illustration, Marketing-Raster, PNG/WebP | **Zuko** | **composer-2.5** | ~~horos-ui~~ |
+| Mobile / `apps/mobile` | **Suki** | **composer-2.5** | — |
+| Multi-Stack ohne klaren UI-Fokus | **Aang** | **composer-2.5** | — |
+| Planung / mehrdeutiger Scope | **Sokka** | `composer-2.5` | — |
+| Dokumentation | **Iroh** | `composer-2.5` | — |
+
+**Zuko baut keine App-Layouts.** Raster-Mockups sind Referenz oder Asset — Code geht an **horos-ui**.
+
+## Modell-Richtlinie (UI-Nachbau)
+
+| Kontext | Modell | Begründung |
+|---------|--------|------------|
+| Figma/Mockup/Screenshot → React/TSX (**horos-ui**) | **`composer-2.5`** | Bild→Layout, pixelgenau |
+| Root-Task-Spawn für horos-ui | **`composer-2.5`** | Pflicht laut `model-policy.mdc` + `orchestrator.mdc` |
+| Alle Agents (horos-ui, Sokka, Iroh, …) | **`composer-2.5`** | Einheitlicher Standard |
+| `composer-2.5-fast` | **verboten** als Default | Nur bei expliziter User-Anfrage |
+
+**Hinweis:** Screenshot-to-Code ohne Figma bleibt **Notlösung** (~70–85 % Parity); Figma MCP bevorzugt (~95–100 %).
+
+## Input-Quelle & Parity-Erwartung
+
+| Quelle | Parity (typisch) | Priorität | Hinweis |
+|--------|------------------|-----------|---------|
+| **Figma MCP** (Frame-URL, Node-ID, Selection) | **~95–100 %** | **Bevorzugt** | Struktur, Spacing, Typography, Variablen auslesbar |
+| **Screenshot / PNG / JPG** (ohne Figma) | **~70–85 %** | **Notlösung** | Artefakte, Schatten, Anti-Aliasing — manuell korrigieren |
+| **Design Mode** (Cursor) | **~90–95 %** | Ergänzung | DOM/Fiber-Kontext für Feintuning nach erstem Pass |
+
+Ohne Figma-Zugang: Screenshot liefern **und** explizit Frame-Bereiche, Zustände und Abstände beschreiben (siehe Prompt-Vorlage).
+
+## Skill-Kette (Pflicht-Reihenfolge)
+
+1. **`@horos-figma-to-code`** — End-to-End-Workflow, Parity, Figma MCP
+2. **`@horos-design-system`** — Slate + Amber Tokens, Spacing, Widget-Patterns
+3. **`@implementing-figma-designs`** — HorosCloud-Pfade, Mock-Daten first
+4. **`@ui-design-brain`** — optional: Komponententyp (Modal, Drawer, Table, …)
+5. Bei `/wul` / `/wide-ultra-logical`: **`@wide-ultra-logical`** — vollständige Lieferung + Lint/Build
+6. Abschluss: **`@screenshot-capture`** + **`screenshot-verify.mdc`** — visuelle Parity
+
+### Raster-Assets (parallel, getrennt)
+
+Wenn der Frame Icons/Hero/Illustrationen enthält:
+
+- **Zuko** + **`@horos-image-embed`** + optional **`@horos-web-image-optimize`**
+- Ablage: `HorosCloudV5/apps/web/public/icons/` oder `public/images/`
+- Layout und Interaktion bleiben in TSX bei **horos-ui**
+
+## Erster Implementierungs-Pass
+
+- **UI first** — Mock-Daten, hardcoded Strings aus Figma
+- **Kein** i18n, **keine** API, **kein** Fetch in Pass 1
+- Bestehende Komponenten unter `HorosCloudV5/apps/web/src` wiederverwenden
+- **Keine** OneKey / `@onekeyhq/components` Imports
+- **Tailwind** + HorosCloud-Tokens (`@horos-design`) — pixelnah, kein generisches AI-Layout
+
+## Commands
+
+| Command | Wirkung |
+|---------|---------|
+| `/mockup` | horos-ui + composer-2.5 + horos-figma-to-code Skill-Kette |
+| `/figma-code` | Alias für `/mockup` |
+| `/image` | Nur Raster — Zuko (nicht Layout-Code) |
+
+## Prompt-Vorlage (Copy-Paste, Deutsch)
+
+```
+/mockup
+
+Figma-Frame: [URL oder Node-ID — bevorzugt]
+Alternativ Screenshot: [PNG anhängen — nur wenn kein Figma]
+
+Ziel: HorosCloud Web-UI 1:1 nachbauen
+Pfad: HorosCloudV5/apps/web/src/[feature]/
+Agent: horos-ui · Modell: composer-2.5
+
+Scope:
+- [ ] Nur dieser Frame / diese Section (nicht ganze App)
+- [ ] Zustände: default, hover, focus, disabled
+- [ ] Breakpoint: [desktop 1440px / tablet / mobile]
+
+Skill-Kette: @horos-figma-to-code → @horos-design-system → @implementing-figma-designs
+Mock-Daten first — kein i18n/API in Pass 1.
+Abschluss: Screenshot-Parity mit @screenshot-capture + Verify.
+
+Raster-Assets im Frame: separat an Zuko / /image
+```
+
+## Häufige Fallstricke (Community-Best-Practices)
+
+| Fallstrick | Symptom | HorosCode-Fix |
+|------------|---------|---------------|
+| **Vager Prompt** | Generisches Layout, falsche Farben | Frame-URL + konkrete Section; Prompt-Vorlage nutzen |
+| **Zu großer Scope** | Halluzinierte Navigation, fehlende Details | Ein Frame / eine Section pro Task; Rest in Follow-ups |
+| **Screenshot-only ohne Kontext** | ~70 % Parity, falsche Abstände | Figma MCP bevorzugen; Zustände und px-Abstände textuell ergänzen |
+| **Hover/Focus ignoriert** | Flache UI, keine Interaktion | Alle 5 States laut `@horos-design` (default, hover, focus, active, disabled) |
+| **Raster-Artefakte kopieren** | Unscharfe Borders, Schatten als Bild | Schatten/Borders in Tailwind nachbauen; Raster nur für echte Assets (Zuko) |
+| **Neue Primitives statt Inventar** | Duplikate, inkonsistentes UI | Zuerst `Glob`/`Grep` in `HorosCloudV5/apps/web/src` |
+| **Falscher Agent für 1:1 UI** | Policy-Widerspruch, schwächere Parity | Immer **horos-ui + composer-2.5** |
+| **Zuko für Layout** | PNG-Layout statt React | Layout → horos-ui; Raster → Zuko |
+| **API/i18n in Pass 1** | Verzögerung, falsche Datenbindung | UI-Freigabe zuerst; Wiring erst auf explizite Anfrage |
+
+## Verweise
+
+| Thema | Pfad |
+|-------|------|
+| Haupt-Skill | `.cursor/skills/horos-figma-to-code/SKILL.md` |
+| horos-ui Agent | `.cursor/agents/horos-ui.md` |
+| Zuko (Raster only) | `.cursor/agents/zuko.md` |
+| Design Globs | `.cursor/rules/horos-design.mdc` |
+| Modell-Policy | `.cursor/rules/model-policy.mdc` |
+| Orchestrator Intent | `.cursor/rules/orchestrator.mdc` |
+| Figma MCP | `.cursor/mcp.json` |
+| Command | `.cursor/commands/mockup.md` |
