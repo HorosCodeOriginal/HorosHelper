@@ -2,9 +2,11 @@ using System.Collections.ObjectModel;
 using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using HorosHelp.Core.Models.Startup;
 using HorosHelp.Core.Navigation;
 using HorosHelp.Core.Services.Admin;
+using HorosHelp.Core.Services.Processes;
 using HorosHelp.Core.Services.Startup;
 using HorosHelp.UI.Services;
 using Microsoft.Extensions.Logging;
@@ -80,14 +82,20 @@ public partial class StartupProgramItem : ObservableObject
 
 public sealed class BackgroundProcessItem
 {
-    public string IconGlyph     { get; init; } = "●";
-    public string Name          { get; init; } = "";
-    public string CpuText       { get; init; } = "";
-    public string RamText       { get; init; } = "";
-    public double CpuProgress   { get; init; }
-    public double RamProgress   { get; init; }
-    public IBrush CpuBarBrush   { get; init; } = Brushes.Gray;
-    public IBrush RamBarBrush   { get; init; } = Brushes.Gray;
+    public int ProcessId           { get; init; }
+    public string IconGlyph        { get; init; } = "●";
+    public string Name             { get; init; } = "";
+    public string CpuText          { get; init; } = "";
+    public string RamText          { get; init; } = "";
+    public string SafetyLabel      { get; init; } = "";
+    public IBrush SafetyForeground { get; init; } = Brushes.Gray;
+    public IBrush SafetyBackground { get; init; } = Brushes.Transparent;
+    public IBrush SafetyBorderBrush { get; init; } = Brushes.Transparent;
+    public double CpuProgress      { get; init; }
+    public double RamProgress      { get; init; }
+    public IBrush CpuBarBrush      { get; init; } = Brushes.Gray;
+    public IBrush RamBarBrush      { get; init; } = Brushes.Gray;
+    public bool CanTerminate       { get; init; }
 }
 
 public sealed partial class StartupViewModel : ViewModelBase, IDisposable
@@ -95,9 +103,14 @@ public sealed partial class StartupViewModel : ViewModelBase, IDisposable
     private const int ProcessRefreshIntervalMs = 3000;
 
     private static readonly IBrush BrushGreen = new SolidColorBrush(Color.Parse("#22C55E"));
+    private static readonly IBrush BrushGreenBg = new SolidColorBrush(Color.FromArgb(0x18, 0x22, 0xC5, 0x5E));
     private static readonly IBrush BrushAmber = new SolidColorBrush(Color.Parse("#F59E0B"));
+    private static readonly IBrush BrushAmberBg = new SolidColorBrush(Color.FromArgb(0x18, 0xF5, 0x9E, 0x0B));
+    private static readonly IBrush BrushRed = new SolidColorBrush(Color.Parse("#EF4444"));
+    private static readonly IBrush BrushRedBg = new SolidColorBrush(Color.FromArgb(0x18, 0xEF, 0x44, 0x44));
 
     private readonly IStartupService _startupService;
+    private readonly IProcessManagerService _processManagerService;
     private readonly IAdminElevationService _adminElevationService;
     private readonly IUacDialogService _uacDialogService;
     private readonly INavigationService _navigationService;
@@ -119,12 +132,14 @@ public sealed partial class StartupViewModel : ViewModelBase, IDisposable
 
     public StartupViewModel(
         IStartupService startupService,
+        IProcessManagerService processManagerService,
         IAdminElevationService adminElevationService,
         IUacDialogService uacDialogService,
         INavigationService navigationService,
         ILogger<StartupViewModel> logger)
     {
         _startupService = startupService;
+        _processManagerService = processManagerService;
         _adminElevationService = adminElevationService;
         _uacDialogService = uacDialogService;
         _navigationService = navigationService;
@@ -212,20 +227,59 @@ public sealed partial class StartupViewModel : ViewModelBase, IDisposable
 
             var cpuBrush = process.CpuPercent >= 10 ? BrushAmber : BrushGreen;
             var ramBrush = ramProgress >= 50 ? BrushAmber : BrushGreen;
+            var (safetyFg, safetyBg, safetyBorder) = MapSafetyBadge(process.SafetyLabel);
 
             BackgroundProcesses.Add(new BackgroundProcessItem
             {
+                ProcessId = process.ProcessId,
                 IconGlyph = GetProcessIcon(process.Name),
                 Name = process.Name,
                 CpuText = $"{process.CpuPercent:F0}%",
                 RamText = FormatRam(process.WorkingSetBytes),
+                SafetyLabel = process.SafetyLabel,
+                SafetyForeground = safetyFg,
+                SafetyBackground = safetyBg,
+                SafetyBorderBrush = safetyBorder,
                 CpuProgress = process.CpuPercent,
                 RamProgress = ramProgress,
                 CpuBarBrush = cpuBrush,
                 RamBarBrush = ramBrush,
+                CanTerminate = process.CanTerminate,
             });
         }
     }
+
+    [RelayCommand]
+    private async Task TerminateProcessAsync(int processId)
+    {
+        var process = BackgroundProcesses.FirstOrDefault(p => p.ProcessId == processId);
+        if (process is null || !process.CanTerminate)
+            return;
+
+        var confirmed = await _uacDialogService.ConfirmAsync(
+            "Prozess beenden",
+            $"Möchten Sie \"{process.Name}\" wirklich beenden?");
+
+        if (!confirmed)
+            return;
+
+        var result = _processManagerService.TryTerminateProcess(processId);
+        if (!result.Success)
+        {
+            _logger.LogWarning("Terminate failed for PID {Pid}: {Message}", processId, result.Message);
+            return;
+        }
+
+        RefreshFromService();
+    }
+
+    private static (IBrush Fg, IBrush Bg, IBrush Border) MapSafetyBadge(string label) =>
+        label switch
+        {
+            "Sicher" => (BrushGreen, BrushGreenBg, BrushGreen),
+            "System" => (BrushRed, BrushRedBg, BrushRed),
+            _ => (BrushAmber, BrushAmberBg, BrushAmber),
+        };
 
     private async Task OnStartupToggleAsync(StartupProgramItem item, bool enabled)
     {

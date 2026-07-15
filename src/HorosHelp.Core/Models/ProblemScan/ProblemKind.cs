@@ -7,4 +7,7 @@ public enum ProblemKind
     StartupPrograms,
     DnsFlush,
     WinsockReset,
+    WindowsUpdateCache,
+    SystemFileCheck,
+    SearchIndexReset,
 }

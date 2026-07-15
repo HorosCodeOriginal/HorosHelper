@@ -96,7 +96,7 @@
       </ItemsControl.ItemTemplate>
     </ItemsControl>
 
-    <!-- Middle: breakdown + skeleton panel -->
+    <!-- Middle: breakdown + folder tree -->
     <Grid Grid.Row="2" ColumnDefinitions="*,12,*" Margin="0,0,0,14">
 
       <!-- Speicherbelegung -->
@@ -141,79 +141,77 @@
         </StackPanel>
       </Border>
 
-      <!-- Bereinigungsvorschläge chart -->
+      <!-- Ordner-Analyse -->
       <Border Grid.Column="2"
               Background="{DynamicResource BrushSurfaceElevated}"
               CornerRadius="{DynamicResource RadiusLg}"
               Padding="18,16">
-        <Grid RowDefinitions="Auto,*,Auto">
+        <StackPanel Spacing="10">
+          <Grid ColumnDefinitions="*,Auto,Auto">
+            <StackPanel Spacing="4">
+              <TextBlock Text="{Binding FolderTreeTitle}"
+                         FontSize="14" FontWeight="SemiBold"
+                         Foreground="{DynamicResource BrushTextPrimary}" />
+              <TextBlock Text="{Binding FolderTreeDescription}"
+                         FontSize="11"
+                         Foreground="{DynamicResource BrushTextMuted}" />
+            </StackPanel>
+            <Button Grid.Column="1"
+                    Command="{Binding ScanFoldersCommand}"
+                    Padding="12,8"
+                    Margin="8,0,0,0"
+                    CornerRadius="{DynamicResource RadiusMd}"
+                    Background="Transparent"
+                    BorderBrush="{DynamicResource BrushBorder}"
+                    BorderThickness="1">
+              <TextBlock Text="{Binding ScanButtonText}" FontSize="11"
+                         Foreground="{DynamicResource BrushTextSecondary}" />
+            </Button>
+            <Button Grid.Column="2"
+                    Command="{Binding CancelScanCommand}"
+                    IsVisible="{Binding IsScanInProgress}"
+                    Padding="12,8"
+                    Margin="8,0,0,0"
+                    CornerRadius="{DynamicResource RadiusMd}"
+                    Background="Transparent"
+                    BorderBrush="{DynamicResource BrushBorder}"
+                    BorderThickness="1">
+              <TextBlock Text="Abbrechen" FontSize="11"
+                         Foreground="{DynamicResource BrushTextSecondary}" />
+            </Button>
+          </Grid>
 
-          <TextBlock Grid.Row="0"
-                     Text="{Binding CleanupChartTitle}"
-                     FontSize="14" FontWeight="SemiBold"
-                     Foreground="{DynamicResource BrushTextPrimary}"
-                     Margin="0,0,0,12" />
+          <ProgressBar Value="{Binding ScanProgress}"
+                       Minimum="0" Maximum="100"
+                       Height="4"
+                       IsVisible="{Binding IsScanInProgress}"
+                       CornerRadius="2"
+                       Background="#334155"
+                       Foreground="{DynamicResource BrushAccentPrimary}" />
 
-          <Grid Grid.Row="1" ColumnDefinitions="Auto,*" VerticalAlignment="Center">
-            <Grid MinWidth="88" MinHeight="88"
-                  Margin="2,0,16,0"
-                  VerticalAlignment="Center">
-              <controls:ProgressRing Diameter="72"
-                                     StrokeThickness="10"
-                                     Value="{Binding CleanupChartPercent}"
-                                     ProgressBrush="{DynamicResource BrushAccentPrimary}"
-                                     TrackBrush="{DynamicResource BrushBorder}"
-                                     HorizontalAlignment="Center"
-                                     VerticalAlignment="Center" />
-              <StackPanel HorizontalAlignment="Center"
-                          VerticalAlignment="Center"
-                          Spacing="0">
-                <TextBlock Text="{Binding CleanupChartTotal}"
-                           FontSize="16" FontWeight="Bold"
-                           HorizontalAlignment="Center"
-                           Foreground="{DynamicResource BrushAccentPrimary}" />
-                <TextBlock Text="freigebbar"
-                           FontSize="10"
-                           HorizontalAlignment="Center"
-                           Foreground="{DynamicResource BrushTextMuted}" />
-              </StackPanel>
-            </Grid>
+          <TextBlock Text="{Binding ScanStatusText}"
+                     FontSize="11"
+                     Foreground="{DynamicResource BrushTextMuted}" />
 
-            <ItemsControl Grid.Column="1"
-                          ItemsSource="{Binding CleanupSuggestions}"
-                          VerticalAlignment="Center">
-              <ItemsControl.ItemTemplate>
-                <DataTemplate x:DataType="vm:CleanupSuggestionItem">
-                  <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,8">
-                    <StackPanel Spacing="4">
-                      <TextBlock Text="{Binding Name}"
-                                 FontSize="12"
-                                 Foreground="{DynamicResource BrushTextPrimary}" />
-                      <ProgressBar Value="{Binding ProgressValue}"
-                                   Minimum="0" Maximum="100"
-                                   Height="4"
-                                   CornerRadius="2"
-                                   Background="#334155"
-                                   Foreground="{DynamicResource BrushAccentPrimary}" />
-                    </StackPanel>
+          <ScrollViewer MaxHeight="220" VerticalScrollBarVisibility="Auto">
+            <TreeView ItemsSource="{Binding FolderTree}">
+              <TreeView.ItemTemplate>
+                <TreeDataTemplate ItemsSource="{Binding Children}" x:DataType="vm:FolderTreeItem">
+                  <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Text="{Binding Name}"
+                               FontSize="12"
+                               Foreground="{DynamicResource BrushTextPrimary}" />
                     <TextBlock Grid.Column="1"
                                Text="{Binding SizeText}"
                                FontSize="11"
-                               VerticalAlignment="Center"
                                Margin="12,0,0,0"
                                Foreground="{DynamicResource BrushTextSecondary}" />
                   </Grid>
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
-          </Grid>
-
-          <TextBlock Grid.Row="2"
-                     Text="Sicher entfernbare Dateien nach Kategorie"
-                     FontSize="11"
-                     Margin="0,12,0,0"
-                     Foreground="{DynamicResource BrushTextMuted}" />
-        </Grid>
+                </TreeDataTemplate>
+              </TreeView.ItemTemplate>
+            </TreeView>
+          </ScrollViewer>
+        </StackPanel>
       </Border>
 
     </Grid>
@@ -223,7 +221,7 @@
             Background="{DynamicResource BrushSurfaceElevated}"
             CornerRadius="{DynamicResource RadiusLg}"
             Padding="18,16">
-      <Grid ColumnDefinitions="*,Auto">
+      <Grid ColumnDefinitions="*,Auto,Auto">
         <StackPanel Spacing="6" VerticalAlignment="Center">
           <TextBlock Text="{Binding CleanupTitle}"
                      FontSize="14" FontWeight="SemiBold"
@@ -238,7 +236,7 @@
                 Command="{Binding CleanupCommand}"
                 VerticalAlignment="Center"
                 Padding="20,12"
-                Margin="16,0,0,0"
+                Margin="16,0,8,0"
                 CornerRadius="{DynamicResource RadiusMd}"
                 Foreground="#0F172A"
                 BorderThickness="0">
@@ -263,6 +261,21 @@
           <TextBlock Text="{Binding CleanupButtonText}"
                      FontSize="13" FontWeight="SemiBold"
                      Foreground="#0F172A" />
+        </Button>
+
+        <Button Grid.Column="2"
+                Command="{Binding EmptyRecycleBinCommand}"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Right"
+                Padding="16,12"
+                Margin="0,0,0,0"
+                CornerRadius="{DynamicResource RadiusMd}"
+                Background="Transparent"
+                BorderBrush="{DynamicResource BrushBorder}"
+                BorderThickness="1">
+          <TextBlock Text="Papierkorb leeren"
+                     FontSize="12"
+                     Foreground="{DynamicResource BrushTextSecondary}" />
         </Button>
       </Grid>
     </Border>

@@ -166,7 +166,7 @@
                      Foreground="{DynamicResource BrushTextPrimary}"
                      Margin="16,14,16,8" />
 
-          <Grid ColumnDefinitions="Auto,*,Auto,Auto"
+          <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto"
                 Margin="16,0,16,8">
             <TextBlock Text="Prozess"
                        FontSize="11" FontWeight="Medium"
@@ -179,6 +179,11 @@
                        FontSize="11" FontWeight="Medium"
                        Margin="24,0,0,0"
                        Foreground="{DynamicResource BrushTextMuted}" />
+            <TextBlock Grid.Column="4" Text="Aktion"
+                       FontSize="11" FontWeight="Medium"
+                       Margin="24,0,0,0"
+                       HorizontalAlignment="Right"
+                       Foreground="{DynamicResource BrushTextMuted}" />
           </Grid>
 
           <Border Height="1" Background="{DynamicResource BrushBorder}" />
@@ -187,7 +192,7 @@
             <ItemsControl.ItemTemplate>
               <DataTemplate x:DataType="vm:BackgroundProcessItem">
                 <StackPanel>
-                  <Grid ColumnDefinitions="Auto,*,140,140"
+                  <Grid ColumnDefinitions="Auto,*,120,120,Auto"
                         Margin="16,12">
                     <StackPanel Orientation="Horizontal" Spacing="10">
                       <Border Width="32" Height="32"
@@ -199,10 +204,21 @@
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource BrushTextPrimary}" />
                       </Border>
-                      <TextBlock Text="{Binding Name}"
-                                 FontSize="13" FontWeight="SemiBold"
-                                 VerticalAlignment="Center"
-                                 Foreground="{DynamicResource BrushTextPrimary}" />
+                      <StackPanel Spacing="4" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Name}"
+                                   FontSize="13" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource BrushTextPrimary}" />
+                        <Border CornerRadius="8"
+                                Padding="8,2"
+                                HorizontalAlignment="Left"
+                                Background="{Binding SafetyBackground}"
+                                BorderBrush="{Binding SafetyBorderBrush}"
+                                BorderThickness="1">
+                          <TextBlock Text="{Binding SafetyLabel}"
+                                     FontSize="10" FontWeight="Medium"
+                                     Foreground="{Binding SafetyForeground}" />
+                        </Border>
+                      </StackPanel>
                     </StackPanel>
 
                     <!-- CPU -->
@@ -228,6 +244,21 @@
                                    Background="#1E293B"
                                    Foreground="{Binding RamBarBrush}" />
                     </StackPanel>
+
+                    <Button Grid.Column="4"
+                            Margin="16,0,0,0"
+                            Padding="12,6"
+                            CornerRadius="{DynamicResource RadiusMd}"
+                            IsEnabled="{Binding CanTerminate}"
+                            Command="{Binding $parent[UserControl].((vm:StartupViewModel)DataContext).TerminateProcessCommand}"
+                            CommandParameter="{Binding ProcessId}"
+                            Background="Transparent"
+                            BorderBrush="{DynamicResource BrushBorder}"
+                            BorderThickness="1">
+                      <TextBlock Text="Beenden"
+                                 FontSize="11"
+                                 Foreground="{DynamicResource BrushTextSecondary}" />
+                    </Button>
                   </Grid>
                   <Border Height="1"
                           Background="{DynamicResource BrushBorder}"

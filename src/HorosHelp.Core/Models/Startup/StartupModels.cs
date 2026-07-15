@@ -33,6 +33,9 @@ public sealed class BackgroundProcessInfo
     public int ProcessId { get; init; }
     public double CpuPercent { get; init; }
     public long WorkingSetBytes { get; init; }
+    public string SafetyLabel { get; init; } = "Unbekannt";
+    public string SafetyLevel { get; init; } = "Unknown";
+    public bool CanTerminate { get; init; } = true;
 }
 
 public sealed class StartupSnapshot

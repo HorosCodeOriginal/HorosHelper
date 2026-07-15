@@ -7,4 +7,6 @@ public interface IStorageService
     StorageSnapshot GetSnapshot();
 
     Task<StorageCleanupResult> RunSafeCleanupAsync(CancellationToken cancellationToken = default);
+
+    Task<StorageCleanupResult> EmptyRecycleBinAsync(CancellationToken cancellationToken = default);
 }

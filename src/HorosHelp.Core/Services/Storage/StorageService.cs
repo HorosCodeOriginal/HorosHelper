@@ -121,6 +121,40 @@ public sealed class StorageService : IStorageService
         };
     }
 
+    public async Task<StorageCleanupResult> EmptyRecycleBinAsync(CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var messages = new List<string>();
+        var success = await Task.Run(() => Interop.Shell32RecycleBin.TryEmptyRecycleBin(), cancellationToken);
+
+        messages.Add(success
+            ? "Papierkorb geleert."
+            : "Papierkorb konnte nicht geleert werden.");
+
+        return new StorageCleanupResult
+        {
+            BytesFreed = success ? EstimateRecycleBinSizeFromSnapshot() : 0,
+            FilesDeleted = success ? 1 : 0,
+            Errors = success ? 0 : 1,
+            Messages = messages,
+        };
+    }
+
+    private long EstimateRecycleBinSizeFromSnapshot()
+    {
+        try
+        {
+            return GetSnapshot().CleanupCandidates
+                .FirstOrDefault(c => c.CategoryId.Equals("recycle", StringComparison.OrdinalIgnoreCase))
+                ?.SizeBytes ?? 0;
+        }
+        catch
+        {
+            return 0;
+        }
+    }
+
     private static IReadOnlyList<DriveStorageInfo> ReadDrives()
     {
         var drives = new List<DriveStorageInfo>();

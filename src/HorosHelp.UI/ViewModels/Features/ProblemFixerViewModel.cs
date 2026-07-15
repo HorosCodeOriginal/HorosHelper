@@ -3,8 +3,10 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using HorosHelp.Core.Models.Knowledge;
 using HorosHelp.Core.Models.ProblemScan;
 using HorosHelp.Core.Services.Admin;
+using HorosHelp.Core.Services.Knowledge;
 using HorosHelp.Core.Services.ProblemScan;
 using HorosHelp.UI.Services;
 using Microsoft.Extensions.Logging;
@@ -34,6 +36,14 @@ public sealed class LogEntryItem
     public string Message     { get; init; } = "";
     public string StatusIcon  { get; init; } = "●";
     public IBrush StatusBrush { get; init; } = Brushes.Gray;
+}
+
+public sealed class RollbackEntryItem
+{
+    public string Id { get; init; } = "";
+    public string Description { get; init; } = "";
+    public string TimestampText { get; init; } = "";
+    public string KindLabel { get; init; } = "";
 }
 
 public sealed partial class ProblemFixerViewModel : ViewModelBase, IDisposable
@@ -68,6 +78,7 @@ public sealed partial class ProblemFixerViewModel : ViewModelBase, IDisposable
 
     public ObservableCollection<ProblemCardItem> ProblemCards { get; } = [];
     public ObservableCollection<LogEntryItem> LogEntries { get; } = [];
+    public ObservableCollection<RollbackEntryItem> RollbackEntries { get; } = [];
 
     public ProblemFixerViewModel(
         IProblemScannerService scannerService,
@@ -82,6 +93,7 @@ public sealed partial class ProblemFixerViewModel : ViewModelBase, IDisposable
 
         _adminElevationService.AdminStatusChanged += OnAdminStatusChanged;
         UpdateRepairAdminShield();
+        RefreshRollbackEntries();
 
         Dispatcher.UIThread.Post(() => _ = ScanAsync());
     }
@@ -219,6 +231,66 @@ public sealed partial class ProblemFixerViewModel : ViewModelBase, IDisposable
         finally
         {
             _isRepairing = false;
+            RefreshRollbackEntries();
+        }
+    }
+
+    [RelayCommand]
+    private async Task RollbackAsync(string? rollbackId)
+    {
+        if (string.IsNullOrWhiteSpace(rollbackId) || _isRepairing || _isScanning)
+            return;
+
+        var confirmed = await _uacDialogService.ConfirmAsync(
+            "Aktion rückgängig machen",
+            "Möchten Sie diese Reparatur wirklich rückgängig machen?");
+
+        if (!confirmed)
+            return;
+
+        _isRepairing = true;
+
+        try
+        {
+            var entries = await _scannerService.RollbackAsync(rollbackId);
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                foreach (var entry in entries)
+                    LogEntries.Add(MapLogEntry(entry));
+            });
+
+            RefreshRollbackEntries();
+            await ScanAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Rollback failed for {RollbackId}", rollbackId);
+        }
+        finally
+        {
+            _isRepairing = false;
+        }
+    }
+
+    private void RefreshRollbackEntries()
+    {
+        RollbackEntries.Clear();
+        foreach (var entry in _scannerService.GetRecentRollbacks(5))
+        {
+            RollbackEntries.Add(new RollbackEntryItem
+            {
+                Id = entry.Id,
+                Description = entry.Description,
+                TimestampText = entry.Timestamp.ToLocalTime().ToString("dd.MM.yyyy HH:mm"),
+                KindLabel = entry.RepairKind switch
+                {
+                    ProblemKind.Registry => "Registry",
+                    ProblemKind.TempFiles => "Temp",
+                    ProblemKind.SearchIndexReset => "Suchdienst",
+                    _ => entry.RepairKind.ToString(),
+                },
+            });
         }
     }
 

@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using HorosHelp.Core.Models.Storage;
 using HorosHelp.Core.Navigation;
 using HorosHelp.Core.Services.Storage;
 using Microsoft.Extensions.Logging;
@@ -35,12 +36,25 @@ public sealed class CleanupSuggestionItem
     public double ProgressValue { get; init; }
 }
 
+public sealed class FolderTreeItem
+{
+    public string Name { get; init; } = "";
+    public string Path { get; init; } = "";
+    public string SizeText { get; init; } = "";
+    public int Level { get; init; }
+    public bool HasChildren { get; init; }
+    public ObservableCollection<FolderTreeItem> Children { get; init; } = [];
+}
+
 public sealed partial class SpeicherViewModel : ViewModelBase
 {
     private readonly IStorageService _storageService;
+    private readonly IDiskAnalyzerService _diskAnalyzerService;
     private readonly INavigationService _navigationService;
     private readonly ILogger<SpeicherViewModel> _logger;
+    private CancellationTokenSource? _scanCts;
     private bool _isCleaning;
+    private bool _isScanning;
 
     public string Title    => "Speicher";
     public string Subtitle => "Übersicht über Festplatten und Speicherbelegung.";
@@ -48,11 +62,27 @@ public sealed partial class SpeicherViewModel : ViewModelBase
     public string CleanupTitle       => "Bereinigungsvorschläge";
     public string CleanupDescription => "Wir haben Dateien gefunden, die sicher entfernt werden können, um Speicherplatz freizugeben.";
 
+    public string FolderTreeTitle => "Ordner-Analyse";
+    public string FolderTreeDescription => "Größte Verzeichnisse auf dem Systemlaufwerk.";
+
     [ObservableProperty]
     private string _cleanupButtonText = "Jetzt bereinigen";
 
+    [ObservableProperty]
+    private string _scanButtonText = "Ordner scannen";
+
+    [ObservableProperty]
+    private string _scanStatusText = "Noch nicht gescannt";
+
+    [ObservableProperty]
+    private double _scanProgress;
+
+    [ObservableProperty]
+    private bool _isScanInProgress;
+
     public ObservableCollection<DriveCardItem> DriveCards { get; } = [];
     public ObservableCollection<StorageCategoryItem> StorageCategories { get; } = [];
+    public ObservableCollection<FolderTreeItem> FolderTree { get; } = [];
 
     public string BreakdownTitle => "Speicherbelegung";
 
@@ -68,10 +98,12 @@ public sealed partial class SpeicherViewModel : ViewModelBase
 
     public SpeicherViewModel(
         IStorageService storageService,
+        IDiskAnalyzerService diskAnalyzerService,
         INavigationService navigationService,
         ILogger<SpeicherViewModel> logger)
     {
         _storageService = storageService;
+        _diskAnalyzerService = diskAnalyzerService;
         _navigationService = navigationService;
         _logger = logger;
 
@@ -106,6 +138,101 @@ public sealed partial class SpeicherViewModel : ViewModelBase
             _isCleaning = false;
             RefreshFromService();
         }
+    }
+
+    [RelayCommand]
+    private async Task EmptyRecycleBinAsync()
+    {
+        if (_isCleaning)
+            return;
+
+        _isCleaning = true;
+        CleanupButtonText = "Papierkorb wird geleert …";
+
+        try
+        {
+            var result = await _storageService.EmptyRecycleBinAsync();
+            _logger.LogInformation("Recycle bin empty result: {Messages}", string.Join("; ", result.Messages));
+            RefreshFromService();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Recycle bin cleanup failed.");
+        }
+        finally
+        {
+            _isCleaning = false;
+            CleanupButtonText = StorageAnalyzer.BuildCleanupButtonText(
+                _storageService.GetSnapshot().TotalReclaimableBytes);
+        }
+    }
+
+    [RelayCommand]
+    private async Task ScanFoldersAsync()
+    {
+        if (_isScanning)
+            return;
+
+        _isScanning = true;
+        _scanCts?.Cancel();
+        _scanCts = new CancellationTokenSource();
+        IsScanInProgress = true;
+        ScanButtonText = "Scan läuft …";
+        ScanProgress = 0;
+        FolderTree.Clear();
+
+        try
+        {
+            var rootPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            var progress = new Progress<DiskAnalysisProgress>(p =>
+            {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    ScanProgress = p.Percent;
+                    ScanStatusText = string.IsNullOrWhiteSpace(p.CurrentPath)
+                        ? "Scan läuft …"
+                        : p.CurrentPath;
+                });
+            });
+
+            var result = await _diskAnalyzerService.ScanAsync(rootPath, progress, _scanCts.Token);
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                FolderTree.Clear();
+                if (result.Root is not null)
+                {
+                    foreach (var child in MapTree(result.Root, level: 0).Children)
+                        FolderTree.Add(child);
+                }
+
+                ScanStatusText = result.WasCancelled
+                    ? "Scan abgebrochen"
+                    : $"{result.TotalFoldersScanned} Ordner analysiert";
+            });
+        }
+        catch (OperationCanceledException)
+        {
+            ScanStatusText = "Scan abgebrochen";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Folder scan failed.");
+            ScanStatusText = "Scan fehlgeschlagen";
+        }
+        finally
+        {
+            _isScanning = false;
+            IsScanInProgress = false;
+            ScanButtonText = "Ordner scannen";
+            ScanProgress = 0;
+        }
+    }
+
+    [RelayCommand]
+    private void CancelScan()
+    {
+        _scanCts?.Cancel();
     }
 
     private void OnNavigated(object? sender, EventArgs e)
@@ -160,5 +287,22 @@ public sealed partial class SpeicherViewModel : ViewModelBase
         CleanupChartTotal = StorageAnalyzer.FormatSizeDe(snapshot.TotalReclaimableBytes);
         CleanupChartPercent = snapshot.CleanupChartPercent;
         CleanupButtonText = StorageAnalyzer.BuildCleanupButtonText(snapshot.TotalReclaimableBytes);
+    }
+
+    private static FolderTreeItem MapTree(FolderTreeNode node, int level)
+    {
+        var item = new FolderTreeItem
+        {
+            Name = node.Name,
+            Path = node.Path,
+            SizeText = StorageAnalyzer.FormatSizeDe(node.SizeBytes),
+            Level = level,
+            HasChildren = node.Children.Count > 0,
+        };
+
+        foreach (var child in node.Children.OrderByDescending(c => c.SizeBytes))
+            item.Children.Add(MapTree(child, level + 1));
+
+        return item;
     }
 }

@@ -2,7 +2,6 @@ using System.Collections.Concurrent;
 using HorosHelp.Core.Models.ProblemScan;
 using HorosHelp.Core.Services.Admin;
 using Microsoft.Extensions.Logging;
-using Microsoft.Win32;
 
 namespace HorosHelp.Core.Services.ProblemScan;
 
@@ -12,17 +11,27 @@ public sealed class ProblemScannerService : IProblemScannerService
     private readonly ProblemScannerThresholds _thresholds;
     private readonly IAdminElevationService _adminElevationService;
     private readonly IReadOnlyDictionary<ProblemKind, IRepairAction> _repairActions;
+    private readonly IReadOnlyDictionary<ProblemKind, IProblemCheck> _problemChecks;
+    private readonly IRollbackStore _rollbackStore;
+    private readonly RegistryRepairAction _registryRepairAction;
+    private IReadOnlyList<RegistryIssue> _lastRegistryIssues = [];
 
     public ProblemScannerService(
         ILogger<ProblemScannerService> logger,
         IAdminElevationService adminElevationService,
         IEnumerable<IRepairAction> repairActions,
+        IEnumerable<IProblemCheck> problemChecks,
+        IRollbackStore rollbackStore,
+        RegistryRepairAction registryRepairAction,
         ProblemScannerThresholds? thresholds = null)
     {
         _logger = logger;
         _adminElevationService = adminElevationService;
         _thresholds = thresholds ?? ProblemScannerThresholds.Default;
         _repairActions = repairActions.ToDictionary(action => action.Kind);
+        _problemChecks = problemChecks.ToDictionary(check => check.Kind);
+        _rollbackStore = rollbackStore;
+        _registryRepairAction = registryRepairAction;
     }
 
     public async Task<ScanResult> ScanAsync(
@@ -57,22 +66,21 @@ public sealed class ProblemScannerService : IProblemScannerService
 
         await Task.Delay(150, cancellationToken);
 
-        // Registry check (light — HKCU only, no admin)
         Report(30, "Registry wird überprüft...", "Bekannte Muster werden geprüft.",
             CreateLog("Registry wird überprüft", ScanLogStatus.InProgress));
 
-        var registryCard = CheckRegistry(out var registryMock);
-        usedMock |= registryMock;
-        problems.Add(registryCard);
+        var registryResult = RunCheck(ProblemKind.Registry);
+        usedMock |= registryResult.UsedMockData;
+        problems.Add(registryResult.Card);
+        _lastRegistryIssues = ExtractRegistryIssues(registryResult);
 
-        Report(40, "Registry wird überprüft...", registryCard.Subtitle,
-            CreateLog(registryCard.Title, registryCard.Severity == ProblemSeverity.Good
+        Report(40, "Registry wird überprüft...", registryResult.Card.Subtitle,
+            CreateLog(registryResult.Card.Title, registryResult.Card.Severity == ProblemSeverity.Good
                 ? ScanLogStatus.Success
                 : ScanLogStatus.Warning));
 
         await Task.Delay(200, cancellationToken);
 
-        // Temp files
         Report(55, "Temp-Verzeichnisse werden gescannt...", "Benutzer-Temp wird analysiert.",
             CreateLog("Temp-Verzeichnisse werden gescannt", ScanLogStatus.InProgress));
 
@@ -91,7 +99,6 @@ public sealed class ProblemScannerService : IProblemScannerService
 
         await Task.Delay(200, cancellationToken);
 
-        // Startup programs
         Report(85, "Startup-Programme werden überprüft...", "Autostart-Einträge werden gezählt.",
             CreateLog("Startup-Programme werden überprüft", ScanLogStatus.InProgress));
 
@@ -110,7 +117,6 @@ public sealed class ProblemScannerService : IProblemScannerService
 
         await Task.Delay(150, cancellationToken);
 
-        // Optional network maintenance repairs
         Report(97, "Netzwerk-Wartung...", "Optionale Reparaturen verfügbar.",
             CreateLog("Optionale Netzwerk-Reparaturen geladen", ScanLogStatus.Success));
 
@@ -123,6 +129,21 @@ public sealed class ProblemScannerService : IProblemScannerService
             ProblemKind.WinsockReset,
             "Winsock zurücksetzen",
             "Optional — Neustart erforderlich. Bei hartnäckigen Netzwerkfehlern."));
+
+        problems.Add(BuildOptionalRepairCard(
+            ProblemKind.WindowsUpdateCache,
+            "Windows-Update-Cache leeren",
+            "Optional — behebt häufige Update-Fehler. Administratorrechte erforderlich."));
+
+        problems.Add(BuildOptionalRepairCard(
+            ProblemKind.SystemFileCheck,
+            "Systemdateien prüfen (SFC/DISM)",
+            "Optional — kann 15–45 Minuten dauern. Administratorrechte erforderlich."));
+
+        problems.Add(BuildOptionalRepairCard(
+            ProblemKind.SearchIndexReset,
+            "Windows-Suchdienst zurücksetzen",
+            "Optional — behebt Suchprobleme. Administratorrechte erforderlich."));
 
         await Task.Delay(100, cancellationToken);
 
@@ -163,11 +184,17 @@ public sealed class ProblemScannerService : IProblemScannerService
                 ProblemKind.StartupPrograms,
                 ProblemKind.DnsFlush,
                 ProblemKind.WinsockReset,
+                ProblemKind.WindowsUpdateCache,
+                ProblemKind.SystemFileCheck,
+                ProblemKind.SearchIndexReset,
             };
 
         foreach (var target in targets)
         {
             cancellationToken.ThrowIfCancellationRequested();
+
+            if (target == ProblemKind.Registry)
+                _registryRepairAction.SetIssues(_lastRegistryIssues);
 
             if (_repairActions.TryGetValue(target, out var repairAction))
             {
@@ -184,11 +211,11 @@ public sealed class ProblemScannerService : IProblemScannerService
                     entries.AddRange(await RepairTempFilesAsync(cancellationToken));
                     break;
                 case ProblemKind.Registry:
-                    entries.Add(CreateLog("Registry-Optimierung simuliert (keine Admin-Rechte erforderlich)", ScanLogStatus.Success));
+                    entries.Add(CreateLog("Registry-Reparatur nicht verfügbar.", ScanLogStatus.Warning));
                     await Task.Delay(300, cancellationToken);
                     break;
                 case ProblemKind.StartupPrograms:
-                    entries.Add(CreateLog("Startup-Hinweise aktualisiert — vollständige Verwaltung in Phase 2", ScanLogStatus.Warning));
+                    entries.Add(CreateLog("Startup-Hinweise aktualisiert — Verwaltung unter Startup.", ScanLogStatus.Warning));
                     await Task.Delay(200, cancellationToken);
                     break;
             }
@@ -200,37 +227,43 @@ public sealed class ProblemScannerService : IProblemScannerService
         return entries;
     }
 
-    private ProblemCard CheckRegistry(out bool usedMock)
+    public IReadOnlyList<RollbackEntry> GetRecentRollbacks(int maxCount = 5) =>
+        _rollbackStore.GetRecentEntries(maxCount);
+
+    public Task<IReadOnlyList<ScanLogEntry>> RollbackAsync(
+        string rollbackId,
+        CancellationToken cancellationToken = default) =>
+        _rollbackStore.RollbackAsync(rollbackId, cancellationToken);
+
+    private ProblemCheckResult RunCheck(ProblemKind kind) =>
+        _problemChecks.TryGetValue(kind, out var check)
+            ? check.Check()
+            : new ProblemCheckResult
+            {
+                Card = new ProblemCard
+                {
+                    Kind = kind,
+                    Severity = ProblemSeverity.Good,
+                    Title = kind.ToString(),
+                    Subtitle = "Kein Check registriert.",
+                },
+            };
+
+    private static IReadOnlyList<RegistryIssue> ExtractRegistryIssues(ProblemCheckResult result)
     {
-        usedMock = false;
-
-        try
-        {
-            if (!OperatingSystem.IsWindows())
+        return result.Items
+            .Where(i => i.IsRepairable)
+            .Select(i =>
             {
-                usedMock = true;
-                return BuildRegistryCard(ProblemSeverity.Good, "Registry optimiert", "Keine Probleme gefunden (Mock).");
-            }
-
-            using var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run");
-            var count = key?.GetValueNames().Length ?? 0;
-
-            if (count > 25)
-            {
-                return BuildRegistryCard(
-                    ProblemSeverity.Warning,
-                    "Registry Autostart",
-                    $"{count} Einträge im Benutzer-Autostart — Überprüfung empfohlen.");
-            }
-
-            return BuildRegistryCard(ProblemSeverity.Good, "Registry optimiert", "Keine Probleme gefunden.");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogDebug(ex, "Registry check failed; using mock result.");
-            usedMock = true;
-            return BuildRegistryCard(ProblemSeverity.Good, "Registry optimiert", "Keine Probleme gefunden (eingeschränkter Zugriff).");
-        }
+                var parts = i.Id.Split('|', 2);
+                return new RegistryIssue(
+                    RegistryIssueKind.MissingExecutable,
+                    parts.Length == 2 ? parts[0] : "",
+                    parts.Length == 2 ? parts[1] : i.Title,
+                    "",
+                    i.Description);
+            })
+            .ToList();
     }
 
     private ProblemCard CheckTempFiles(out bool usedMock)
@@ -297,7 +330,7 @@ public sealed class ProblemScannerService : IProblemScannerService
     {
         var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        void CollectFromKey(RegistryKey baseKey, string subKeyPath)
+        void CollectFromKey(Microsoft.Win32.RegistryKey baseKey, string subKeyPath)
         {
             try
             {
@@ -317,8 +350,8 @@ public sealed class ProblemScannerService : IProblemScannerService
             }
         }
 
-        CollectFromKey(Registry.CurrentUser, @"Software\Microsoft\Windows\CurrentVersion\Run");
-        CollectFromKey(Registry.LocalMachine, @"Software\Microsoft\Windows\CurrentVersion\Run");
+        CollectFromKey(Microsoft.Win32.Registry.CurrentUser, @"Software\Microsoft\Windows\CurrentVersion\Run");
+        CollectFromKey(Microsoft.Win32.Registry.LocalMachine, @"Software\Microsoft\Windows\CurrentVersion\Run");
 
         try
         {
@@ -344,6 +377,9 @@ public sealed class ProblemScannerService : IProblemScannerService
             CreateLog("Temporäre Dateien werden bereinigt...", ScanLogStatus.InProgress),
         };
 
+        var snapshotDir = _rollbackStore.CreateSnapshotDirectory(ProblemKind.TempFiles, "Temp-Dateien bereinigt");
+        var deletedFiles = new List<string>();
+
         try
         {
             var tempPath = Path.GetTempPath();
@@ -365,6 +401,7 @@ public sealed class ProblemScannerService : IProblemScannerService
                     var info = new FileInfo(file);
                     if (info.LastWriteTimeUtc < DateTime.UtcNow.AddDays(-7))
                     {
+                        deletedFiles.Add(file);
                         info.Delete();
                         deleted++;
                     }
@@ -378,9 +415,29 @@ public sealed class ProblemScannerService : IProblemScannerService
                     await Task.Delay(10, cancellationToken);
             }
 
+            var listPath = Path.Combine(snapshotDir, "deleted-files.txt");
+            await File.WriteAllLinesAsync(listPath, deletedFiles, cancellationToken);
+            _rollbackStore.SaveManifest(new RollbackManifest
+            {
+                Id = Path.GetFileName(snapshotDir),
+                RepairKind = ProblemKind.TempFiles,
+                Description = $"Temp-Bereinigung: {deleted} Dateien",
+                Timestamp = DateTime.UtcNow,
+                Items =
+                [
+                    new RollbackManifestItem
+                    {
+                        Kind = RollbackEntryKind.FileList,
+                        RelativePath = "deleted-files.txt",
+                        Metadata = $"{deleted} Dateien",
+                    },
+                ],
+            });
+
             entries.Add(CreateLog(
                 $"Temp-Bereinigung abgeschlossen: {deleted} Dateien entfernt" +
-                (errors > 0 ? $", {errors} übersprungen (in Verwendung)" : ""),
+                (errors > 0 ? $", {errors} übersprungen (in Verwendung)" : "") +
+                " (Backup-Liste erstellt).",
                 ScanLogStatus.Success));
         }
         catch (Exception ex)
@@ -413,17 +470,6 @@ public sealed class ProblemScannerService : IProblemScannerService
 
         return ProblemSeverity.Good;
     }
-
-    private static ProblemCard BuildRegistryCard(ProblemSeverity severity, string title, string subtitle) =>
-        new()
-        {
-            Kind = ProblemKind.Registry,
-            Severity = severity,
-            Title = title,
-            Subtitle = subtitle,
-            ProgressValue = SeverityToProgress(severity),
-            IsRepairable = severity != ProblemSeverity.Good,
-        };
 
     private static ProblemCard BuildTempCard(ProblemSeverity severity, double sizeGb, string subtitle) =>
         new()

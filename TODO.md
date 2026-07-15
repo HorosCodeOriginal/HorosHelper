@@ -98,10 +98,10 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 #### Windows-API-Integration
 - [x] WMI-Queries für Prozess- und Hardware-Daten kapseln
 - [x] `PerformanceCounter`-Wrapper mit Fehlerbehandlung
-- [ ] Ereignisprotokoll (Windows Event Log) auslesen für Systemfehler
+- [x] Ereignisprotokoll (Windows Event Log) auslesen für Systemfehler
 
 #### Tests
-- [ ] Unit-Tests für `SystemHealthService` mit Mock-Daten
+- [x] Unit-Tests für `SystemHealthService` mit Mock-Daten
 - [x] Schwellenwert-Logik testen
 - [ ] UI-Binding-Tests (ViewModel → View-Updates)
 
@@ -123,15 +123,15 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 
 #### Service / Backend
 - [x] `ProblemScannerService` mit Plugin-Architektur für erweiterbare Checks
-- [ ] Repair-Actions implementieren:
+- [x] Repair-Actions implementieren:
   - [x] Temporäre Dateien bereinigen (`%TEMP%`, Windows Temp)
-  - [ ] Windows-Update-Cache leeren
+  - [x] Windows-Update-Cache leeren
   - [x] DNS-Cache leeren (`ipconfig /flushdns`)
-  - [ ] Beschädigte Systemdateien prüfen (SFC / DISM via Process)
-  - [ ] Defekte Registry-Einträge erkennen (bekannte Muster)
-  - [ ] Windows-Suchdienst zurücksetzen
+  - [x] Beschädigte Systemdateien prüfen (SFC / DISM via Process)
+  - [x] Defekte Registry-Einträge erkennen (bekannte Muster)
+  - [x] Windows-Suchdienst zurücksetzen
   - [x] Netzwerkstack zurücksetzen (`netsh winsock reset`)
-- [ ] Rückgängig-Mechanismus für reversible Aktionen
+- [x] Rückgängig-Mechanismus für reversible Aktionen
 - [x] Scan-Ergebnisse in Log-Datei speichern
 
 #### Windows-API-Integration
@@ -142,7 +142,7 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 #### Tests
 - [x] Unit-Tests für jeden Check-Plugin
 - [x] Reparatur-Aktionen mit Mock-Filesystem testen
-- [ ] Rollback-Logik testen
+- [x] Rollback-Logik testen
 
 ---
 
@@ -169,7 +169,7 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 
 #### Windows-API-Integration
 - [x] `ms-settings:` URI-Links für alle relevanten Einstellungsseiten
-- [ ] `Shell32` für das Öffnen von Control-Panel-Elementen
+- [x] `Shell32` für das Öffnen von Control-Panel-Elementen
 
 #### Tests
 - [x] Suchfunktions-Tests mit verschiedenen Queries
@@ -190,8 +190,8 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 - [x] Autostart-Liste mit Status (aktiviert / deaktiviert), Publisher, Startzeit-Impact
 - [x] Toggles zum Aktivieren / Deaktivieren einzelner Einträge
 - [x] Prozess-Liste mit CPU/RAM-Verbrauch
-- [ ] Prozesse beenden (mit Bestätigungsdialog)
-- [ ] Empfehlungs-Badges (sicher zu deaktivieren / unbekannt / System)
+- [x] Prozesse beenden (mit Bestätigungsdialog)
+- [x] Empfehlungs-Badges (sicher zu deaktivieren / unbekannt / System)
 
 #### Service / Backend
 - [x] `StartupManagerService`
@@ -199,7 +199,7 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
   - [x] Einträge aktivieren / deaktivieren / löschen
 - [x] `ProcessManagerService`
   - [x] Laufende Prozesse mit Ressourcenverbrauch auflisten
-  - [ ] Prozesse beenden (mit Bestätigungsdialog)
+  - [x] Prozesse beenden (mit Bestätigungsdialog)
 - [x] Eintrags-Datenbank mit bekannten Safe-to-Disable-Einträgen (Heuristik)
 
 #### Windows-API-Integration
@@ -221,15 +221,15 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 
 #### UI
 - [x] Speicher-Karte pro Laufwerk mit Nutzungsanzeige
-- [ ] Ordner-Analyse mit Baumstruktur (größte Verzeichnisse zuerst)
+- [x] Ordner-Analyse mit Baumstruktur (größte Verzeichnisse zuerst)
 - [x] Bereinigungsoptionen-Checkliste (Papierkorb, Downloads, Temp, …)
 - [x] Bereinigung-Vorschau (Größe vor Ausführung)
 - [ ] S.M.A.R.T.-Status-Anzeige pro Laufwerk
 
 #### Service / Backend
-- [ ] `DiskAnalyzerService` — Verzeichnisbaum mit Größenberechnung
+- [x] `DiskAnalyzerService` — Verzeichnisbaum mit Größenberechnung
 - [x] `DiskCleanupService`
-  - [ ] Papierkorb leeren
+  - [x] Papierkorb leeren
   - [x] Temp-Ordner bereinigen
   - [ ] Windows Update Cache (`SoftwareDistribution\Download`)
   - [ ] Browser-Cache-Erkennung (Chrome, Edge, Firefox)
@@ -237,7 +237,7 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 
 #### Windows-API-Integration
 - [ ] WMI `Win32_DiskDrive` für S.M.A.R.T.
-- [ ] `Shell32.SHEmptyRecycleBin` für Papierkorb
+- [x] `Shell32.SHEmptyRecycleBin` für Papierkorb
 - [x] `Directory.GetFiles` + Größenberechnung rekursiv
 
 #### Tests
@@ -485,6 +485,24 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 ---
 
 ## Erledigt
+
+**2026-07-15 (Phase 1 Abschluss + Phase 2 Startup/Speicher)**
+
+- Problem-Fixer: `IProblemCheck` / `RegistryProblemCheck` + `RegistryPatternAnalyzer` (fehlende EXEs, App Paths, verdächtige Run-Orte), `RegistryRepairAction` mit Backup
+- `SearchIndexResetRepair` (WSearch stoppen, Index-Pfad bereinigen, Dienst starten) — optional im Scanner
+- `IRollbackStore` / `RollbackStore` unter `%LocalAppData%/HorosHelper/rollback/` — Snapshots für Registry, Temp, Suchdienst; Rollback-UI im Problem-Fixer
+- `ISystemMetricsProvider` + umfassende `SystemHealthService`-Tests (Score, Schwellen, Multi-Drive, Event-Log-Penalty)
+- `IShell32Launcher` / `IWindowsSettingsLauncher` — Control-Panel via `rundll32 shell32.dll`; Wissen-Artikel `control:appwiz`, `control:hdwwiz`
+- Startup: `ProcessManagerService`, `ProcessClassifier`, Beenden-Button mit Bestätigung, Sicherheits-Badges (Sicher/Unbekannt/System)
+- Speicher: `DiskAnalyzerService` + Ordner-TreeView, Scan-Fortschritt/Abbrechen, Papierkorb leeren via `SHEmptyRecycleBin`
+- Unit-Tests: 113 gesamt (alle grün) — Registry, Rollback, Shell32, ProcessClassifier, DiskTreeBuilder, SystemHealth
+
+**2026-07-15 (Phase 1 — Backend Fortsetzung)**
+
+- Problem-Fixer: `WindowsUpdateCacheRepair` (wuauserv stoppen, `SoftwareDistribution\Download` leeren, Dienst starten) und `SfcDismRepair` (SFC `/scannow` + DISM `/RestoreHealth`, Fortschritt im Scan-Log, Dauer-Hinweis)
+- `RepairCommandBuilder`: neue Specs + Unit-Tests für Update-Cache, SFC und DISM
+- Dashboard: `IEventLogService` / `EventLogService` — System- und Anwendungsfehler (24 h, Top 10) als Warnungen in `SystemHealthService`
+- Unit-Tests: `EventLogServiceTests`, `SystemHealthServiceEventLogTests`, erweiterte `ProblemScannerServiceTests`
 
 **2026-07-15 (Phase 4 — Infra & UAC)**
 

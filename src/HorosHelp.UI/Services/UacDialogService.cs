@@ -9,13 +9,32 @@ namespace HorosHelp.UI.Services;
 public interface IUacDialogService
 {
     Task<bool> ConfirmElevationAsync(string message, string actionDescription);
+
+    Task<bool> ConfirmAsync(string title, string message);
 }
 
 public sealed class UacDialogService : IUacDialogService
 {
-    public async Task<bool> ConfirmElevationAsync(string message, string actionDescription)
+    public Task<bool> ConfirmAsync(string title, string message) =>
+        ShowConfirmationAsync(title, message, confirmLabel: "Bestätigen", isElevation: false);
+
+    public async Task<bool> ConfirmElevationAsync(string message, string actionDescription) =>
+        await ShowConfirmationAsync(
+            "Administratorrechte erforderlich",
+            $"{message}\n\n{actionDescription}",
+            confirmLabel: "Mit UAC fortfahren",
+            isElevation: true);
+
+    private static async Task<bool> ShowConfirmationAsync(
+        string title,
+        string message,
+        string confirmLabel,
+        bool isElevation)
     {
-        var viewModel = new UacPromptViewModel(message, actionDescription);
+        var viewModel = isElevation
+            ? new UacPromptViewModel(message, confirmLabel)
+            : new UacPromptViewModel(message, confirmLabel, titleOverride: title, showShield: false);
+
         var window = new Window
         {
             Title = viewModel.Title,

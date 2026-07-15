@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using HorosHelp.Core.Models.Startup;
 using HorosHelp.Core.Services.Admin;
+using HorosHelp.Core.Services.Processes;
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 
@@ -13,13 +14,16 @@ public sealed class StartupService : IStartupService
 
     private readonly ILogger<StartupService> _logger;
     private readonly IAdminElevationService _adminElevationService;
-    private readonly Dictionary<int, (TimeSpan CpuTime, DateTime Timestamp)> _processCpuSnapshots = new();
-    private DateTime _lastCpuSnapshotUtc = DateTime.MinValue;
+    private readonly IProcessManagerService _processManagerService;
 
-    public StartupService(ILogger<StartupService> logger, IAdminElevationService adminElevationService)
+    public StartupService(
+        ILogger<StartupService> logger,
+        IAdminElevationService adminElevationService,
+        IProcessManagerService processManagerService)
     {
         _logger = logger;
         _adminElevationService = adminElevationService;
+        _processManagerService = processManagerService;
     }
 
     public StartupSnapshot GetSnapshot()
@@ -34,7 +38,18 @@ public sealed class StartupService : IStartupService
 
             var isAdmin = _adminElevationService.IsRunningAsAdmin;
             var entries = ReadStartupEntries(isAdmin);
-            var processes = ReadBackgroundProcesses();
+            var processes = _processManagerService.GetBackgroundProcesses()
+                .Select(p => new BackgroundProcessInfo
+                {
+                    Name = p.Name,
+                    ProcessId = p.ProcessId,
+                    CpuPercent = p.CpuPercent,
+                    WorkingSetBytes = p.WorkingSetBytes,
+                    SafetyLevel = p.SafetyLevel.ToString(),
+                    SafetyLabel = p.SafetyLabel,
+                    CanTerminate = ProcessClassifier.CanTerminate(p.SafetyLevel),
+                })
+                .ToList();
 
             return new StartupSnapshot
             {
@@ -210,83 +225,6 @@ public sealed class StartupService : IStartupService
         }
     }
 
-    private IReadOnlyList<BackgroundProcessInfo> ReadBackgroundProcesses()
-    {
-        var now = DateTime.UtcNow;
-        var elapsedSeconds = _lastCpuSnapshotUtc == DateTime.MinValue
-            ? 0
-            : Math.Max(0.5, (now - _lastCpuSnapshotUtc).TotalSeconds);
-
-        var processes = Process.GetProcesses()
-            .Where(p =>
-            {
-                try
-                {
-                    return !string.IsNullOrWhiteSpace(p.ProcessName)
-                           && p.Id != 0
-                           && p.WorkingSet64 >= 5 * 1024 * 1024;
-                }
-                catch
-                {
-                    return false;
-                }
-            })
-            .Select(p =>
-            {
-                try
-                {
-                    var cpuPercent = CalculateCpuPercent(p, elapsedSeconds);
-                    return new BackgroundProcessInfo
-                    {
-                        Name = $"{p.ProcessName}.exe",
-                        ProcessId = p.Id,
-                        CpuPercent = cpuPercent,
-                        WorkingSetBytes = p.WorkingSet64,
-                    };
-                }
-                catch
-                {
-                    return null;
-                }
-                finally
-                {
-                    p.Dispose();
-                }
-            })
-            .Where(p => p is not null)
-            .Cast<BackgroundProcessInfo>()
-            .OrderByDescending(p => p.WorkingSetBytes)
-            .ThenByDescending(p => p.CpuPercent)
-            .Take(8)
-            .ToList();
-
-        _lastCpuSnapshotUtc = now;
-        return processes;
-    }
-
-    private double CalculateCpuPercent(Process process, double elapsedSeconds)
-    {
-        try
-        {
-            var cpuTime = process.TotalProcessorTime;
-            if (!_processCpuSnapshots.TryGetValue(process.Id, out var previous))
-            {
-                _processCpuSnapshots[process.Id] = (cpuTime, DateTime.UtcNow);
-                return 0;
-            }
-
-            var delta = (cpuTime - previous.CpuTime).TotalMilliseconds;
-            var cpuPercent = delta / (elapsedSeconds * 1000 * Environment.ProcessorCount) * 100;
-            _processCpuSnapshots[process.Id] = (cpuTime, DateTime.UtcNow);
-
-            return Math.Clamp(Math.Round(cpuPercent, 0, MidpointRounding.AwayFromZero), 0, 100);
-        }
-        catch
-        {
-            return 0;
-        }
-    }
-
     private StartupToggleResult ToggleRegistryEntry(
         RegistryKey root,
         string runKeyPath,
@@ -411,9 +349,9 @@ public sealed class StartupService : IStartupService
             ],
             BackgroundProcesses =
             [
-                new() { Name = "Chrome.exe", ProcessId = 1, CpuPercent = 12, WorkingSetBytes = 512L * 1024 * 1024 },
-                new() { Name = "Teams.exe", ProcessId = 2, CpuPercent = 8, WorkingSetBytes = 342L * 1024 * 1024 },
-                new() { Name = "explorer.exe", ProcessId = 3, CpuPercent = 2, WorkingSetBytes = 128L * 1024 * 1024 },
+                new() { Name = "Chrome.exe", ProcessId = 1, CpuPercent = 12, WorkingSetBytes = 512L * 1024 * 1024, SafetyLabel = "Sicher", SafetyLevel = "Safe", CanTerminate = true },
+                new() { Name = "Teams.exe", ProcessId = 2, CpuPercent = 8, WorkingSetBytes = 342L * 1024 * 1024, SafetyLabel = "Sicher", SafetyLevel = "Safe", CanTerminate = true },
+                new() { Name = "explorer.exe", ProcessId = 3, CpuPercent = 2, WorkingSetBytes = 128L * 1024 * 1024, SafetyLabel = "System", SafetyLevel = "System", CanTerminate = false },
             ],
             SafeToDisableCount = 3,
             IsRunningAsAdmin = false,

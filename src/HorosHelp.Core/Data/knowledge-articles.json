@@ -144,7 +144,7 @@
       "title": "Netzwerkadapter aktualisieren",
       "subtitle": "Treiber fuer Netzwerkadapter aktualisieren",
       "description": "Aktualisieren Sie den Netzwerktreiber ueber den Geraete-Manager.",
-      "deepLink": "ms-settings:devices",
+      "deepLink": "control:hdwwiz",
       "tip": "Treiber vom Hersteller herunterladen.",
       "steps": [
         {
@@ -995,7 +995,7 @@
       "title": "Installierte Apps verwalten",
       "subtitle": "Apps deinstallieren oder reparieren",
       "description": "Entfernen Sie nicht benoetigte Anwendungen.",
-      "deepLink": "ms-settings:appsfeatures",
+      "deepLink": "control:appwiz",
       "tip": "System-Apps oft nicht entfernbar.",
       "steps": [
         {

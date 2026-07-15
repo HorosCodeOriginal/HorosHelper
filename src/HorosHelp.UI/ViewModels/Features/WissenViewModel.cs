@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -66,6 +65,7 @@ public sealed partial class WissenViewModel : ViewModelBase
 {
     private readonly IKnowledgeBaseService _knowledgeService;
     private readonly ISettingsService _settingsService;
+    private readonly IWindowsSettingsLauncher _settingsLauncher;
     private readonly ILogger<WissenViewModel> _logger;
     private string _selectedCategoryId = "netzwerk";
     private string? _selectedArticleId = "wlan-settings";
@@ -95,10 +95,12 @@ public sealed partial class WissenViewModel : ViewModelBase
     public WissenViewModel(
         IKnowledgeBaseService knowledgeService,
         ISettingsService settingsService,
+        IWindowsSettingsLauncher settingsLauncher,
         ILogger<WissenViewModel> logger)
     {
         _knowledgeService = knowledgeService;
         _settingsService = settingsService;
+        _settingsLauncher = settingsLauncher;
         _logger = logger;
         RefreshAll();
     }
@@ -191,7 +193,13 @@ public sealed partial class WissenViewModel : ViewModelBase
 
         try
         {
-            Process.Start(new ProcessStartInfo(article.DeepLink) { UseShellExecute = true });
+            if (!_settingsLauncher.TryLaunch(article.DeepLink))
+            {
+                _logger.LogWarning("Could not launch deep link {DeepLink} for article {ArticleId}",
+                    article.DeepLink, article.Id);
+                return;
+            }
+
             _logger.LogInformation("Opened deep link {DeepLink} for article {ArticleId}",
                 article.DeepLink, article.Id);
         }
