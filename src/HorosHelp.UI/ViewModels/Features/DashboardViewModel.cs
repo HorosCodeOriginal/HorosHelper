@@ -78,9 +78,9 @@ public sealed partial class DashboardViewModel : ViewModelBase, IDisposable
         _settingsService = settingsService;
         _thresholdsOverride = thresholdsOverride;
 
-        RefreshFromService();
-        _pollTimer = CreatePollTimer(_settingsService.Current.ScanIntervalSeconds);
         _lastPollIntervalSeconds = _settingsService.Current.ScanIntervalSeconds;
+        _pollTimer = CreatePollTimer(_lastPollIntervalSeconds);
+        RefreshFromService();
     }
 
     private readonly SystemHealthThresholds? _thresholdsOverride;
@@ -112,7 +112,7 @@ public sealed partial class DashboardViewModel : ViewModelBase, IDisposable
             return;
 
         _lastPollIntervalSeconds = intervalSeconds;
-        _pollTimer.Dispose();
+        _pollTimer?.Dispose();
         _pollTimer = CreatePollTimer(intervalSeconds);
     }
 
