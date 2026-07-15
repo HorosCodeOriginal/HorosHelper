@@ -3,6 +3,7 @@
         xmlns:views="using:HorosHelp.UI.Views.Shell"
         x:Class="HorosHelp.App.MainWindow"
         Title="HorosHelper"
+        Icon="/Assets/horoshelper.ico"
         Width="1280"
         Height="800"
         MinWidth="960"
