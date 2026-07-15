@@ -1,28 +1,46 @@
-using System.Diagnostics;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using HorosHelp.Core.Models.Backup;
 using HorosHelp.Core.Services.Admin;
+using HorosHelp.Core.Services.Security;
 using Microsoft.Extensions.Logging;
-using Microsoft.Win32;
 
 namespace HorosHelp.Core.Services.Backup;
 
-public sealed partial class BackupService : IBackupService
+public sealed class BackupService : IBackupService
 {
-    private const string RunKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
 
     private readonly ILogger<BackupService> _logger;
     private readonly IAdminElevationService _adminElevationService;
+    private readonly IRestorePointService _restorePointService;
+    private readonly IBackupFileSystem _fileSystem;
+    private readonly IFileHashService _hashService;
+    private readonly IBackupManifestStore _manifestStore;
+    private readonly IBackupEncryptionService _encryptionService;
+    private readonly IBackupSchedulerService _schedulerService;
     private readonly string _configDirectory;
     private readonly string _profilesPath;
 
-    public BackupService(ILogger<BackupService> logger, IAdminElevationService adminElevationService)
+    public BackupService(
+        ILogger<BackupService> logger,
+        IAdminElevationService adminElevationService,
+        IRestorePointService restorePointService,
+        IBackupFileSystem fileSystem,
+        IFileHashService hashService,
+        IBackupManifestStore manifestStore,
+        IBackupEncryptionService encryptionService,
+        IBackupSchedulerService schedulerService,
+        string? configDirectoryOverride = null)
     {
         _logger = logger;
         _adminElevationService = adminElevationService;
-        _configDirectory = Path.Combine(
+        _restorePointService = restorePointService;
+        _fileSystem = fileSystem;
+        _hashService = hashService;
+        _manifestStore = manifestStore;
+        _encryptionService = encryptionService;
+        _schedulerService = schedulerService;
+        _configDirectory = configDirectoryOverride ?? Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             "HorosHelper");
         _profilesPath = Path.Combine(_configDirectory, "backup-profiles.json");
@@ -38,8 +56,11 @@ public sealed partial class BackupService : IBackupService
                 return BuildMockSnapshot();
             }
 
-            var restorePoints = ReadRestorePoints();
+            var restorePoints = _restorePointService.GetRestorePoints();
             var profiles = LoadProfiles();
+
+            if (restorePoints.Count == 0)
+                restorePoints = BuildMockSnapshot().RestorePoints.ToList();
 
             return new BackupSnapshot
             {
@@ -56,59 +77,10 @@ public sealed partial class BackupService : IBackupService
         }
     }
 
-    public async Task<BackupOperationResult> CreateRestorePointAsync(CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            if (!OperatingSystem.IsWindows())
-                return Fail("Nur unter Windows verfügbar.");
+    public Task<BackupOperationResult> CreateRestorePointAsync(CancellationToken cancellationToken = default) =>
+        _restorePointService.CreateRestorePointAsync(cancellationToken);
 
-            if (!_adminElevationService.IsRunningAsAdmin)
-            {
-                return new BackupOperationResult
-                {
-                    Success = false,
-                    Message = "Wiederherstellungspunkte erfordern Administratorrechte (UAC).",
-                };
-            }
-
-            var description = $"HorosHelper — {DateTime.Now:dd.MM.yyyy HH:mm}";
-            var psi = new ProcessStartInfo
-            {
-                FileName = "powershell",
-                Arguments = $"-NoProfile -Command \"Checkpoint-Computer -Description '{description}' -RestorePointType MODIFY_SETTINGS\"",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-            };
-
-            using var process = Process.Start(psi);
-            if (process is null)
-                return Fail("PowerShell konnte nicht gestartet werden.");
-
-            var output = await process.StandardOutput.ReadToEndAsync(cancellationToken);
-            var error = await process.StandardError.ReadToEndAsync(cancellationToken);
-            await process.WaitForExitAsync(cancellationToken);
-
-            if (process.ExitCode != 0)
-            {
-                _logger.LogWarning("Restore point creation failed: {Error}", error);
-                return Fail("Wiederherstellungspunkt konnte nicht erstellt werden.");
-            }
-
-            return new BackupOperationResult
-            {
-                Success = true,
-                Message = "Wiederherstellungspunkt wurde erstellt.",
-            };
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Create restore point failed.");
-            return Fail("Wiederherstellungspunkt fehlgeschlagen.");
-        }
-    }
+    public string GetRestorePointCreationMethod() => _restorePointService.LastCreationMethod;
 
     public async Task<BackupOperationResult> RunProfileBackupAsync(
         string profileId,
@@ -123,44 +95,108 @@ public sealed partial class BackupService : IBackupService
             if (profile is null)
                 return Fail("Kein Backup-Profil konfiguriert.");
 
+            if (!InputSecurityValidator.IsValidFilePath(profile.DestinationFolder, out var destError))
+                return Fail(destError);
+
             if (profile.SourceFolders.Count == 0)
                 return Fail("Profil enthält keine Quellordner.");
 
-            Directory.CreateDirectory(profile.DestinationFolder);
+            foreach (var source in profile.SourceFolders)
+            {
+                if (!InputSecurityValidator.IsValidFilePath(source, out var sourceError))
+                    return Fail($"Ungültiger Quellordner: {sourceError}");
+            }
+
+            _fileSystem.CreateDirectory(profile.DestinationFolder);
+
+            var previousManifest = _manifestStore.Load(profile.DestinationFolder, profile.Name);
+            var previousEntries = previousManifest?.Files.ToDictionary(
+                e => e.RelativePath,
+                e => e,
+                StringComparer.OrdinalIgnoreCase) ?? new Dictionary<string, BackupManifestEntry>(StringComparer.OrdinalIgnoreCase);
 
             long bytesCopied = 0;
             var filesCopied = 0;
+            var filesSkipped = 0;
+            var manifestEntries = new List<BackupManifestEntry>();
 
             foreach (var source in profile.SourceFolders)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                if (!Directory.Exists(source))
+                if (!_fileSystem.DirectoryExists(source))
                 {
                     _logger.LogDebug("Source folder missing: {Source}", source);
                     continue;
                 }
 
-                var targetRoot = Path.Combine(profile.DestinationFolder, profile.Name, Path.GetFileName(source.TrimEnd('\\', '/')));
-                Directory.CreateDirectory(targetRoot);
+                var sourceFolderName = Path.GetFileName(source.TrimEnd('\\', '/'));
+                var targetRoot = Path.Combine(profile.DestinationFolder, profile.Name, sourceFolderName);
+                _fileSystem.CreateDirectory(targetRoot);
 
-                foreach (var file in Directory.EnumerateFiles(source, "*", SearchOption.AllDirectories))
+                foreach (var file in _fileSystem.EnumerateFiles(source, "*", SearchOption.AllDirectories))
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    var relative = Path.GetRelativePath(source, file);
-                    var target = Path.Combine(targetRoot, relative);
-                    Directory.CreateDirectory(Path.GetDirectoryName(target)!);
+                    var relative = $"{sourceFolderName}/{Path.GetRelativePath(source, file).Replace('\\', '/')}";
+                    var hash = _hashService.ComputeSha256(file);
+                    var lastModified = _fileSystem.GetLastWriteTimeUtc(file);
+                    var size = _fileSystem.GetFileLength(file);
 
-                    File.Copy(file, target, overwrite: true);
-                    var info = new FileInfo(file);
-                    bytesCopied += info.Length;
+                    if (previousEntries.TryGetValue(relative, out var existing) &&
+                        existing.Sha256.Equals(hash, StringComparison.OrdinalIgnoreCase) &&
+                        existing.SizeBytes == size)
+                    {
+                        manifestEntries.Add(existing);
+                        filesSkipped++;
+                        continue;
+                    }
+
+                    var target = Path.Combine(targetRoot, Path.GetRelativePath(source, file));
+                    var targetDirectory = Path.GetDirectoryName(target);
+                    if (!string.IsNullOrWhiteSpace(targetDirectory))
+                        _fileSystem.CreateDirectory(targetDirectory);
+
+                    if (profile.EncryptBackups && _encryptionService.IsEncryptionAvailable)
+                    {
+                        var encryptedTarget = target + ".horos.enc";
+                        await _encryptionService.EncryptFileAsync(file, encryptedTarget, cancellationToken);
+                        if (_fileSystem.FileExists(target))
+                            _fileSystem.DeleteFile(target);
+                    }
+                    else
+                    {
+                        _fileSystem.CopyFile(file, target, overwrite: true);
+                    }
+
+                    manifestEntries.Add(new BackupManifestEntry
+                    {
+                        RelativePath = relative,
+                        Sha256 = hash,
+                        SizeBytes = size,
+                        LastModifiedUtc = lastModified,
+                        IsEncrypted = profile.EncryptBackups && _encryptionService.IsEncryptionAvailable,
+                    });
+
+                    bytesCopied += size;
                     filesCopied++;
                 }
             }
 
-            if (filesCopied == 0)
+            if (filesCopied == 0 && filesSkipped == 0)
                 return Fail("Keine Dateien zum Sichern gefunden.");
+
+            var manifest = new BackupManifest
+            {
+                ProfileId = profile.Id,
+                ProfileName = profile.Name,
+                CreatedUtc = previousManifest?.CreatedUtc ?? DateTimeOffset.UtcNow,
+                LastRunUtc = DateTimeOffset.UtcNow,
+                EncryptionEnabled = profile.EncryptBackups,
+                Files = manifestEntries,
+            };
+
+            await _manifestStore.SaveAsync(manifest, profile.DestinationFolder, profile.Name, cancellationToken);
 
             await SaveProfileBackupMetaAsync(new BackupProfileConfig
             {
@@ -168,15 +204,21 @@ public sealed partial class BackupService : IBackupService
                 Name = profile.Name,
                 SourceFolders = profile.SourceFolders,
                 DestinationFolder = profile.DestinationFolder,
+                Schedule = profile.Schedule,
+                EncryptBackups = profile.EncryptBackups,
                 LastBackupUtc = DateTimeOffset.UtcNow,
-                LastBackupSizeBytes = bytesCopied,
+                LastBackupSizeBytes = bytesCopied > 0 ? bytesCopied : previousManifest?.Files.Sum(f => f.SizeBytes),
                 LastBackupStatus = "Erfolgreich",
             }, cancellationToken);
+
+            var message = filesCopied > 0
+                ? $"Backup abgeschlossen — {filesCopied} Dateien kopiert, {filesSkipped} unverändert."
+                : $"Backup abgeschlossen — alle {filesSkipped} Dateien unverändert (inkrementell).";
 
             return new BackupOperationResult
             {
                 Success = true,
-                Message = $"Backup abgeschlossen — {filesCopied} Dateien kopiert.",
+                Message = message,
                 BytesCopied = bytesCopied,
             };
         }
@@ -187,94 +229,29 @@ public sealed partial class BackupService : IBackupService
         }
     }
 
-    private List<RestorePointInfo> ReadRestorePoints()
+    public bool RegisterProfileSchedule(string profileId, string executablePath)
     {
-        var points = TryReadRestorePointsViaPowerShell();
-        if (points.Count > 0)
-            return points;
+        if (!InputSecurityValidator.IsValidFilePath(executablePath, out _))
+            return false;
 
-        return BuildMockSnapshot().RestorePoints.ToList();
+        var profiles = LoadProfiles();
+        var profile = profiles.FirstOrDefault(p => p.Id.Equals(profileId, StringComparison.OrdinalIgnoreCase));
+        if (profile is null)
+            return false;
+
+        return _schedulerService.RegisterProfileSchedule(profile, executablePath);
     }
 
-    private List<RestorePointInfo> TryReadRestorePointsViaPowerShell()
-    {
-        var points = new List<RestorePointInfo>();
-
-        try
-        {
-            var output = RunProcessSync(
-                "powershell",
-                "-NoProfile -Command \"Get-ComputerRestorePoint | Select-Object SequenceNumber,CreationTime,RestorePointType,Description | ConvertTo-Json -Compress\"");
-
-            if (string.IsNullOrWhiteSpace(output))
-                return points;
-
-            foreach (Match match in RestorePointBlockRegex().Matches(output))
-            {
-                if (!int.TryParse(match.Groups["seq"].Value, out var seq))
-                    continue;
-
-                var created = DateTime.TryParse(match.Groups["time"].Value, out var dt)
-                    ? dt
-                    : DateTime.Now;
-
-                points.Add(new RestorePointInfo
-                {
-                    SequenceNumber = seq,
-                    CreatedAt = created,
-                    Type = MapRestoreType(match.Groups["type"].Value),
-                    Description = match.Groups["desc"].Value.Trim(),
-                });
-            }
-
-            if (points.Count == 0 && output.Contains("SequenceNumber", StringComparison.OrdinalIgnoreCase))
-            {
-                points.Add(ParseSingleRestorePoint(output));
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogDebug(ex, "PowerShell restore point read failed.");
-        }
-
-        return points
-            .OrderByDescending(p => p.CreatedAt)
-            .Take(10)
-            .ToList();
-    }
-
-    private static RestorePointInfo ParseSingleRestorePoint(string json)
-    {
-        var seq = SequenceRegex().Match(json).Groups[1].Value;
-        var time = TimeRegex().Match(json).Groups[1].Value;
-        var type = TypeRegex().Match(json).Groups[1].Value;
-        var desc = DescRegex().Match(json).Groups[1].Value;
-
-        return new RestorePointInfo
-        {
-            SequenceNumber = int.TryParse(seq, out var s) ? s : 0,
-            CreatedAt = DateTime.TryParse(time, out var dt) ? dt : DateTime.Now,
-            Type = MapRestoreType(type),
-            Description = string.IsNullOrWhiteSpace(desc) ? "Wiederherstellungspunkt" : desc,
-        };
-    }
-
-    private static string MapRestoreType(string raw) => raw switch
-    {
-        "0" => "Anwendung",
-        "1" => "Deinstallation",
-        "10" => "Manuell",
-        "12" => "Windows Update",
-        _ => string.IsNullOrWhiteSpace(raw) ? "System" : raw,
-    };
+    public bool UnregisterProfileSchedule(string profileId) =>
+        _schedulerService.UnregisterProfileSchedule(profileId);
 
     private List<BackupProfileConfig> LoadProfiles()
     {
         try
         {
-            if (File.Exists(_profilesPath))
+            if (_fileSystem.FileExists(_profilesPath))
             {
-                var json = File.ReadAllText(_profilesPath);
+                var json = _fileSystem.ReadAllText(_profilesPath);
                 var profiles = JsonSerializer.Deserialize<List<BackupProfileConfig>>(json, JsonOptions);
                 if (profiles is { Count: > 0 })
                     return profiles;
@@ -294,9 +271,9 @@ public sealed partial class BackupService : IBackupService
     {
         try
         {
-            Directory.CreateDirectory(_configDirectory);
+            _fileSystem.CreateDirectory(_configDirectory);
             var json = JsonSerializer.Serialize(profiles, JsonOptions);
-            File.WriteAllText(_profilesPath, json);
+            _fileSystem.WriteAllTextAsync(_profilesPath, json).GetAwaiter().GetResult();
         }
         catch (Exception ex)
         {
@@ -313,9 +290,9 @@ public sealed partial class BackupService : IBackupService
         else
             profiles.Add(updated);
 
-        Directory.CreateDirectory(_configDirectory);
+        _fileSystem.CreateDirectory(_configDirectory);
         var json = JsonSerializer.Serialize(profiles, JsonOptions);
-        await File.WriteAllTextAsync(_profilesPath, json, cancellationToken);
+        await _fileSystem.WriteAllTextAsync(_profilesPath, json, cancellationToken);
     }
 
     private static List<BackupProfileConfig> CreateDefaultProfiles()
@@ -335,6 +312,8 @@ public sealed partial class BackupService : IBackupService
                 Name = "Dokumente",
                 SourceFolders = [documents],
                 DestinationFolder = backupRoot,
+                EncryptBackups = true,
+                Schedule = new BackupScheduleConfig { IsEnabled = false, Frequency = "Manuell" },
             },
             new()
             {
@@ -342,6 +321,13 @@ public sealed partial class BackupService : IBackupService
                 Name = "Desktop",
                 SourceFolders = [desktop],
                 DestinationFolder = backupRoot,
+                EncryptBackups = true,
+                Schedule = new BackupScheduleConfig
+                {
+                    IsEnabled = true,
+                    Frequency = "Taeglich",
+                    TimeOfDay = "02:00",
+                },
             },
             new()
             {
@@ -349,6 +335,8 @@ public sealed partial class BackupService : IBackupService
                 Name = "Bilder",
                 SourceFolders = [pictures],
                 DestinationFolder = backupRoot,
+                EncryptBackups = true,
+                Schedule = new BackupScheduleConfig { IsEnabled = false, Frequency = "Manuell" },
             },
             new()
             {
@@ -356,31 +344,16 @@ public sealed partial class BackupService : IBackupService
                 Name = "Vollbackup",
                 SourceFolders = [documents, desktop, pictures],
                 DestinationFolder = backupRoot,
+                EncryptBackups = true,
+                Schedule = new BackupScheduleConfig
+                {
+                    IsEnabled = true,
+                    Frequency = "Woechentlich",
+                    TimeOfDay = "03:00",
+                    DayOfWeek = "Sunday",
+                },
             },
         ];
-    }
-
-    private static string RunProcessSync(string fileName, string arguments)
-    {
-        var psi = new ProcessStartInfo
-        {
-            FileName = fileName,
-            Arguments = arguments,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-        };
-
-        using var process = Process.Start(psi);
-        if (process is null)
-            return "";
-
-        var output = process.StandardOutput.ReadToEnd();
-        var error = process.StandardError.ReadToEnd();
-        process.WaitForExit();
-
-        return string.IsNullOrWhiteSpace(output) ? error : output;
     }
 
     private static BackupOperationResult Fail(string message) =>
@@ -417,21 +390,4 @@ public sealed partial class BackupService : IBackupService
             IsRunningAsAdmin = false,
             IsMockData = true,
         };
-
-    [GeneratedRegex(
-        @"\{[^}]*""SequenceNumber""\s*:\s*(?<seq>\d+)[^}]*""CreationTime""\s*:\s*""(?<time>[^""]+)""[^}]*""RestorePointType""\s*:\s*(?<type>\d+)[^}]*""Description""\s*:\s*""(?<desc>[^""]*)""[^}]*\}",
-        RegexOptions.IgnoreCase)]
-    private static partial Regex RestorePointBlockRegex();
-
-    [GeneratedRegex(@"""SequenceNumber""\s*:\s*(\d+)", RegexOptions.IgnoreCase)]
-    private static partial Regex SequenceRegex();
-
-    [GeneratedRegex(@"""CreationTime""\s*:\s*""([^""]+)""", RegexOptions.IgnoreCase)]
-    private static partial Regex TimeRegex();
-
-    [GeneratedRegex(@"""RestorePointType""\s*:\s*(\d+)", RegexOptions.IgnoreCase)]
-    private static partial Regex TypeRegex();
-
-    [GeneratedRegex(@"""Description""\s*:\s*""([^""]*)""", RegexOptions.IgnoreCase)]
-    private static partial Regex DescRegex();
 }

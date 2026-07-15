@@ -140,6 +140,10 @@
                                FontSize="11"
                                Foreground="{DynamicResource BrushTextSecondary}" />
 
+                    <TextBlock Text="{Binding ScheduleText}"
+                               FontSize="10"
+                               Foreground="{DynamicResource BrushTextMuted}" />
+
                     <Grid ColumnDefinitions="*,Auto">
                       <StackPanel Orientation="Horizontal" Spacing="4">
                         <TextBlock Text="{Binding StatusIcon}"

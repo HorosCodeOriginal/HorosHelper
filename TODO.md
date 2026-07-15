@@ -11,11 +11,11 @@
 
 - [x] Tech-Stack-Entscheidung treffen und dokumentieren
   - [x] Option A: C# / Avalonia (empfohlen — HorosCode Desktop-Konsistenz, plattformfähig)
-  - [ ] Option B: C# / WPF (nur Windows, etabliert, umfangreiche Windows-API-Unterstützung)
-  - [ ] Option C: C# / MAUI (modern, aber höhere Komplexität für Desktop-First)
-  - [ ] Entscheidung in `docs/architecture.md` festhalten
+  - [x] ~~Option B: C# / WPF~~ — verworfen (Avalonia gewählt)
+  - [x] ~~Option C: C# / MAUI~~ — verworfen (Avalonia gewählt)
+  - [x] Entscheidung in `docs/architecture.md` festhalten
 - [x] Repository-Struktur anlegen
-  - [ ] `.gitignore` für C# / .NET
+  - [x] `.gitignore` für C# / .NET
   - [x] `HorosHelp.sln` Solution-Datei
   - [x] Projektordner: `src/`, `tests/`, `assets/`
 - [x] Projekt-Dateien initialisieren
@@ -336,7 +336,7 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
   - [x] Deinstallation via `UninstallString` starten
 - [x] Treiber via `Win32_PnPSignedDriver` (WMI)
   - [x] Geräte-Manager öffnen für Updates
-- [ ] Bereinigung zurückgelassener Registry-Einträge nach Deinstallation
+- [x] Bereinigung zurückgelassener Registry-Einträge nach Deinstallation (`OrphanedRegistryScanner`, `ScanOrphanedRegistryEntries`)
 
 #### Windows-API-Integration
 - [x] Registry `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall`
@@ -367,19 +367,19 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
   - [x] Neuen Punkt erstellen via `Checkpoint-Computer` (Admin/UAC-Hinweis)
 - [x] Backup-Profile (JSON in `%AppData%\HorosHelper\backup-profiles.json`)
   - [x] Datei-/Ordner-Backup (native Copy)
-  - [ ] Backup-Zeitplanung via Windows Task Scheduler
-  - [ ] Inkrementelles Backup (nur geänderte Dateien)
+  - [x] Backup-Zeitplanung via Windows Task Scheduler (`SchTasksSchedulerClient`, `--backup-run` Headless-Modus)
+  - [x] Inkrementelles Backup (nur geänderte Dateien, SHA-256-Manifest)
 - [x] Backup-Manifest (JSON) für Wiederherstellungs-Tracking
 
 #### Windows-API-Integration
 - [x] PowerShell `Get-ComputerRestorePoint` / `Checkpoint-Computer`
-- [ ] `SRSetRestorePoint` via P/Invoke oder PowerShell-Aufruf
-- [ ] Windows Task Scheduler COM-Interface
+- [x] `SRSetRestorePoint` via P/Invoke (`srclient.dll`) mit Checkpoint-Computer-Fallback
+- [x] Windows Task Scheduler via `schtasks`-Wrapper (`ITaskSchedulerClient`)
 
 #### Tests
-- [ ] Wiederherstellungspunkt-Service-Tests mit WMI-Mock
-- [ ] Backup-Logik-Tests mit Mock-Filesystem
-- [ ] Zeitplanung-Tests
+- [x] Wiederherstellungspunkt-Service-Tests mit PowerShell-Mock (`RestorePointServiceTests`)
+- [x] Backup-Logik-Tests mit Mock-Filesystem (`BackupServiceTests`)
+- [x] Zeitplanung-Tests (`BackupSchedulerServiceTests`)
 
 ---
 
@@ -426,7 +426,7 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 **Mockup:** `assets/images/dashboard-mockup-07/` · Sidebar-Item: **Einstellungen** (immer als letzter Nav-Eintrag)
 
 - [x] Einstellungen-View gemäß Mockup (Kategorie-Nav, Toggles, Theme, Sprache, Scan-Intervall)
-- [ ] Von Sidebar-Item 11 erreichbar; unabhängig von Feature-Phasen
+- [x] Von Sidebar-Item 11 erreichbar; unabhängig von Feature-Phasen
 
 ### Logging & Fehlerbehandlung
 
@@ -438,30 +438,30 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 ### Admin-Rechte & UAC
 
 - [x] UAC-Elevation-Strategie festlegen:
-  - [ ] Option A: App startet immer als Admin (einfacher, weniger sicher)
+  - [x] ~~Option A: App startet immer als Admin~~ — verworfen
   - [x] Option B: Elevation on demand per Aktion (empfohlen) — `IAdminElevationService` + `RequestElevation(runas)`
-- [ ] UAC-Shield-Icon auf Buttons die Admin-Rechte benötigen
+- [x] UAC-Shield-Icon auf Buttons die Admin-Rechte benötigen (`AdminUiGlyphs.Shield` in Backup, Startup, Sicherheit, Problem-Fixer)
 - [x] Elevated-Helper-Prozess oder COM-Elevation für Admin-Aktionen — App-Neustart via `runas`
 - [x] Shell StatusBar Admin-Badge live (`ShellViewModel` → `IsRunningAsAdmin`)
 
 ### Sicherheit
 
-- [ ] Keine hardcodierten API-Keys (Key-Store verwenden)
+- [x] Keine hardcodierten API-Keys (Backup-Key via DPAPI, kein Klartext im Repo)
 - [ ] Alle Registry-Schreiboperationen mit Transaktionssicherheit
-- [ ] Backup-Daten lokal verschlüsseln (AES-256)
-- [ ] Input-Validierung für alle Nutzereingaben (keine Shell-Injection)
+- [x] Backup-Daten lokal verschlüsseln (AES-256, DPAPI-geschützter Master-Key)
+- [x] Input-Validierung für alle Nutzereingaben (keine Shell-Injection) — `InputSecurityValidator`
 - [ ] Least-Privilege-Prinzip: Admin-Rechte nur wo nötig
 
 ### Lokalisierung (Deutsch)
 
 - [ ] Alle UI-Texte in Ressourcen-Datei auslagern (`de-DE`)
 - [ ] Datum- und Zahlenformatierung auf Deutsch einstellen
-- [ ] Wissensdatenbank auf Deutsch verfassen
+- [x] Wissensdatenbank auf Deutsch verfassen (`knowledge-articles.json`, deutsche UI-Texte)
 - [ ] Englische Basis-Übersetzung parallel pflegen (Fallback)
 
 ### Dokumentation
 
-- [ ] `docs/architecture.md` — Architektur-Entscheidungen und Projektstruktur
+- [x] `docs/architecture.md` — Architektur-Entscheidungen und Projektstruktur (inkl. Backup, Avalonia-Entscheidung)
 - [ ] `docs/features/` — Feature-Dokumentation pro Bereich
 - [x] `README.md` — Projekt-Einstieg, Setup, Build-Anleitung
 - [x] `docs/installation.md` — Installation und UAC-Hinweise
@@ -473,7 +473,7 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 - [ ] Startzeit < 2 Sekunden (kein blockierendes IO beim Start)
 - [ ] Alle langen Operationen asynchron (`async/await`) + Fortschrittsanzeige
 - [ ] Responsive UI (keine Blockierung des UI-Threads)
-- [ ] Dunkles Theme als Standard (HorosCode Design-System)
+- [x] Dunkles Theme als Standard (HorosCode Design-System — `RequestedThemeVariant="Dark"`, Default `Theme = "Dunkel"`)
 
 ### Tests & Qualität
 
@@ -485,6 +485,16 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 ---
 
 ## Erledigt
+
+**2026-07-15 (Feature 9 Backup + Housekeeping)**
+
+- Feature 9 Backup: inkrementelles Backup mit SHA-256-Manifest, AES-256-Verschlüsselung (DPAPI-Master-Key), `SRSetRestorePoint` P/Invoke + Checkpoint-Computer-Fallback, Windows Task Scheduler (`schtasks`), Headless `--backup-run`
+- `InputSecurityValidator` für Pfade, Prozessnamen, PowerShell-Literale und Task-Namen
+- `RestorePointService`, `BackupSchedulerService`, `BackupEncryptionService`, `OrphanedRegistryScanner`
+- UI: Zeitplan-Anzeige in Backup-Profilen, UAC-Shield bereits vorhanden
+- Housekeeping: WPF/MAUI/Always-Admin als verworfen markiert, `.gitignore` verifiziert, Einstellungen-Navigation, deutsche Wissensdatenbank, Dark-Theme-Default
+- `docs/architecture.md` erweitert (Tech-Stack + Backup-Architektur)
+- Unit-Tests: 184 gesamt (alle grün) — `BackupServiceTests`, `RestorePointServiceTests`, `BackupSchedulerServiceTests`, `InputSecurityValidatorTests`, `OrphanedRegistryScannerTests`
 
 **2026-07-15 (Phase 2 Netzwerk/Speicher + Phase 1 Polish)**
 

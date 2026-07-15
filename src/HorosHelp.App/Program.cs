@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Avalonia;
 using HorosHelp.Core.DependencyInjection;
+using HorosHelp.Core.Services.Backup;
 using HorosHelp.Core.Services.Logging;
 using HorosHelp.Core.Services.Settings;
 using HorosHelp.UI.DependencyInjection;
@@ -44,6 +45,9 @@ internal static class Program
             services.AddHorosHelpUi();
             App.Services = services.BuildServiceProvider();
 
+            if (TryRunHeadlessBackup(args, App.Services))
+                return;
+
             var globalHandler = App.Services.GetRequiredService<IGlobalExceptionHandler>();
             globalHandler.Register();
             globalHandler.UnhandledExceptionOccurred += OnUnhandledExceptionOccurred;
@@ -73,6 +77,27 @@ internal static class Program
 #endif
             .WithInterFont()
             .LogToTrace();
+
+    private static bool TryRunHeadlessBackup(string[] args, IServiceProvider services)
+    {
+        if (args.Length < 2 || !string.Equals(args[0], "--backup-run", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        var profileId = args[1];
+        var logger = services.GetRequiredService<ILoggerFactory>().CreateLogger("HorosHelp.App");
+        logger.LogInformation("Headless backup run for profile {ProfileId}", profileId);
+
+        var backupService = services.GetRequiredService<IBackupService>();
+        var result = backupService.RunProfileBackupAsync(profileId).GetAwaiter().GetResult();
+
+        if (result.Success)
+            logger.LogInformation("Headless backup succeeded: {Message}", result.Message);
+        else
+            logger.LogWarning("Headless backup failed: {Message}", result.Message);
+
+        Environment.Exit(result.Success ? 0 : 1);
+        return true;
+    }
 
     private static void OnUnhandledExceptionOccurred(object? sender, UnhandledExceptionNotification e)
     {

@@ -170,3 +170,27 @@ App → UI → Core
 ```
 
 `HorosHelp.Core` kennt weder Avalonia noch ViewModels. Neue Features: Service/Model in Core, ViewModel + View in UI, Registrierung in beiden `ServiceCollectionExtensions`, Route in `NavigationRoutes` + Resolver-Switch.
+
+## Tech-Stack-Entscheidung
+
+| Option | Status | Begründung |
+|--------|--------|------------|
+| **A: C# / Avalonia** | **Gewählt** | HorosCode Desktop-Konsistenz, plattformfähig, Fluent Dark Theme |
+| B: C# / WPF | Verworfen | Nur Windows, kein HorosCode-Stack-Alignment |
+| C: C# / MAUI | Verworfen | Höhere Komplexität für Desktop-First |
+
+## Feature 9 — Backup & Wiederherstellung
+
+**Services:** `IBackupService`, `IRestorePointService`, `IBackupSchedulerService`, `IBackupEncryptionService`
+
+| Funktion | Implementierung |
+|----------|-----------------|
+| Inkrementelles Backup | SHA-256-Hashes in `manifest.json`; nur geänderte Dateien kopieren |
+| AES-256-Verschlüsselung | `BackupEncryptionService` — AES-256-CBC, Master-Key via **Windows DPAPI** (`%AppData%\HorosHelper\backup-master-key.dpapi`) |
+| Wiederherstellungspunkte | **Primär:** `SRSetRestorePoint` P/Invoke (`srclient.dll`) · **Fallback:** `Checkpoint-Computer` PowerShell |
+| Zeitplanung | `schtasks`-Wrapper (`SchTasksSchedulerClient`); Headless-Modus `--backup-run <profileId>` in `Program.cs` |
+| Input-Validierung | `InputSecurityValidator` vor `Process.Start` / PowerShell / Pfad-Operationen |
+
+**Profile:** JSON in `%AppData%\HorosHelper\backup-profiles.json` — enthält `Schedule`, `EncryptBackups`, Quell-/Zielordner.
+
+**Tests:** `BackupServiceTests` (Mock-Filesystem), `RestorePointServiceTests` (Mock-PowerShell), `BackupSchedulerServiceTests`, `InputSecurityValidatorTests`.

@@ -31,6 +31,7 @@ public sealed class BackupProfileItem
     public IBrush IconBackground  { get; init; } = Brushes.Transparent;
     public string Name            { get; init; } = "";
     public string LastBackupText  { get; init; } = "";
+    public string ScheduleText    { get; init; } = "";
     public string StatusLabel     { get; init; } = "";
     public IBrush StatusForeground { get; init; } = Brushes.White;
     public string StatusIcon      { get; init; } = "✓";
@@ -48,6 +49,7 @@ public sealed partial class BackupViewModel : ViewModelBase, IDisposable
     private static readonly IBrush BrushIconPurple = new SolidColorBrush(Color.Parse("#7C3AED"));
 
     private readonly IBackupService _backupService;
+    private readonly IBackupSchedulerService _schedulerService;
     private readonly IAdminElevationService _adminElevationService;
     private readonly IUacDialogService _uacDialogService;
     private readonly INavigationService _navigationService;
@@ -70,12 +72,14 @@ public sealed partial class BackupViewModel : ViewModelBase, IDisposable
 
     public BackupViewModel(
         IBackupService backupService,
+        IBackupSchedulerService schedulerService,
         IAdminElevationService adminElevationService,
         IUacDialogService uacDialogService,
         INavigationService navigationService,
         ILogger<BackupViewModel> logger)
     {
         _backupService = backupService;
+        _schedulerService = schedulerService;
         _adminElevationService = adminElevationService;
         _uacDialogService = uacDialogService;
         _navigationService = navigationService;
@@ -211,6 +215,7 @@ public sealed partial class BackupViewModel : ViewModelBase, IDisposable
                 IconBackground = MapProfileColor(profile.Name),
                 Name = profile.Name,
                 LastBackupText = CopilotRuleEngine.FormatRelativeBackup(profile.LastBackupUtc),
+                ScheduleText = _schedulerService.FormatScheduleLabel(profile.Schedule),
                 StatusLabel = status,
                 StatusForeground = brush,
                 StatusIcon = icon,

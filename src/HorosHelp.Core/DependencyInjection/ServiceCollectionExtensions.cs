@@ -67,6 +67,13 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ISecurityService, SecurityService>();
         services.AddSingleton<IPrivacyService, PrivacyService>();
         services.AddSingleton<IAppMaintenanceService, AppMaintenanceService>();
+        services.AddSingleton<IBackupFileSystem, PhysicalBackupFileSystem>();
+        services.AddSingleton<IFileHashService, FileHashService>();
+        services.AddSingleton<IBackupManifestStore, BackupManifestStore>();
+        services.AddSingleton<IBackupEncryptionService, BackupEncryptionService>();
+        services.AddSingleton<ITaskSchedulerClient, SchTasksSchedulerClient>();
+        services.AddSingleton<IBackupSchedulerService, BackupSchedulerService>();
+        services.AddSingleton<IRestorePointService, RestorePointService>();
         services.AddSingleton<IBackupService, BackupService>();
         services.AddSingleton<ICopilotService, CopilotService>();
 

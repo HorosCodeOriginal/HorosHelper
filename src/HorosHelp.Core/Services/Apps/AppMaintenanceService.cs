@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Management;
 using HorosHelp.Core.Models.Apps;
+using HorosHelp.Core.Services.Security;
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 
@@ -92,6 +93,15 @@ public sealed class AppMaintenanceService : IAppMaintenanceService
     {
         try
         {
+            if (!InputSecurityValidator.IsValidProcessFileName("devmgmt.msc", out _))
+            {
+                return new DriverActionResult
+                {
+                    Success = false,
+                    Message = "Geräte-Manager konnte nicht geöffnet werden.",
+                };
+            }
+
             Process.Start(new ProcessStartInfo
             {
                 FileName = "devmgmt.msc",
@@ -112,6 +122,122 @@ public sealed class AppMaintenanceService : IAppMaintenanceService
                 Success = false,
                 Message = "Geräte-Manager konnte nicht geöffnet werden.",
             };
+        }
+    }
+
+    public IReadOnlyList<OrphanedRegistryEntry> ScanOrphanedRegistryEntries()
+    {
+        if (!OperatingSystem.IsWindows())
+            return [];
+
+        var entries = new List<RegistryUninstallEntry>();
+        CollectUninstallEntries(Registry.LocalMachine, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall", "HKLM", entries);
+        CollectUninstallEntries(Registry.LocalMachine, @"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall", "HKLM", entries);
+        CollectUninstallEntries(Registry.CurrentUser, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall", "HKCU", entries);
+
+        return OrphanedRegistryScanner.Scan(entries, Directory.Exists);
+    }
+
+    public RegistryCleanupResult RemoveOrphanedRegistryEntry(string registryPath)
+    {
+        if (string.IsNullOrWhiteSpace(registryPath))
+            return new RegistryCleanupResult { Success = false, Message = "Kein Registry-Pfad angegeben." };
+
+        if (!OperatingSystem.IsWindows())
+            return new RegistryCleanupResult { Success = false, Message = "Nur unter Windows verfügbar." };
+
+        try
+        {
+            var parts = registryPath.Split(':', 2);
+            if (parts.Length != 2)
+                return new RegistryCleanupResult { Success = false, Message = "Ungültiger Registry-Pfad." };
+
+            var root = parts[0] switch
+            {
+                "HKLM" => Registry.LocalMachine,
+                "HKCU" => Registry.CurrentUser,
+                _ => null,
+            };
+
+            if (root is null)
+                return new RegistryCleanupResult { Success = false, Message = "Nur HKLM/HKCU werden unterstützt." };
+
+            using var key = root.OpenSubKey(parts[1], writable: true);
+            if (key is null)
+                return new RegistryCleanupResult { Success = false, Message = "Registry-Schlüssel nicht gefunden." };
+
+            var parentPath = parts[1][..parts[1].LastIndexOf('\\')];
+            var subKeyName = parts[1][(parts[1].LastIndexOf('\\') + 1)..];
+
+            using var parent = root.OpenSubKey(parentPath, writable: true);
+            if (parent is null)
+                return new RegistryCleanupResult { Success = false, Message = "Übergeordneter Schlüssel nicht gefunden." };
+
+            parent.DeleteSubKeyTree(subKeyName, throwOnMissingSubKey: false);
+
+            return new RegistryCleanupResult
+            {
+                Success = true,
+                Message = "Verwaister Registry-Eintrag wurde entfernt.",
+            };
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return new RegistryCleanupResult
+            {
+                Success = false,
+                Message = "Administratorrechte erforderlich (UAC).",
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to remove orphaned registry entry {Path}", registryPath);
+            return new RegistryCleanupResult { Success = false, Message = "Registry-Bereinigung fehlgeschlagen." };
+        }
+    }
+
+    private static void CollectUninstallEntries(
+        RegistryKey root,
+        string path,
+        string prefix,
+        List<RegistryUninstallEntry> entries)
+    {
+        try
+        {
+            using var uninstallKey = root.OpenSubKey(path);
+            if (uninstallKey is null)
+                return;
+
+            foreach (var subKeyName in uninstallKey.GetSubKeyNames())
+            {
+                try
+                {
+                    using var subKey = uninstallKey.OpenSubKey(subKeyName);
+                    if (subKey is null)
+                        continue;
+
+                    var displayName = subKey.GetValue("DisplayName")?.ToString();
+                    if (string.IsNullOrWhiteSpace(displayName))
+                        continue;
+
+                    var installLocation = subKey.GetValue("InstallLocation")?.ToString();
+
+                    entries.Add(new RegistryUninstallEntry
+                    {
+                        RegistryPath = $"{prefix}:{path}\\{subKeyName}",
+                        DisplayName = displayName.Trim(),
+                        InstallLocation = installLocation,
+                    });
+                }
+                catch
+                {
+                    // Skip unreadable keys.
+                }
+            }
+        }
+        catch
+        {
+            // Skip unreadable paths.
         }
     }
 

@@ -6,8 +6,13 @@ namespace HorosHelp.Tests;
 public sealed class MockPowerShellQuery : HorosHelp.Core.Services.Windows.IPowerShellQuery
 {
     public string ScriptToReturn { get; set; } = """{"PendingSecurityUpdates":2}""";
+    public List<string> ExecutedScripts { get; } = [];
 
-    public string Execute(string script) => ScriptToReturn;
+    public string Execute(string script)
+    {
+        ExecutedScripts.Add(script);
+        return ScriptToReturn;
+    }
 }
 
 public class WindowsUpdateServiceTests

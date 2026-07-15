@@ -11,4 +11,10 @@ public interface IBackupService
     Task<BackupOperationResult> RunProfileBackupAsync(
         string profileId,
         CancellationToken cancellationToken = default);
+
+    bool RegisterProfileSchedule(string profileId, string executablePath);
+
+    bool UnregisterProfileSchedule(string profileId);
+
+    string GetRestorePointCreationMethod();
 }

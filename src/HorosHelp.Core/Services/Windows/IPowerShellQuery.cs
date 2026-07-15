@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using HorosHelp.Core.Services.Security;
 
 namespace HorosHelp.Core.Services.Windows;
 
@@ -11,6 +12,9 @@ public sealed class PowerShellQuery : IPowerShellQuery
 {
     public string Execute(string script)
     {
+        if (!InputSecurityValidator.IsValidProcessFileName("powershell", out _))
+            return "";
+
         var psi = new ProcessStartInfo
         {
             FileName = "powershell",

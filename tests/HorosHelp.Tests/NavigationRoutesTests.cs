@@ -11,13 +11,19 @@ public class NavigationRoutesTests
     }
 
     [Fact]
-    public void NavigationService_Resolves_Registered_ViewModel()
+    public void NavigationService_Resolves_Einstellungen_ViewModel()
     {
         var service = new NavigationService(_ => new object());
 
-        service.NavigateTo(NavigationRoutes.Dashboard);
+        service.NavigateTo(NavigationRoutes.Einstellungen);
 
-        Assert.Equal(NavigationRoutes.Dashboard, service.CurrentRoute);
+        Assert.Equal(NavigationRoutes.Einstellungen, service.CurrentRoute);
         Assert.NotNull(service.CurrentViewModel);
+    }
+
+    [Fact]
+    public void All_Contains_Einstellungen_As_Last_Route()
+    {
+        Assert.Equal(NavigationRoutes.Einstellungen, NavigationRoutes.All[^1]);
     }
 }

@@ -17,6 +17,8 @@ public sealed class BackupProfileConfig
     public DateTimeOffset? LastBackupUtc { get; init; }
     public long? LastBackupSizeBytes { get; init; }
     public string? LastBackupStatus { get; init; }
+    public BackupScheduleConfig? Schedule { get; init; }
+    public bool EncryptBackups { get; init; } = true;
 }
 
 public sealed class BackupSnapshot
