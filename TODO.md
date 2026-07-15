@@ -79,30 +79,30 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 
 #### UI
 - [x] Dashboard-View entwerfen und implementieren
-- [ ] CPU-Auslastungs-Widget (Gauge oder Verlaufsgraph)
-- [ ] RAM-Nutzungs-Widget (verwendet / verfügbar / gesamt)
-- [ ] Festplatten-Widget pro Volume (Nutzung, Lese-/Schreibgeschwindigkeit)
-- [ ] Netzwerk-Widget (Sende- / Empfangsrate, aktive Verbindungen)
-- [ ] Gesamtgesundheits-Score (Ampel-Indikator: Gut / Achtung / Kritisch)
-- [ ] Warnungs-Panel für kritische Schwellenwerte
+- [x] CPU-Auslastungs-Widget (Gauge oder Verlaufsgraph)
+- [x] RAM-Nutzungs-Widget (verwendet / verfügbar / gesamt)
+- [x] Festplatten-Widget pro Volume (Nutzung, Lese-/Schreibgeschwindigkeit)
+- [x] Netzwerk-Widget (Sende- / Empfangsrate, aktive Verbindungen)
+- [x] Gesamtgesundheits-Score (Ampel-Indikator: Gut / Achtung / Kritisch)
+- [x] Warnungs-Panel für kritische Schwellenwerte
 
 #### Service / Backend
-- [ ] `SystemHealthService` implementieren
-  - [ ] CPU-Auslastung via `PerformanceCounter` oder WMI
-  - [ ] RAM-Statistiken via `GlobalMemoryStatusEx` (P/Invoke)
-  - [ ] Festplatten-I/O und freier Speicher via `DriveInfo` + WMI
-  - [ ] Netzwerkstatistiken via `NetworkInterface`
-- [ ] Polling-Mechanismus mit konfigurierbarem Intervall (Standard: 2 s)
-- [ ] Schwellenwert-Konfiguration (Nutzer kann Warnwerte anpassen)
+- [x] `SystemHealthService` implementieren
+  - [x] CPU-Auslastung via `PerformanceCounter` oder WMI
+  - [x] RAM-Statistiken via `GlobalMemoryStatusEx` (P/Invoke)
+  - [x] Festplatten-I/O und freier Speicher via `DriveInfo` + WMI
+  - [x] Netzwerkstatistiken via `NetworkInterface`
+- [x] Polling-Mechanismus mit konfigurierbarem Intervall (Standard: 2 s)
+- [x] Schwellenwert-Konfiguration (Nutzer kann Warnwerte anpassen)
 
 #### Windows-API-Integration
-- [ ] WMI-Queries für Prozess- und Hardware-Daten kapseln
-- [ ] `PerformanceCounter`-Wrapper mit Fehlerbehandlung
+- [x] WMI-Queries für Prozess- und Hardware-Daten kapseln
+- [x] `PerformanceCounter`-Wrapper mit Fehlerbehandlung
 - [ ] Ereignisprotokoll (Windows Event Log) auslesen für Systemfehler
 
 #### Tests
 - [ ] Unit-Tests für `SystemHealthService` mit Mock-Daten
-- [ ] Schwellenwert-Logik testen
+- [x] Schwellenwert-Logik testen
 - [ ] UI-Binding-Tests (ViewModel → View-Updates)
 
 ---
@@ -126,16 +126,16 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 - [ ] Repair-Actions implementieren:
   - [x] Temporäre Dateien bereinigen (`%TEMP%`, Windows Temp)
   - [ ] Windows-Update-Cache leeren
-  - [ ] DNS-Cache leeren (`ipconfig /flushdns`)
+  - [x] DNS-Cache leeren (`ipconfig /flushdns`)
   - [ ] Beschädigte Systemdateien prüfen (SFC / DISM via Process)
   - [ ] Defekte Registry-Einträge erkennen (bekannte Muster)
   - [ ] Windows-Suchdienst zurücksetzen
-  - [ ] Netzwerkstack zurücksetzen (`netsh winsock reset`)
+  - [x] Netzwerkstack zurücksetzen (`netsh winsock reset`)
 - [ ] Rückgängig-Mechanismus für reversible Aktionen
 - [x] Scan-Ergebnisse in Log-Datei speichern
 
 #### Windows-API-Integration
-- [ ] `Process.Start` für System-Kommandos mit Elevation
+- [x] `Process.Start` für System-Kommandos mit Elevation
 - [x] Registry-Zugriff via `Microsoft.Win32.Registry`
 - [ ] Windows-Dienste starten/stoppen via `ServiceController`
 
@@ -157,7 +157,7 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 - [x] Kategorisierte Artikelliste (Netzwerk, Sicherheit, Leistung, …)
 - [x] Artikel-Detailansicht mit Schritt-für-Schritt-Anleitungen
 - [x] „Direkt öffnen"-Buttons für Windows-Einstellungen (Deep-Links)
-- [ ] Favoriten / Lesezeichen für häufig genutzte Artikel
+- [x] Favoriten / Lesezeichen für häufig genutzte Artikel
 - [x] Offline-Wissensbasis (keine Internetverbindung nötig)
 
 #### Service / Backend
@@ -165,7 +165,7 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 - [x] Volltextsuche-Engine (z. B. einfacher Tokenizer oder Lucene.NET)
 - [x] `WindowsSettingsLauncher` — Deep-Links zu ms-settings: URI-Schema
 - [x] Artikel-Format definieren (Markdown oder strukturiertes JSON)
-- [ ] Initiale Wissensbasis befüllen (min. 50 Windows-Themen auf Deutsch)
+- [x] Initiale Wissensbasis befüllen (min. 50 Windows-Themen auf Deutsch)
 
 #### Windows-API-Integration
 - [x] `ms-settings:` URI-Links für alle relevanten Einstellungsseiten

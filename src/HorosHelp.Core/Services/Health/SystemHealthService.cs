@@ -2,6 +2,8 @@ using System.Diagnostics;
 using System.Net.NetworkInformation;
 using HorosHelp.Core.Interop;
 using HorosHelp.Core.Models;
+using HorosHelp.Core.Models.Settings;
+using HorosHelp.Core.Services.Settings;
 using Microsoft.Extensions.Logging;
 
 namespace HorosHelp.Core.Services.Health;
@@ -9,17 +11,17 @@ namespace HorosHelp.Core.Services.Health;
 public sealed class SystemHealthService : ISystemHealthService
 {
     private readonly ILogger<SystemHealthService> _logger;
-    private readonly SystemHealthThresholds _thresholds;
+    private readonly ISettingsService _settingsService;
     private PerformanceCounter? _cpuCounter;
     private bool _cpuCounterPrimed;
     private bool _disposed;
 
     public SystemHealthService(
         ILogger<SystemHealthService> logger,
-        SystemHealthThresholds? thresholds = null)
+        ISettingsService settingsService)
     {
         _logger = logger;
-        _thresholds = thresholds ?? SystemHealthThresholds.Default;
+        _settingsService = settingsService;
     }
 
     public SystemHealthSnapshot GetSnapshot()
@@ -42,7 +44,7 @@ public sealed class SystemHealthService : ISystemHealthService
                 ? ram
                 : (62.0, 9.9, 16.0);
 
-            var diskOk = TryGetDiskMetrics(out var disk);
+            var diskOk = TryGetDiskMetrics(out var disk, out var diskVolumes);
             var (diskPercent, diskUsedGb, diskTotalGb) = diskOk
                 ? disk
                 : (71.0, 664.0, 931.0);
@@ -56,7 +58,7 @@ public sealed class SystemHealthService : ISystemHealthService
                     cpuOk, ramOk, diskOk);
 
             return BuildSnapshot(cpuPercent, ramPercent, ramUsedGb, ramTotalGb,
-                diskPercent, diskUsedGb, diskTotalGb, networkOk, usedMock);
+                diskPercent, diskUsedGb, diskTotalGb, diskVolumes, networkOk, usedMock);
         }
         catch (Exception ex)
         {
@@ -76,7 +78,7 @@ public sealed class SystemHealthService : ISystemHealthService
     }
 
     private SystemHealthSnapshot BuildMockSnapshot() =>
-        BuildSnapshot(34, 62, 9.9, 16, 71, 664, 931, true, isMock: true);
+        BuildSnapshot(34, 62, 9.9, 16, 71, 664, 931, [], true, isMock: true);
 
     private SystemHealthSnapshot BuildSnapshot(
         double cpuPercent,
@@ -86,14 +88,17 @@ public sealed class SystemHealthService : ISystemHealthService
         double diskPercent,
         double diskUsedGb,
         double diskTotalGb,
+        IReadOnlyList<DiskVolumeInfo> diskVolumes,
         bool networkOk,
         bool isMock)
     {
+        var thresholds = AppSettingsMapper.ToHealthThresholds(_settingsService.Current.HealthThresholds);
+
         var healthScore = SystemHealthAnalyzer.CalculateHealthScore(
-            cpuPercent, ramPercent, diskPercent, networkOk, _thresholds);
+            cpuPercent, ramPercent, diskPercent, networkOk, thresholds);
 
         var warnings = SystemHealthAnalyzer.BuildWarnings(
-            cpuPercent, ramPercent, diskPercent, diskUsedGb, diskTotalGb, networkOk, _thresholds);
+            cpuPercent, ramPercent, diskPercent, diskUsedGb, diskTotalGb, networkOk, thresholds);
 
         return new SystemHealthSnapshot
         {
@@ -104,6 +109,7 @@ public sealed class SystemHealthService : ISystemHealthService
             DiskPercent = Round(diskPercent),
             DiskUsedGb = Round(diskUsedGb, 0),
             DiskTotalGb = Round(diskTotalGb, 0),
+            DiskVolumes = diskVolumes,
             NetworkOk = networkOk,
             HealthScore = healthScore,
             Warnings = warnings,
@@ -181,21 +187,54 @@ public sealed class SystemHealthService : ISystemHealthService
         return true;
     }
 
-    private static bool TryGetDiskMetrics(out (double Percent, double UsedGb, double TotalGb) metrics)
+    private static bool TryGetDiskMetrics(
+        out (double Percent, double UsedGb, double TotalGb) metrics,
+        out IReadOnlyList<DiskVolumeInfo> volumes)
     {
         metrics = default;
+        volumes = [];
 
-        var root = Path.GetPathRoot(Environment.SystemDirectory) ?? "C:\\";
-        var drive = new DriveInfo(root);
+        var readyDrives = DriveInfo.GetDrives()
+            .Where(d => d.IsReady && d.DriveType == DriveType.Fixed && d.TotalSize > 0)
+            .ToList();
 
-        if (!drive.IsReady || drive.TotalSize <= 0)
+        if (readyDrives.Count == 0)
             return false;
 
+        var systemRoot = Path.GetPathRoot(Environment.SystemDirectory) ?? "C:\\";
+        var systemDrive = readyDrives.FirstOrDefault(d =>
+            d.Name.Equals(systemRoot, StringComparison.OrdinalIgnoreCase))
+            ?? readyDrives[0];
+
+        var largestDrive = readyDrives
+            .OrderByDescending(d => d.TotalSize)
+            .First();
+
+        var selected = new List<DriveInfo> { systemDrive };
+        if (!largestDrive.Name.Equals(systemDrive.Name, StringComparison.OrdinalIgnoreCase))
+            selected.Add(largestDrive);
+
+        volumes = selected
+            .Select(ToDiskVolumeInfo)
+            .ToList();
+
+        var primary = volumes[0];
+        metrics = (primary.Percent, primary.UsedGb, primary.TotalGb);
+        return true;
+    }
+
+    private static DiskVolumeInfo ToDiskVolumeInfo(DriveInfo drive)
+    {
         var used = drive.TotalSize - drive.AvailableFreeSpace;
         var percent = used / (double)drive.TotalSize * 100;
 
-        metrics = (percent, BytesToGb(used), BytesToGb(drive.TotalSize));
-        return true;
+        return new DiskVolumeInfo
+        {
+            DriveLetter = drive.Name.TrimEnd('\\'),
+            Percent = Math.Round(percent, 0, MidpointRounding.AwayFromZero),
+            UsedGb = Math.Round(BytesToGb(used), 0, MidpointRounding.AwayFromZero),
+            TotalGb = Math.Round(BytesToGb(drive.TotalSize), 0, MidpointRounding.AwayFromZero),
+        };
     }
 
     private static bool TryGetNetworkStatus(out bool networkOk)

@@ -4,7 +4,9 @@ using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HorosHelp.Core.Models.Knowledge;
+using HorosHelp.Core.Models.Settings;
 using HorosHelp.Core.Services.Knowledge;
+using HorosHelp.Core.Services.Settings;
 using Microsoft.Extensions.Logging;
 using CoreCategory = HorosHelp.Core.Models.Knowledge.KnowledgeCategory;
 
@@ -63,6 +65,7 @@ public sealed class ArticleStepItem
 public sealed partial class WissenViewModel : ViewModelBase
 {
     private readonly IKnowledgeBaseService _knowledgeService;
+    private readonly ISettingsService _settingsService;
     private readonly ILogger<WissenViewModel> _logger;
     private string _selectedCategoryId = "netzwerk";
     private string? _selectedArticleId = "wlan-settings";
@@ -71,6 +74,7 @@ public sealed partial class WissenViewModel : ViewModelBase
     public string Subtitle => "Durchsuchbare Wissensdatenbank";
 
     [ObservableProperty] private string _searchQuery = "";
+    [ObservableProperty] private bool _showFavoritesOnly;
 
     public ObservableCollection<KnowledgeCategoryItem> Categories { get; } = [];
     public ObservableCollection<KnowledgeArticleItem> Articles { get; } = [];
@@ -84,17 +88,28 @@ public sealed partial class WissenViewModel : ViewModelBase
     [ObservableProperty] private string _detailTip = "";
 
     public string BreadcrumbRoot => "Wissen";
+    public string FavoritesFilterLabel => ShowFavoritesOnly ? "★ Nur Favoriten" : "☆ Alle Artikel";
+    public bool IsDetailFavorite => IsFavorite(_selectedArticleId);
+    public string DetailStarGlyph => IsDetailFavorite ? "★" : "☆";
 
     public WissenViewModel(
         IKnowledgeBaseService knowledgeService,
+        ISettingsService settingsService,
         ILogger<WissenViewModel> logger)
     {
         _knowledgeService = knowledgeService;
+        _settingsService = settingsService;
         _logger = logger;
         RefreshAll();
     }
 
     partial void OnSearchQueryChanged(string value) => RefreshArticles();
+
+    partial void OnShowFavoritesOnlyChanged(bool value)
+    {
+        OnPropertyChanged(nameof(FavoritesFilterLabel));
+        RefreshAll();
+    }
 
     [RelayCommand]
     private void SelectCategory(string? categoryId)
@@ -118,6 +133,48 @@ public sealed partial class WissenViewModel : ViewModelBase
         RefreshArticles();
         RefreshDetail();
     }
+
+    [RelayCommand]
+    private void ToggleFavorite(string? articleId)
+    {
+        if (string.IsNullOrWhiteSpace(articleId))
+            return;
+
+        var settings = _settingsService.Current;
+        var favorites = new List<string>(settings.FavoriteArticleIds);
+
+        if (favorites.Contains(articleId, StringComparer.OrdinalIgnoreCase))
+            favorites.RemoveAll(id => id.Equals(articleId, StringComparison.OrdinalIgnoreCase));
+        else
+            favorites.Add(articleId);
+
+        _settingsService.Save(new AppSettings
+        {
+            OpenOnStartup = settings.OpenOnStartup,
+            StartMinimized = settings.StartMinimized,
+            Theme = settings.Theme,
+            Language = settings.Language,
+            ScanIntervalSeconds = settings.ScanIntervalSeconds,
+            NotificationsEnabled = settings.NotificationsEnabled,
+            HealthThresholds = settings.HealthThresholds,
+            FavoriteArticleIds = favorites,
+        });
+
+        RefreshArticles();
+        RefreshDetail();
+    }
+
+    [RelayCommand]
+    private void ToggleDetailFavorite()
+    {
+        if (string.IsNullOrWhiteSpace(_selectedArticleId))
+            return;
+
+        ToggleFavorite(_selectedArticleId);
+    }
+
+    [RelayCommand]
+    private void ToggleFavoritesFilter() => ShowFavoritesOnly = !ShowFavoritesOnly;
 
     [RelayCommand]
     private void OpenDirectly()
@@ -166,6 +223,9 @@ public sealed partial class WissenViewModel : ViewModelBase
         Articles.Clear();
         var articles = _knowledgeService.GetArticles(_selectedCategoryId, SearchQuery);
 
+        if (ShowFavoritesOnly)
+            articles = articles.Where(a => IsFavorite(a.Id)).ToList();
+
         if (_selectedArticleId is null || articles.All(a => a.Id != _selectedArticleId))
             _selectedArticleId = articles.FirstOrDefault()?.Id;
 
@@ -176,12 +236,14 @@ public sealed partial class WissenViewModel : ViewModelBase
                 Id = article.Id,
                 Title = article.Title,
                 Subtitle = article.Subtitle,
-                IsFavorite = article.IsFavorite,
+                IsFavorite = IsFavorite(article.Id),
                 IsSelected = article.Id == _selectedArticleId,
             });
         }
 
-        ArticlesHeader = $"Artikel ({articles.Count})";
+        ArticlesHeader = ShowFavoritesOnly
+            ? $"Favoriten ({articles.Count})"
+            : $"Artikel ({articles.Count})";
 
         var category = _knowledgeService.GetCategories()
             .FirstOrDefault(c => c.Id == _selectedCategoryId);
@@ -209,6 +271,8 @@ public sealed partial class WissenViewModel : ViewModelBase
         DetailDescription = article.Description;
         DetailTip = article.Tip;
         BreadcrumbArticle = article.Title;
+        OnPropertyChanged(nameof(IsDetailFavorite));
+        OnPropertyChanged(nameof(DetailStarGlyph));
 
         foreach (var step in article.Steps)
         {
@@ -219,6 +283,10 @@ public sealed partial class WissenViewModel : ViewModelBase
             });
         }
     }
+
+    private bool IsFavorite(string? articleId) =>
+        !string.IsNullOrWhiteSpace(articleId)
+        && _settingsService.Current.FavoriteArticleIds.Contains(articleId, StringComparer.OrdinalIgnoreCase);
 
     private static KnowledgeCategoryItem MapCategory(CoreCategory category, int count, bool isActive) =>
         new()

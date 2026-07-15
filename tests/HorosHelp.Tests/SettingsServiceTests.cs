@@ -52,6 +52,31 @@ public class SettingsServiceTests : IDisposable
         Assert.False(reloaded.NotificationsEnabled);
     }
 
+    [Fact]
+    public void SaveAndLoad_PersistsHealthThresholdsAndFavorites()
+    {
+        var service = new SettingsService(NullLogger<SettingsService>.Instance, _settingsPath);
+
+        service.Save(new AppSettings
+        {
+            HealthThresholds = new HealthThresholdSettings
+            {
+                CpuWarn = 75,
+                RamWarn = 70,
+                DiskWarn = 82,
+            },
+            FavoriteArticleIds = ["wlan-settings", "dns-settings"],
+        });
+
+        var reloaded = new SettingsService(NullLogger<SettingsService>.Instance, _settingsPath).Load();
+
+        Assert.Equal(75, reloaded.HealthThresholds.CpuWarn);
+        Assert.Equal(70, reloaded.HealthThresholds.RamWarn);
+        Assert.Equal(82, reloaded.HealthThresholds.DiskWarn);
+        Assert.Equal(2, reloaded.FavoriteArticleIds.Count);
+        Assert.Contains("wlan-settings", reloaded.FavoriteArticleIds);
+    }
+
     public void Dispose()
     {
         try

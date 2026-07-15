@@ -8,4 +8,7 @@ public sealed class AppSettings
     public string Language { get; set; } = "Deutsch";
     public double ScanIntervalSeconds { get; set; } = 2;
     public bool NotificationsEnabled { get; set; } = true;
+    public HealthThresholdSettings HealthThresholds { get; set; } = new();
+    public List<string> FavoriteArticleIds { get; set; } = [];
 }
+

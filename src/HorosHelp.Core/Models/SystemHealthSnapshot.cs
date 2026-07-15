@@ -15,6 +15,7 @@ public sealed class SystemHealthSnapshot
     public double DiskPercent { get; init; }
     public double DiskUsedGb { get; init; }
     public double DiskTotalGb { get; init; }
+    public IReadOnlyList<DiskVolumeInfo> DiskVolumes { get; init; } = [];
     public bool NetworkOk { get; init; }
     public int HealthScore { get; init; }
     public IReadOnlyList<SystemHealthWarning> Warnings { get; init; } = [];

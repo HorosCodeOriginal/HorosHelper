@@ -19,13 +19,13 @@
     </StackPanel>
 
     <!-- ══ SEARCH BAR ══ -->
-    <Border Grid.Row="1"
+    <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,0,0,12">
+    <Border Grid.Column="0"
             Background="{DynamicResource BrushSurfaceElevated}"
             BorderBrush="{DynamicResource BrushBorderFocus}"
             BorderThickness="1"
             CornerRadius="{DynamicResource RadiusMd}"
-            Padding="14,0"
-            Margin="0,0,0,12">
+            Padding="14,0">
       <Grid ColumnDefinitions="Auto,*">
         <TextBlock Grid.Column="0"
                    Text="⊙"
@@ -56,6 +56,20 @@
         </TextBox>
       </Grid>
     </Border>
+
+    <Button Grid.Column="1"
+            Command="{Binding ToggleFavoritesFilterCommand}"
+            Margin="10,0,0,0"
+            Padding="14,12"
+            CornerRadius="{DynamicResource RadiusMd}"
+            Background="{DynamicResource BrushSurfaceElevated}"
+            BorderBrush="{DynamicResource BrushBorder}"
+            BorderThickness="1">
+      <TextBlock Text="{Binding FavoritesFilterLabel}"
+                 FontSize="12"
+                 Foreground="{DynamicResource BrushAccentPrimary}" />
+    </Button>
+    </Grid>
 
     <!-- ══ BREADCRUMB ══ -->
     <StackPanel Grid.Row="2"
@@ -210,12 +224,18 @@
                       </StackPanel>
 
                       <!-- Favorite star -->
-                      <TextBlock Grid.Column="1"
-                                 Text="{Binding StarGlyph}"
-                                 FontSize="16"
-                                 Foreground="{Binding StarForeground}"
-                                 VerticalAlignment="Center"
-                                 Margin="8,0,0,0" />
+                      <Button Grid.Column="1"
+                              Command="{Binding #Root.DataContext.ToggleFavoriteCommand}"
+                              CommandParameter="{Binding Id}"
+                              Background="Transparent"
+                              BorderThickness="0"
+                              Padding="4"
+                              VerticalAlignment="Center"
+                              Margin="8,0,0,0">
+                        <TextBlock Text="{Binding StarGlyph}"
+                                   FontSize="16"
+                                   Foreground="{Binding StarForeground}" />
+                      </Button>
 
                     </Grid>
                   </Border>
@@ -249,12 +269,17 @@
                            FontSize="16" FontWeight="Bold"
                            TextWrapping="Wrap"
                            Foreground="{DynamicResource BrushTextPrimary}" />
-                <TextBlock Grid.Column="1"
-                           Text="★"
-                           FontSize="18"
-                           Foreground="{DynamicResource BrushAccentPrimary}"
-                           VerticalAlignment="Top"
-                           Margin="8,0,0,0" />
+                <Button Grid.Column="1"
+                        Command="{Binding ToggleDetailFavoriteCommand}"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Padding="4"
+                        VerticalAlignment="Top"
+                        Margin="8,0,0,0">
+                  <TextBlock Text="{Binding DetailStarGlyph}"
+                             FontSize="18"
+                             Foreground="{DynamicResource BrushAccentPrimary}" />
+                </Button>
               </Grid>
 
               <!-- Description -->

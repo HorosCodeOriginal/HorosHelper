@@ -291,6 +291,62 @@
                 <ToggleSwitch Grid.Column="2" IsChecked="True"
                               OnContent="" OffContent="" />
               </Grid>
+
+              <TextBlock Text="Gesundheits-Schwellenwerte"
+                         FontSize="14" FontWeight="SemiBold"
+                         Foreground="{DynamicResource BrushTextPrimary}"
+                         Margin="0,8,0,0" />
+
+              <Grid ColumnDefinitions="Auto,*">
+                <Border Width="36" Height="36" CornerRadius="8" Background="#334155" Margin="0,4,0,0">
+                  <TextBlock Text="CPU" FontSize="11" FontWeight="Bold"
+                             HorizontalAlignment="Center" VerticalAlignment="Center"
+                             Foreground="{DynamicResource BrushTextPrimary}" />
+                </Border>
+                <StackPanel Grid.Column="1" Margin="12,0,0,0" Spacing="8">
+                  <TextBlock Text="{Binding CpuWarnText}"
+                             FontSize="13" Foreground="{DynamicResource BrushTextPrimary}" />
+                  <Slider Minimum="50" Maximum="95"
+                          Value="{Binding CpuWarnPercent}"
+                          TickFrequency="5"
+                          IsSnapToTickEnabled="True"
+                          Foreground="{DynamicResource BrushAccentPrimary}" />
+                </StackPanel>
+              </Grid>
+
+              <Grid ColumnDefinitions="Auto,*">
+                <Border Width="36" Height="36" CornerRadius="8" Background="#334155" Margin="0,4,0,0">
+                  <TextBlock Text="RAM" FontSize="11" FontWeight="Bold"
+                             HorizontalAlignment="Center" VerticalAlignment="Center"
+                             Foreground="{DynamicResource BrushTextPrimary}" />
+                </Border>
+                <StackPanel Grid.Column="1" Margin="12,0,0,0" Spacing="8">
+                  <TextBlock Text="{Binding RamWarnText}"
+                             FontSize="13" Foreground="{DynamicResource BrushTextPrimary}" />
+                  <Slider Minimum="50" Maximum="95"
+                          Value="{Binding RamWarnPercent}"
+                          TickFrequency="5"
+                          IsSnapToTickEnabled="True"
+                          Foreground="{DynamicResource BrushAccentPrimary}" />
+                </StackPanel>
+              </Grid>
+
+              <Grid ColumnDefinitions="Auto,*">
+                <Border Width="36" Height="36" CornerRadius="8" Background="#334155" Margin="0,4,0,0">
+                  <TextBlock Text="SSD" FontSize="11" FontWeight="Bold"
+                             HorizontalAlignment="Center" VerticalAlignment="Center"
+                             Foreground="{DynamicResource BrushTextPrimary}" />
+                </Border>
+                <StackPanel Grid.Column="1" Margin="12,0,0,0" Spacing="8">
+                  <TextBlock Text="{Binding DiskWarnText}"
+                             FontSize="13" Foreground="{DynamicResource BrushTextPrimary}" />
+                  <Slider Minimum="50" Maximum="95"
+                          Value="{Binding DiskWarnPercent}"
+                          TickFrequency="5"
+                          IsSnapToTickEnabled="True"
+                          Foreground="{DynamicResource BrushAccentPrimary}" />
+                </StackPanel>
+              </Grid>
             </StackPanel>
 
             <!-- Datenschutz -->

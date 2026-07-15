@@ -55,6 +55,9 @@ public sealed partial class EinstellungenViewModel : ViewModelBase
     [ObservableProperty] private string _selectedTheme = "Dunkel";
     [ObservableProperty] private string _selectedLanguage = "Deutsch";
     [ObservableProperty] private double _scanIntervalSeconds = 2;
+    [ObservableProperty] private double _cpuWarnPercent = 80;
+    [ObservableProperty] private double _ramWarnPercent = 80;
+    [ObservableProperty] private double _diskWarnPercent = 85;
 
     [ObservableProperty] private string _saveStatusText = "";
 
@@ -77,6 +80,9 @@ public sealed partial class EinstellungenViewModel : ViewModelBase
     public bool ShowUeberForm => SelectedCategoryKey == "ueber";
 
     public string ScanIntervalText => $"Scan-Intervall: {ScanIntervalSeconds:0} Sekunden";
+    public string CpuWarnText => $"CPU-Warnung ab {CpuWarnPercent:0}%";
+    public string RamWarnText => $"RAM-Warnung ab {RamWarnPercent:0}%";
+    public string DiskWarnText => $"Festplatten-Warnung ab {DiskWarnPercent:0}%";
 
     public string AppVersion => "HorosHelper v1.0.0";
     public string BuildInfo => "Build 2026.07.14 · HorosCode";
@@ -121,6 +127,15 @@ public sealed partial class EinstellungenViewModel : ViewModelBase
     partial void OnScanIntervalSecondsChanged(double value) =>
         OnPropertyChanged(nameof(ScanIntervalText));
 
+    partial void OnCpuWarnPercentChanged(double value) =>
+        OnPropertyChanged(nameof(CpuWarnText));
+
+    partial void OnRamWarnPercentChanged(double value) =>
+        OnPropertyChanged(nameof(RamWarnText));
+
+    partial void OnDiskWarnPercentChanged(double value) =>
+        OnPropertyChanged(nameof(DiskWarnText));
+
     [RelayCommand]
     private void Save()
     {
@@ -134,6 +149,13 @@ public sealed partial class EinstellungenViewModel : ViewModelBase
                 Language = SelectedLanguage,
                 ScanIntervalSeconds = ScanIntervalSeconds,
                 NotificationsEnabled = NotificationsEnabled,
+                HealthThresholds = new HealthThresholdSettings
+                {
+                    CpuWarn = CpuWarnPercent,
+                    RamWarn = RamWarnPercent,
+                    DiskWarn = DiskWarnPercent,
+                },
+                FavoriteArticleIds = _settingsService.Current.FavoriteArticleIds,
             };
 
             _settingsService.Save(settings);
@@ -155,5 +177,8 @@ public sealed partial class EinstellungenViewModel : ViewModelBase
         SelectedLanguage = settings.Language;
         ScanIntervalSeconds = settings.ScanIntervalSeconds;
         NotificationsEnabled = settings.NotificationsEnabled;
+        CpuWarnPercent = settings.HealthThresholds.CpuWarn;
+        RamWarnPercent = settings.HealthThresholds.RamWarn;
+        DiskWarnPercent = settings.HealthThresholds.DiskWarn;
     }
 }

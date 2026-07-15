@@ -1,5 +1,7 @@
 using HorosHelp.Core.Models.ProblemScan;
+using HorosHelp.Core.Services.Admin;
 using HorosHelp.Core.Services.ProblemScan;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace HorosHelp.Tests;
 
@@ -20,16 +22,18 @@ public class ProblemScannerThresholdsTests
 public class ProblemScannerServiceTests
 {
     [Fact]
-    public async Task ScanAsync_ReturnsThreeProblemCategories()
+    public async Task ScanAsync_ReturnsProblemCategories_IncludingOptionalRepairs()
     {
         var service = CreateService();
         var result = await service.ScanAsync();
 
         Assert.True(result.IsComplete);
-        Assert.Equal(3, result.Problems.Count);
+        Assert.Equal(5, result.Problems.Count);
         Assert.Contains(result.Problems, p => p.Kind == ProblemKind.Registry);
         Assert.Contains(result.Problems, p => p.Kind == ProblemKind.TempFiles);
         Assert.Contains(result.Problems, p => p.Kind == ProblemKind.StartupPrograms);
+        Assert.Contains(result.Problems, p => p.Kind == ProblemKind.DnsFlush);
+        Assert.Contains(result.Problems, p => p.Kind == ProblemKind.WinsockReset);
     }
 
     [Fact]
@@ -42,6 +46,17 @@ public class ProblemScannerServiceTests
         Assert.Contains(entries, e => e.Message.Contains("Temp", StringComparison.OrdinalIgnoreCase));
     }
 
-    private static ProblemScannerService CreateService() =>
-        new(Microsoft.Extensions.Logging.Abstractions.NullLogger<ProblemScannerService>.Instance);
+    private static ProblemScannerService CreateService()
+    {
+        IRepairAction[] repairs =
+        [
+            new DnsFlushRepair(NullLogger<DnsFlushRepair>.Instance),
+            new WinsockResetRepair(NullLogger<WinsockResetRepair>.Instance),
+        ];
+
+        return new ProblemScannerService(
+            NullLogger<ProblemScannerService>.Instance,
+            new AdminElevationService(),
+            repairs);
+    }
 }

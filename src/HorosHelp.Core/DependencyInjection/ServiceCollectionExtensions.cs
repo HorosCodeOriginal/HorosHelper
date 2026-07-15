@@ -20,9 +20,10 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton<IAdminElevationService, AdminElevationService>();
 
-        services.AddSingleton(SystemHealthThresholds.Default);
         services.AddSingleton<ISystemHealthService, SystemHealthService>();
 
+        services.AddSingleton<IRepairAction, DnsFlushRepair>();
+        services.AddSingleton<IRepairAction, WinsockResetRepair>();
         services.AddSingleton(ProblemScannerThresholds.Default);
         services.AddSingleton<IProblemScannerService, ProblemScannerService>();
 

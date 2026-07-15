@@ -4,7 +4,9 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using HorosHelp.Core.Models;
+using HorosHelp.Core.Models.Settings;
 using HorosHelp.Core.Services.Health;
+using HorosHelp.Core.Services.Settings;
 
 namespace HorosHelp.UI.ViewModels.Features;
 
@@ -32,7 +34,6 @@ public sealed class WarningItem
 
 public sealed partial class DashboardViewModel : ViewModelBase, IDisposable
 {
-    private const int PollIntervalMs = 2000;
     private const int SparklinePointCount = 12;
 
     private static readonly IBrush BrushGreen = new SolidColorBrush(Color.Parse("#22C55E"));
@@ -40,8 +41,9 @@ public sealed partial class DashboardViewModel : ViewModelBase, IDisposable
     private static readonly IBrush BrushRed   = new SolidColorBrush(Color.Parse("#EF4444"));
 
     private readonly ISystemHealthService _healthService;
-    private readonly SystemHealthThresholds _thresholds;
-    private readonly Timer _pollTimer;
+    private readonly ISettingsService _settingsService;
+    private Timer _pollTimer;
+    private double _lastPollIntervalSeconds = -1;
     private readonly List<double> _cpuHistory = [];
     private readonly List<double> _networkHistory = [];
     private bool _disposed;
@@ -62,24 +64,26 @@ public sealed partial class DashboardViewModel : ViewModelBase, IDisposable
     [ObservableProperty]
     private string _warningsTitle = "Keine Warnungen";
 
-    public DashboardViewModel(ISystemHealthService healthService)
-        : this(healthService, SystemHealthThresholds.Default)
+    public DashboardViewModel(ISystemHealthService healthService, ISettingsService settingsService)
+        : this(healthService, settingsService, null)
     {
     }
 
-    internal DashboardViewModel(ISystemHealthService healthService, SystemHealthThresholds thresholds)
+    internal DashboardViewModel(
+        ISystemHealthService healthService,
+        ISettingsService settingsService,
+        SystemHealthThresholds? thresholdsOverride)
     {
         _healthService = healthService;
-        _thresholds = thresholds;
+        _settingsService = settingsService;
+        _thresholdsOverride = thresholdsOverride;
 
         RefreshFromService();
-
-        _pollTimer = new Timer(
-            _ => Dispatcher.UIThread.Post(RefreshFromService),
-            null,
-            PollIntervalMs,
-            PollIntervalMs);
+        _pollTimer = CreatePollTimer(_settingsService.Current.ScanIntervalSeconds);
+        _lastPollIntervalSeconds = _settingsService.Current.ScanIntervalSeconds;
     }
+
+    private readonly SystemHealthThresholds? _thresholdsOverride;
 
     public void Dispose()
     {
@@ -95,9 +99,35 @@ public sealed partial class DashboardViewModel : ViewModelBase, IDisposable
         if (_disposed)
             return;
 
+        EnsurePollInterval();
+
         var snapshot = _healthService.GetSnapshot();
         ApplySnapshot(snapshot);
     }
+
+    private void EnsurePollInterval()
+    {
+        var intervalSeconds = _settingsService.Current.ScanIntervalSeconds;
+        if (Math.Abs(intervalSeconds - _lastPollIntervalSeconds) < 0.01)
+            return;
+
+        _lastPollIntervalSeconds = intervalSeconds;
+        _pollTimer.Dispose();
+        _pollTimer = CreatePollTimer(intervalSeconds);
+    }
+
+    private Timer CreatePollTimer(double intervalSeconds)
+    {
+        var interval = TimeSpan.FromSeconds(Math.Clamp(intervalSeconds, 1, 60));
+        return new Timer(
+            _ => Dispatcher.UIThread.Post(RefreshFromService),
+            null,
+            interval,
+            interval);
+    }
+
+    private SystemHealthThresholds GetThresholds() =>
+        _thresholdsOverride ?? AppSettingsMapper.ToHealthThresholds(_settingsService.Current.HealthThresholds);
 
     private void ApplySnapshot(SystemHealthSnapshot snapshot)
     {
@@ -137,7 +167,8 @@ public sealed partial class DashboardViewModel : ViewModelBase, IDisposable
 
     private KpiCardItem BuildCpuCard(SystemHealthSnapshot snapshot)
     {
-        var (dot, progress) = StatusBrushes(snapshot.CpuPercent, _thresholds.CpuWarningPercent, _thresholds.CpuCriticalPercent);
+        var thresholds = GetThresholds();
+        var (dot, progress) = StatusBrushes(snapshot.CpuPercent, thresholds.CpuWarningPercent, thresholds.CpuCriticalPercent);
 
         return new KpiCardItem
         {
@@ -155,7 +186,8 @@ public sealed partial class DashboardViewModel : ViewModelBase, IDisposable
 
     private KpiCardItem BuildRamCard(SystemHealthSnapshot snapshot)
     {
-        var (dot, progress) = StatusBrushes(snapshot.RamPercent, _thresholds.RamWarningPercent, _thresholds.RamCriticalPercent);
+        var thresholds = GetThresholds();
+        var (dot, progress) = StatusBrushes(snapshot.RamPercent, thresholds.RamWarningPercent, thresholds.RamCriticalPercent);
 
         return new KpiCardItem
         {
@@ -175,7 +207,12 @@ public sealed partial class DashboardViewModel : ViewModelBase, IDisposable
 
     private KpiCardItem BuildDiskCard(SystemHealthSnapshot snapshot)
     {
-        var (dot, progress) = StatusBrushes(snapshot.DiskPercent, _thresholds.DiskWarningPercent, _thresholds.DiskCriticalPercent);
+        var thresholds = GetThresholds();
+        var (dot, progress) = StatusBrushes(snapshot.DiskPercent, thresholds.DiskWarningPercent, thresholds.DiskCriticalPercent);
+
+        var detailText = snapshot.DiskVolumes.Count > 1
+            ? string.Join(" · ", snapshot.DiskVolumes.Select(v => $"{v.DriveLetter}: {v.UsedGb}/{v.TotalGb} GB"))
+            : $"{snapshot.DiskUsedGb:F0} GB / {snapshot.DiskTotalGb:F0} GB";
 
         return new KpiCardItem
         {
@@ -188,7 +225,7 @@ public sealed partial class DashboardViewModel : ViewModelBase, IDisposable
             ShowProgress = true,
             ProgressValue = snapshot.DiskPercent,
             ProgressBrush = progress,
-            DetailText = $"{snapshot.DiskUsedGb:F0} GB / {snapshot.DiskTotalGb:F0} GB",
+            DetailText = detailText,
             ShowDetail = true,
         };
     }

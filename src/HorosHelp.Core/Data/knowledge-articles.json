@@ -1,0 +1,1315 @@
+{
+  "articles": [
+    {
+      "id": "wlan-settings",
+      "categoryId": "netzwerk",
+      "title": "WLAN-Einstellungen oeffnen",
+      "subtitle": "Verbinden und Verwalten von WLAN-Netzwerken",
+      "description": "Oeffnen Sie die WLAN-Einstellungen, um verfuegbare Netzwerke anzuzeigen und zu verwalten.",
+      "deepLink": "ms-settings:network-wifi",
+      "tip": "Vergessenes Netzwerk? Waehlen Sie Vergessen.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer WLAN-Einstellungen oeffnen."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "dns-settings",
+      "categoryId": "netzwerk",
+      "title": "DNS-Server aendern",
+      "subtitle": "Eigene DNS-Server konfigurieren",
+      "description": "Konfigurieren Sie benutzerdefinierte DNS-Server fuer eine stabilere Namensaufloesung.",
+      "deepLink": "ms-settings:network-ethernet",
+      "tip": "Oeffentliche DNS-Server wie 1.1.1.1 oder 8.8.8.8 koennen helfen.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer DNS-Server aendern."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "firewall-settings",
+      "categoryId": "netzwerk",
+      "title": "Firewall konfigurieren",
+      "subtitle": "Windows Defender Firewall anpassen",
+      "description": "Steuern Sie, welche Apps ueber die Firewall kommunizieren duerfen.",
+      "deepLink": "ms-settings:windowsdefender-firewall",
+      "tip": "Lassen Sie die Firewall aktiviert.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Firewall konfigurieren."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "network-profile",
+      "categoryId": "netzwerk",
+      "title": "Netzwerkprofil aendern",
+      "subtitle": "Oeffentliches oder privates Netzwerk",
+      "description": "Legen Sie fest, ob Windows Ihr Netzwerk als oeffentlich oder privat behandelt.",
+      "deepLink": "ms-settings:network-status",
+      "tip": "In oeffentlichen Netzwerken Erkennung ausschalten.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Netzwerkprofil aendern."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "network-reset",
+      "categoryId": "netzwerk",
+      "title": "Netzwerkverbindung zuruecksetzen",
+      "subtitle": "Zuruecksetzen aller Netzwerkkomponenten",
+      "description": "Setzt Netzwerkadapter und Protokolle auf Werkseinstellungen zurueck.",
+      "deepLink": "ms-settings:network-status",
+      "tip": "VPN-Profile vorher sichern.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Netzwerkverbindung zuruecksetzen."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "proxy-settings",
+      "categoryId": "netzwerk",
+      "title": "Proxy-Einstellungen",
+      "subtitle": "Proxy-Server manuell einrichten",
+      "description": "Konfigurieren Sie einen Proxy fuer Firmen- oder Schulnetzwerke.",
+      "deepLink": "ms-settings:network-proxy",
+      "tip": "Automatische Erkennung in Firmennetzen nutzen.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Proxy-Einstellungen."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "adapter-driver",
+      "categoryId": "netzwerk",
+      "title": "Netzwerkadapter aktualisieren",
+      "subtitle": "Treiber fuer Netzwerkadapter aktualisieren",
+      "description": "Aktualisieren Sie den Netzwerktreiber ueber den Geraete-Manager.",
+      "deepLink": "ms-settings:devices",
+      "tip": "Treiber vom Hersteller herunterladen.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Netzwerkadapter aktualisieren."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "ethernet-settings",
+      "categoryId": "netzwerk",
+      "title": "Ethernet-Einstellungen",
+      "subtitle": "Kabelgebundene Verbindung verwalten",
+      "description": "Verwalten Sie Ethernet-Verbindungen, IP-Adressen und Adaptereigenschaften.",
+      "deepLink": "ms-settings:network-ethernet",
+      "tip": "Bei DHCP-Problemen manuellen DNS setzen.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Ethernet-Einstellungen."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "vpn-settings",
+      "categoryId": "netzwerk",
+      "title": "VPN-Verbindungen",
+      "subtitle": "VPN hinzufuegen und verwalten",
+      "description": "Richten Sie VPN-Verbindungen fuer sicheren Fernzugriff ein.",
+      "deepLink": "ms-settings:network-vpn",
+      "tip": "Firmen-VPN braucht oft IT-Profil.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer VPN-Verbindungen."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "mobile-hotspot",
+      "categoryId": "netzwerk",
+      "title": "Mobiler Hotspot",
+      "subtitle": "Internet ueber WLAN teilen",
+      "description": "Teilen Sie Ihre Internetverbindung mit anderen Geraeten.",
+      "deepLink": "ms-settings:network-mobilehotspot",
+      "tip": "Hotspot verbraucht Akku.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Mobiler Hotspot."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "airplane-mode",
+      "categoryId": "netzwerk",
+      "title": "Flugmodus",
+      "subtitle": "Alle Funkverbindungen deaktivieren",
+      "description": "Schalten Sie WLAN, Bluetooth und Mobilfunk mit einem Klick aus.",
+      "deepLink": "ms-settings:network-airplanemode",
+      "tip": "Spart Akku und stoppt Sync.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Flugmodus."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "data-usage",
+      "categoryId": "netzwerk",
+      "title": "Datennutzung",
+      "subtitle": "Verbrauch pro App ueberwachen",
+      "description": "Sehen Sie, welche Apps wie viel Daten verbrauchen.",
+      "deepLink": "ms-settings:datausage",
+      "tip": "Hintergrunddaten bei Mobilfunk begrenzen.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Datennutzung."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "network-troubleshooter",
+      "categoryId": "netzwerk",
+      "title": "Netzwerk-Fehlerbehebung",
+      "subtitle": "Automatische Diagnose starten",
+      "description": "Windows sucht nach haeufigen Netzwerkproblemen.",
+      "deepLink": "ms-settings:troubleshoot",
+      "tip": "Als Administrator ausfuehren.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Netzwerk-Fehlerbehebung."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "display-settings",
+      "categoryId": "system",
+      "title": "Anzeige-Einstellungen",
+      "subtitle": "Aufloesung und Skalierung anpassen",
+      "description": "Passen Sie Bildschirmaufloesung, HDR und Skalierung an.",
+      "deepLink": "ms-settings:display",
+      "tip": "Native Aufloesung bevorzugen.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Anzeige-Einstellungen."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "sound-settings",
+      "categoryId": "system",
+      "title": "Sound-Einstellungen",
+      "subtitle": "Ausgabegeraet und Lautstaerke",
+      "description": "Waehlen Sie Lautsprecher, Kopfhoerer und Standardgeraete.",
+      "deepLink": "ms-settings:sound",
+      "tip": "Bluetooth zuerst koppeln.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Sound-Einstellungen."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "power-settings",
+      "categoryId": "system",
+      "title": "Energieoptionen",
+      "subtitle": "Energiesparmodus und Bildschirmzeit",
+      "description": "Steuern Sie Ruhezustand und Energieplaene.",
+      "deepLink": "ms-settings:powersleep",
+      "tip": "Beste Leistung verbraucht mehr Strom.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Energieoptionen."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "storage-settings",
+      "categoryId": "system",
+      "title": "Speicher verwalten",
+      "subtitle": "Festplattennutzung und Bereinigung",
+      "description": "Sehen Sie Speicherverbrauch nach Kategorien.",
+      "deepLink": "ms-settings:storagesense",
+      "tip": "Temp-Dateien oft mehrere GB.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Speicher verwalten."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "notifications-settings",
+      "categoryId": "system",
+      "title": "Benachrichtigungen",
+      "subtitle": "Hinweise und Fokus-Assistent",
+      "description": "Steuern Sie, welche Apps Benachrichtigungen senden.",
+      "deepLink": "ms-settings:notifications",
+      "tip": "Unnoetige Hinweise deaktivieren.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Benachrichtigungen."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "focus-assist",
+      "categoryId": "system",
+      "title": "Fokus-Assistent",
+      "subtitle": "Stoerungen reduzieren",
+      "description": "Blenden Sie Benachrichtigungen in bestimmten Situationen aus.",
+      "deepLink": "ms-settings:quiethours",
+      "tip": "Zeitplaene fuer Arbeit nutzen.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Fokus-Assistent."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "clipboard-settings",
+      "categoryId": "system",
+      "title": "Zwischenablage",
+      "subtitle": "Verlauf und Synchronisation",
+      "description": "Aktivieren Sie den erweiterten Zwischenablageverlauf.",
+      "deepLink": "ms-settings:clipboard",
+      "tip": "Win+V oeffnet den Verlauf.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Zwischenablage."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "remote-desktop",
+      "categoryId": "system",
+      "title": "Remotedesktop",
+      "subtitle": "Fernzugriff auf diesen PC",
+      "description": "Erlauben Sie anderen Geraeten die Verbindung.",
+      "deepLink": "ms-settings:remotedesktop",
+      "tip": "Nur in vertrauenswuerdigen Netzen.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Remotedesktop."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "bluetooth-settings",
+      "categoryId": "system",
+      "title": "Bluetooth",
+      "subtitle": "Geraete koppeln und verwalten",
+      "description": "Verbinden Sie Kopfhoerer, Maeuse und andere Geraete.",
+      "deepLink": "ms-settings:bluetooth",
+      "tip": "Alte Geraete entfernen.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Bluetooth."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "printers-settings",
+      "categoryId": "system",
+      "title": "Drucker und Scanner",
+      "subtitle": "Geraete hinzufuegen und verwalten",
+      "description": "Installieren und konfigurieren Sie Drucker.",
+      "deepLink": "ms-settings:printers",
+      "tip": "Netzwerkdrucker braucht oft IP.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Drucker und Scanner."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "mouse-settings",
+      "categoryId": "system",
+      "title": "Maus-Einstellungen",
+      "subtitle": "Zeigergeschwindigkeit und Tasten",
+      "description": "Passen Sie Mauszeiger und Scrollen an.",
+      "deepLink": "ms-settings:mousetouchpad",
+      "tip": "Hoehere DPI bei 4K-Monitoren.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Maus-Einstellungen."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "keyboard-settings",
+      "categoryId": "system",
+      "title": "Tastatur-Einstellungen",
+      "subtitle": "Layout und Eingabehilfen",
+      "description": "Waehlen Sie Tastaturlayout und Wiederholungsrate.",
+      "deepLink": "ms-settings:keyboard",
+      "tip": "Win+Leertaste wechselt Layout.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Tastatur-Einstellungen."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "touchpad-settings",
+      "categoryId": "system",
+      "title": "Touchpad",
+      "subtitle": "Gesten und Empfindlichkeit",
+      "description": "Konfigurieren Sie Touchpad-Gesten auf Laptops.",
+      "deepLink": "ms-settings:devices-touchpad",
+      "tip": "Bei Maus Touchpad deaktivieren.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Touchpad."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "night-light",
+      "categoryId": "system",
+      "title": "Nachtlicht",
+      "subtitle": "Blaulichtfilter fuer abends",
+      "description": "Reduzieren Sie blaues Licht am Abend.",
+      "deepLink": "ms-settings:nightlight",
+      "tip": "Automatische Zeiten planen.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Nachtlicht."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "multitasking-settings",
+      "categoryId": "system",
+      "title": "Multitasking",
+      "subtitle": "Fensteranordnung und Desktops",
+      "description": "Steuern Sie Snap-Layouts und virtuelle Desktops.",
+      "deepLink": "ms-settings:multitasking",
+      "tip": "Win+Tab zeigt alle Fenster.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Multitasking."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "about-settings",
+      "categoryId": "system",
+      "title": "Systeminfo",
+      "subtitle": "Windows-Version und Hardware",
+      "description": "Pruefen Sie Windows-Version und Build-Nummer.",
+      "deepLink": "ms-settings:about",
+      "tip": "Win+R winver fuer Schnellinfo.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Systeminfo."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "windows-security",
+      "categoryId": "sicherheit",
+      "title": "Windows-Sicherheit oeffnen",
+      "subtitle": "Virenschutz und Bedrohungsschutz",
+      "description": "Pruefen Sie Schutzstatus und Scans.",
+      "deepLink": "ms-settings:windowsdefender",
+      "tip": "Vollscan bei Verdacht.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Windows-Sicherheit oeffnen."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "bitlocker",
+      "categoryId": "sicherheit",
+      "title": "Geraeteverschluesselung",
+      "subtitle": "BitLocker und Festplattenverschluesselung",
+      "description": "Schuetzen Sie Daten bei Verlust des Geraets.",
+      "deepLink": "ms-settings:deviceencryption",
+      "tip": "Wiederherstellungsschluessel sichern.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Geraeteverschluesselung."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "privacy-settings",
+      "categoryId": "sicherheit",
+      "title": "Datenschutz-Einstellungen",
+      "subtitle": "App-Berechtigungen und Telemetrie",
+      "description": "Steuern Sie Kamera, Mikrofon und Standort.",
+      "deepLink": "ms-settings:privacy",
+      "tip": "Hintergrund-Apps pruefen.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Datenschutz-Einstellungen."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "windows-update",
+      "categoryId": "sicherheit",
+      "title": "Windows Update",
+      "subtitle": "Updates pruefen und installieren",
+      "description": "Halten Sie Windows aktuell.",
+      "deepLink": "ms-settings:windowsupdate",
+      "tip": "Neustarts planen.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Windows Update."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "defender-smartscreen",
+      "categoryId": "sicherheit",
+      "title": "SmartScreen-Filter",
+      "subtitle": "Schutz vor unsicheren Downloads",
+      "description": "Windows warnt vor verdaechtigen Dateien.",
+      "deepLink": "ms-settings:windowsdefender",
+      "tip": "Nicht ohne Grund deaktivieren.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer SmartScreen-Filter."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "ransomware-protection",
+      "categoryId": "sicherheit",
+      "title": "Ransomware-Schutz",
+      "subtitle": "Ordner vor Aenderungen schuetzen",
+      "description": "Kontrollierter Ordnerzugriff schuetzt Dateien.",
+      "deepLink": "ms-settings:windowsdefender",
+      "tip": "Vertrauenswuerdige Apps erlauben.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Ransomware-Schutz."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "find-my-device",
+      "categoryId": "sicherheit",
+      "title": "Geraet suchen",
+      "subtitle": "Verlorenes Geraet orten",
+      "description": "Finden Sie Ihr Windows-Geraet ueber Microsoft-Konto.",
+      "deepLink": "ms-settings:findmydevice",
+      "tip": "Standortdienste aktivieren.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Geraet suchen."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "sign-in-options",
+      "categoryId": "sicherheit",
+      "title": "Anmeldeoptionen",
+      "subtitle": "PIN, Passwort und Windows Hello",
+      "description": "Verwalten Sie Anmeldemethoden.",
+      "deepLink": "ms-settings:signinoptions",
+      "tip": "Hello ist sicherer als kurzes PW.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Anmeldeoptionen."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "dynamic-lock",
+      "categoryId": "sicherheit",
+      "title": "Dynamische Sperre",
+      "subtitle": "PC sperren bei Entfernung",
+      "description": "Sperrt PC wenn Bluetooth-Geraet weg ist.",
+      "deepLink": "ms-settings:signinoptions-dynamiclock",
+      "tip": "Telefon per BT koppeln.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Dynamische Sperre."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "controlled-folder-access",
+      "categoryId": "sicherheit",
+      "title": "Kontrollierter Ordnerzugriff",
+      "subtitle": "Schutz vor Ransomware",
+      "description": "Nur vertrauenswuerdige Apps duerfen Ordner aendern.",
+      "deepLink": "ms-settings:windowsdefender",
+      "tip": "Dokumente schuetzen.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Kontrollierter Ordnerzugriff."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "exploit-protection",
+      "categoryId": "sicherheit",
+      "title": "Exploit-Schutz",
+      "subtitle": "Schutz vor Speicherangriffen",
+      "description": "System gegen Exploits konfigurieren.",
+      "deepLink": "ms-settings:windowsdefender",
+      "tip": "Standardwerte reichen meist.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Exploit-Schutz."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "secure-boot",
+      "categoryId": "sicherheit",
+      "title": "Secure Boot",
+      "subtitle": "UEFI-Sicherheitsstart",
+      "description": "Verhindert nicht signierte Bootloader.",
+      "deepLink": "ms-settings:recovery",
+      "tip": "Vorsicht bei Dual-Boot.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Secure Boot."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "backup-settings",
+      "categoryId": "sicherheit",
+      "title": "Sicherung",
+      "subtitle": "Dateien und Wiederherstellung",
+      "description": "Konfigurieren Sie Dateisicherung.",
+      "deepLink": "ms-settings:backup",
+      "tip": "Externe Platte oder Cloud nutzen.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Sicherung."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "family-safety",
+      "categoryId": "sicherheit",
+      "title": "Familiensicherheit",
+      "subtitle": "Kindersicherung und Bildschirmzeit",
+      "description": "Verwalten Sie Familienkonten.",
+      "deepLink": "ms-settings:family-group",
+      "tip": "Microsoft-Familiengruppe nutzen.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Familiensicherheit."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "installed-apps",
+      "categoryId": "apps",
+      "title": "Installierte Apps verwalten",
+      "subtitle": "Apps deinstallieren oder reparieren",
+      "description": "Entfernen Sie nicht benoetigte Anwendungen.",
+      "deepLink": "ms-settings:appsfeatures",
+      "tip": "System-Apps oft nicht entfernbar.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Installierte Apps verwalten."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "default-apps",
+      "categoryId": "apps",
+      "title": "Standard-Apps festlegen",
+      "subtitle": "Browser, E-Mail und Medienplayer",
+      "description": "Legen Sie Standard-Apps fest.",
+      "deepLink": "ms-settings:defaultapps",
+      "tip": "Nach Dateityp zuordnen.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Standard-Apps festlegen."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "startup-apps",
+      "categoryId": "apps",
+      "title": "Autostart-Apps verwalten",
+      "subtitle": "Programme beim Windows-Start",
+      "description": "Reduzieren Sie Autostart fuer schnelleren Boot.",
+      "deepLink": "ms-settings:startupapps",
+      "tip": "Weniger Eintraege = schnellerer Start.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Autostart-Apps verwalten."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "optional-features",
+      "categoryId": "apps",
+      "title": "Optionale Features",
+      "subtitle": "Windows-Komponenten hinzufuegen",
+      "description": "Installieren Sie WSL oder Hyper-V.",
+      "deepLink": "ms-settings:optionalfeatures",
+      "tip": "WSL fuer Linux-Terminal.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Optionale Features."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "offline-maps",
+      "categoryId": "apps",
+      "title": "Offline-Karten",
+      "subtitle": "Karten ohne Internet nutzen",
+      "description": "Laden Sie Kartenregionen herunter.",
+      "deepLink": "ms-settings:maps",
+      "tip": "Nur benoetigte Regionen laden.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Offline-Karten."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "app-execution-alias",
+      "categoryId": "apps",
+      "title": "App-Ausfuehrungsaliase",
+      "subtitle": "python, wt und andere Befehle",
+      "description": "Steuern Sie Terminal-Kurzbefehle.",
+      "deepLink": "ms-settings:developers",
+      "tip": "Aliase bei Konflikten deaktivieren.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer App-Ausfuehrungsaliase."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "video-playback",
+      "categoryId": "apps",
+      "title": "Video-Wiedergabe",
+      "subtitle": "HDR und Batterieoptimierung",
+      "description": "Optimieren Sie Video fuer Qualitaet oder Akku.",
+      "deepLink": "ms-settings:videoplayback",
+      "tip": "Battery-Saver senkt Aufloesung.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Video-Wiedergabe."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "gaming-settings",
+      "categoryId": "apps",
+      "title": "Gaming-Einstellungen",
+      "subtitle": "Xbox Game Bar und Spielmodus",
+      "description": "Konfigurieren Sie Aufnahme und Spielmodus.",
+      "deepLink": "ms-settings:gaming-gamebar",
+      "tip": "Spielmodus priorisiert Ressourcen.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Gaming-Einstellungen."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "capture-settings",
+      "categoryId": "apps",
+      "title": "Aufnahme und Screenshots",
+      "subtitle": "Win+Druck und Game Bar",
+      "description": "Einstellungen fuer Bildschirmaufnahmen.",
+      "deepLink": "ms-settings:gaming-gamebar",
+      "tip": "Win+Shift+S fuer Snipping.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Aufnahme und Screenshots."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "phone-link",
+      "categoryId": "apps",
+      "title": "Telefonverknuepfung",
+      "subtitle": "Smartphone mit Windows verbinden",
+      "description": "Nachrichten und Anrufe auf dem PC.",
+      "deepLink": "ms-settings:mobile-devices",
+      "tip": "Begleit-App auf dem Handy installieren.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Telefonverknuepfung."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "cortana-settings",
+      "categoryId": "apps",
+      "title": "Sprachassistent",
+      "subtitle": "Spracherkennung und Cortana",
+      "description": "Verwalten Sie Spracherkennung.",
+      "deepLink": "ms-settings:speech",
+      "tip": "Offline-Sprache ohne Cloud.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Sprachassistent."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "developer-settings",
+      "categoryId": "apps",
+      "title": "Entwicklermodus",
+      "subtitle": "Entwickleroptionen aktivieren",
+      "description": "Aktivieren Sie Entwicklerfunktionen.",
+      "deepLink": "ms-settings:developers",
+      "tip": "Erlaubt Sideloading.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer Entwicklermodus."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "apps-volume",
+      "categoryId": "apps",
+      "title": "App-Lautstaerke",
+      "subtitle": "Lautstaerke pro App steuern",
+      "description": "Stellen Sie Lautstaerke einzelner Apps ein.",
+      "deepLink": "ms-settings:sound",
+      "tip": "Lautstaerkemixer per Rechtsklick.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer App-Lautstaerke."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    },
+    {
+      "id": "reset-apps",
+      "categoryId": "apps",
+      "title": "App zuruecksetzen",
+      "subtitle": "Defekte Store-Apps reparieren",
+      "description": "Setzen Sie eine App auf Standardwerte zurueck.",
+      "deepLink": "ms-settings:appsfeatures",
+      "tip": "Erweiterte Optionen > Zuruecksetzen.",
+      "steps": [
+        {
+          "number": 1,
+          "text": "Oeffnen Sie das Startmenue und waehlen Sie Einstellungen."
+        },
+        {
+          "number": 2,
+          "text": "Navigieren Sie zum Bereich fuer App zuruecksetzen."
+        },
+        {
+          "number": 3,
+          "text": "Passen Sie die gewuenschten Optionen an."
+        }
+      ]
+    }
+  ]
+}

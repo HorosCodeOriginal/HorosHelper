@@ -45,4 +45,10 @@ public class KnowledgeBaseServiceTests
         Assert.StartsWith("ms-settings:", article!.DeepLink);
         Assert.NotEmpty(article.Steps);
     }
+
+    [Fact]
+    public void ArticleCount_IsAtLeastFifty()
+    {
+        Assert.True(_service.ArticleCount >= 50);
+    }
 }

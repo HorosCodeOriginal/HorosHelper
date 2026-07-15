@@ -9,4 +9,6 @@ public interface IKnowledgeBaseService
     IReadOnlyList<KnowledgeArticle> GetArticles(string? categoryId = null, string? searchQuery = null);
 
     KnowledgeArticle? GetArticle(string articleId);
+
+    int ArticleCount { get; }
 }

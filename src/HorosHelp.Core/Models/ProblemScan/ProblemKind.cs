@@ -5,4 +5,6 @@ public enum ProblemKind
     Registry,
     TempFiles,
     StartupPrograms,
+    DnsFlush,
+    WinsockReset,
 }

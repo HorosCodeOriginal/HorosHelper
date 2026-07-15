@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using HorosHelp.Core.Models.ProblemScan;
+using HorosHelp.Core.Services.Admin;
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 
@@ -9,13 +10,19 @@ public sealed class ProblemScannerService : IProblemScannerService
 {
     private readonly ILogger<ProblemScannerService> _logger;
     private readonly ProblemScannerThresholds _thresholds;
+    private readonly IAdminElevationService _adminElevationService;
+    private readonly IReadOnlyDictionary<ProblemKind, IRepairAction> _repairActions;
 
     public ProblemScannerService(
         ILogger<ProblemScannerService> logger,
+        IAdminElevationService adminElevationService,
+        IEnumerable<IRepairAction> repairActions,
         ProblemScannerThresholds? thresholds = null)
     {
         _logger = logger;
+        _adminElevationService = adminElevationService;
         _thresholds = thresholds ?? ProblemScannerThresholds.Default;
+        _repairActions = repairActions.ToDictionary(action => action.Kind);
     }
 
     public async Task<ScanResult> ScanAsync(
@@ -103,6 +110,22 @@ public sealed class ProblemScannerService : IProblemScannerService
 
         await Task.Delay(150, cancellationToken);
 
+        // Optional network maintenance repairs
+        Report(97, "Netzwerk-Wartung...", "Optionale Reparaturen verfügbar.",
+            CreateLog("Optionale Netzwerk-Reparaturen geladen", ScanLogStatus.Success));
+
+        problems.Add(BuildOptionalRepairCard(
+            ProblemKind.DnsFlush,
+            "DNS-Cache leeren",
+            "Optional — hilft bei DNS- und Verbindungsproblemen."));
+
+        problems.Add(BuildOptionalRepairCard(
+            ProblemKind.WinsockReset,
+            "Winsock zurücksetzen",
+            "Optional — Neustart erforderlich. Bei hartnäckigen Netzwerkfehlern."));
+
+        await Task.Delay(100, cancellationToken);
+
         Report(100, "Scan abgeschlossen", "Gefundene Probleme können repariert werden.",
             CreateLog("Scan abgeschlossen", ScanLogStatus.Success));
 
@@ -133,11 +156,27 @@ public sealed class ProblemScannerService : IProblemScannerService
 
         var targets = kind.HasValue
             ? new[] { kind.Value }
-            : new[] { ProblemKind.TempFiles, ProblemKind.Registry, ProblemKind.StartupPrograms };
+            : new[]
+            {
+                ProblemKind.TempFiles,
+                ProblemKind.Registry,
+                ProblemKind.StartupPrograms,
+                ProblemKind.DnsFlush,
+                ProblemKind.WinsockReset,
+            };
 
         foreach (var target in targets)
         {
             cancellationToken.ThrowIfCancellationRequested();
+
+            if (_repairActions.TryGetValue(target, out var repairAction))
+            {
+                var repairEntries = await repairAction.ExecuteAsync(
+                    _adminElevationService.IsRunningAsAdmin,
+                    cancellationToken);
+                entries.AddRange(repairEntries);
+                continue;
+            }
 
             switch (target)
             {
@@ -406,6 +445,17 @@ public sealed class ProblemScannerService : IProblemScannerService
             Subtitle = subtitle,
             ProgressValue = SeverityToProgress(severity),
             IsRepairable = false,
+        };
+
+    private static ProblemCard BuildOptionalRepairCard(ProblemKind kind, string title, string subtitle) =>
+        new()
+        {
+            Kind = kind,
+            Severity = ProblemSeverity.Good,
+            Title = title,
+            Subtitle = subtitle,
+            ProgressValue = 0,
+            IsRepairable = true,
         };
 
     private static double SeverityToProgress(ProblemSeverity severity) =>
