@@ -148,6 +148,7 @@ public sealed partial class NetworkService : INetworkService
                 Id = nic.Id,
                 Name = nic.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 ? "WLAN" : nic.Name,
                 Description = nic.Description,
+                NetshInterfaceName = nic.Name,
                 IsConnected = nic.OperationalStatus == OperationalStatus.Up,
                 InterfaceType = nic.NetworkInterfaceType.ToString(),
                 Details = details,

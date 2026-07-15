@@ -11,6 +11,8 @@ public sealed class DriveStorageInfo
     public long FreeBytes { get; init; }
     public double PercentUsed { get; init; }
     public bool IsReady { get; init; }
+    public SmartHealthStatus SmartStatus { get; init; } = SmartHealthStatus.Unknown;
+    public string SmartStatusLabel { get; init; } = "Unbekannt";
 }
 
 public sealed class StorageCategoryInfo

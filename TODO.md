@@ -103,7 +103,7 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 #### Tests
 - [x] Unit-Tests für `SystemHealthService` mit Mock-Daten
 - [x] Schwellenwert-Logik testen
-- [ ] UI-Binding-Tests (ViewModel → View-Updates)
+- [x] UI-Binding-Tests (ViewModel → View-Updates)
 
 ---
 
@@ -137,7 +137,7 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 #### Windows-API-Integration
 - [x] `Process.Start` für System-Kommandos mit Elevation
 - [x] Registry-Zugriff via `Microsoft.Win32.Registry`
-- [ ] Windows-Dienste starten/stoppen via `ServiceController`
+- [x] Windows-Dienste starten/stoppen via `ServiceController`
 
 #### Tests
 - [x] Unit-Tests für jeden Check-Plugin
@@ -173,7 +173,7 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 
 #### Tests
 - [x] Suchfunktions-Tests mit verschiedenen Queries
-- [ ] Deep-Link-Verifikation (Windows-Dialoge öffnen sich korrekt)
+- [x] Deep-Link-Verifikation (Windows-Dialoge öffnen sich korrekt)
 - [x] Artikel-Parsing-Tests
 
 ---
@@ -224,19 +224,19 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 - [x] Ordner-Analyse mit Baumstruktur (größte Verzeichnisse zuerst)
 - [x] Bereinigungsoptionen-Checkliste (Papierkorb, Downloads, Temp, …)
 - [x] Bereinigung-Vorschau (Größe vor Ausführung)
-- [ ] S.M.A.R.T.-Status-Anzeige pro Laufwerk
+- [x] S.M.A.R.T.-Status-Anzeige pro Laufwerk
 
 #### Service / Backend
 - [x] `DiskAnalyzerService` — Verzeichnisbaum mit Größenberechnung
 - [x] `DiskCleanupService`
   - [x] Papierkorb leeren
   - [x] Temp-Ordner bereinigen
-  - [ ] Windows Update Cache (`SoftwareDistribution\Download`)
-  - [ ] Browser-Cache-Erkennung (Chrome, Edge, Firefox)
-- [ ] `SmartDiskService` — S.M.A.R.T.-Daten via WMI
+  - [x] Windows Update Cache (`SoftwareDistribution\Download`)
+  - [x] Browser-Cache-Erkennung (Chrome, Edge, Firefox)
+- [x] `SmartDiskService` — S.M.A.R.T.-Daten via WMI
 
 #### Windows-API-Integration
-- [ ] WMI `Win32_DiskDrive` für S.M.A.R.T.
+- [x] WMI `Win32_DiskDrive` für S.M.A.R.T.
 - [x] `Shell32.SHEmptyRecycleBin` für Papierkorb
 - [x] `Directory.GetFiles` + Größenberechnung rekursiv
 
@@ -256,7 +256,7 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 - [x] Netzwerkadapter-Übersicht (IP, Gateway, DNS, Status)
 - [x] Verbindungstest-Panel (Ping, Tracert, DNS-Lookup)
 - [x] WLAN-Netzwerkliste mit Signalstärke
-- [ ] Diagnose-Assistent (Schritt-für-Schritt Fehlersuche)
+- [x] Diagnose-Assistent (Schritt-für-Schritt Fehlersuche)
 - [x] Reparatur-Aktionen (Adapter zurücksetzen, IP erneuern, DNS flushen)
 
 #### Service / Backend
@@ -265,8 +265,8 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
   - [x] Adapter-Informationen via `NetworkInterface`
 - [x] `NetworkRepairService`
   - [x] `ipconfig /release` + `/renew`
-  - [ ] `netsh winsock reset`
-  - [ ] Adapter deaktivieren / aktivieren
+  - [x] `netsh winsock reset`
+  - [x] Adapter deaktivieren / aktivieren
 - [x] `WifiScannerService` via `NativeWifi` oder WlanAPI (P/Invoke)
 
 #### Windows-API-Integration
@@ -276,7 +276,7 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 
 #### Tests
 - [x] Diagnose-Service-Tests mit Mock-Netzwerkdaten
-- [ ] Reparatur-Aktions-Tests
+- [x] Reparatur-Aktions-Tests
 
 ---
 
@@ -485,6 +485,15 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 ---
 
 ## Erledigt
+
+**2026-07-15 (Phase 2 Netzwerk/Speicher + Phase 1 Polish)**
+
+- Netzwerk: `NetworkRepairService` (DNS flush, Winsock reset, Adapter toggle via netsh), `NetworkDiagnosticWizard` (DNS → Gateway → 8.8.8.8 → Winsock-Hinweis), UI in `NetzwerkView`
+- `RepairCommandBuilder`: Adapter disable/enable + Ping-Host Specs; `DirectoryCleanupHelper` shared mit Problem-Fixer
+- Speicher: `SmartDiskService` / `SmartDiskMapper` (WMI Win32_DiskDrive), S.M.A.R.T.-Badge in `SpeicherView`, `DiskCleanupService` + `DiskCleanupPaths` (WU-Cache, Chrome/Edge/Firefox)
+- Phase 1: `WindowsServiceController` (wuauserv, WSearch) in Repairs; `DeepLinkValidator` + Warn-Log in `KnowledgeBaseService`; ViewModel-Binding-Tests
+- `start/` BAT-Skripte (build, test, publish, start-dev/release)
+- Unit-Tests: 143 gesamt (alle grün)
 
 **2026-07-15 (Phase 1 Abschluss + Phase 2 Startup/Speicher)**
 

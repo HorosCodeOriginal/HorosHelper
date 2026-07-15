@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Text;
 using HorosHelp.Core.Models.ProblemScan;
+using HorosHelp.Core.Services.Windows;
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 
@@ -132,7 +133,14 @@ public sealed class WinsockResetRepair : RepairActionBase
 
 public sealed class WindowsUpdateCacheRepair : RepairActionBase
 {
-    public WindowsUpdateCacheRepair(ILogger<WindowsUpdateCacheRepair> logger) : base(logger) { }
+    private readonly IWindowsServiceController _serviceController;
+
+    public WindowsUpdateCacheRepair(
+        ILogger<WindowsUpdateCacheRepair> logger,
+        IWindowsServiceController serviceController) : base(logger)
+    {
+        _serviceController = serviceController;
+    }
 
     public override ProblemKind Kind => ProblemKind.WindowsUpdateCache;
 
@@ -165,11 +173,11 @@ public sealed class WindowsUpdateCacheRepair : RepairActionBase
         {
             var stopSpec = RepairCommandBuilder.BuildStopWindowsUpdateService();
             entries.Add(CreateLog(stopSpec.Description + "...", ScanLogStatus.InProgress));
-            var stopResult = await RepairProcessRunner.RunAsync(stopSpec, cancellationToken);
+            var stopResult = await _serviceController.StopAsync("wuauserv", cancellationToken: cancellationToken);
             if (!stopResult.Success)
             {
                 entries.Add(CreateLog(
-                    $"{stopSpec.Description} fehlgeschlagen (Code {stopResult.ExitCode}).",
+                    $"{stopSpec.Description} fehlgeschlagen.",
                     ScanLogStatus.Warning));
             }
             else
@@ -183,7 +191,7 @@ public sealed class WindowsUpdateCacheRepair : RepairActionBase
             entries.Add(CreateLog($"Download-Cache wird gelöscht: {downloadPath}", ScanLogStatus.InProgress));
 
             var (deleted, errors) = await Task.Run(
-                () => ClearDirectoryContents(downloadPath, cancellationToken),
+                () => DirectoryCleanupHelper.ClearDirectoryContents(downloadPath, cancellationToken),
                 cancellationToken);
 
             entries.Add(CreateLog(
@@ -195,11 +203,11 @@ public sealed class WindowsUpdateCacheRepair : RepairActionBase
 
             var startSpec = RepairCommandBuilder.BuildStartWindowsUpdateService();
             entries.Add(CreateLog(startSpec.Description + "...", ScanLogStatus.InProgress));
-            var startResult = await RepairProcessRunner.RunAsync(startSpec, cancellationToken);
+            var startResult = await _serviceController.StartAsync("wuauserv", cancellationToken: cancellationToken);
             if (!startResult.Success)
             {
                 entries.Add(CreateLog(
-                    $"{startSpec.Description} fehlgeschlagen (Code {startResult.ExitCode}).",
+                    $"{startSpec.Description} fehlgeschlagen.",
                     ScanLogStatus.Error));
                 return entries;
             }
@@ -213,36 +221,6 @@ public sealed class WindowsUpdateCacheRepair : RepairActionBase
         }
 
         return entries;
-    }
-
-    private static (int Deleted, int Errors) ClearDirectoryContents(string path, CancellationToken cancellationToken)
-    {
-        if (!Directory.Exists(path))
-            return (0, 0);
-
-        var deleted = 0;
-        var errors = 0;
-
-        foreach (var entry in Directory.EnumerateFileSystemEntries(path))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            try
-            {
-                if (Directory.Exists(entry))
-                    Directory.Delete(entry, recursive: true);
-                else
-                    File.Delete(entry);
-
-                deleted++;
-            }
-            catch
-            {
-                errors++;
-            }
-        }
-
-        return (deleted, errors);
     }
 }
 
@@ -519,12 +497,15 @@ public sealed class RegistryRepairAction : IRepairAction
 public sealed class SearchIndexResetRepair : RepairActionBase
 {
     private readonly IRollbackStore _rollbackStore;
+    private readonly IWindowsServiceController _serviceController;
 
     public SearchIndexResetRepair(
         ILogger<SearchIndexResetRepair> logger,
-        IRollbackStore rollbackStore) : base(logger)
+        IRollbackStore rollbackStore,
+        IWindowsServiceController serviceController) : base(logger)
     {
         _rollbackStore = rollbackStore;
+        _serviceController = serviceController;
     }
 
     public override ProblemKind Kind => ProblemKind.SearchIndexReset;
@@ -582,11 +563,11 @@ public sealed class SearchIndexResetRepair : RepairActionBase
 
             var stopSpec = RepairCommandBuilder.BuildStopWindowsSearchService();
             entries.Add(CreateLog(stopSpec.Description + "...", ScanLogStatus.InProgress));
-            var stopResult = await RepairProcessRunner.RunAsync(stopSpec, cancellationToken);
+            var stopResult = await _serviceController.StopAsync("WSearch", cancellationToken: cancellationToken);
             if (!stopResult.Success)
             {
                 entries.Add(CreateLog(
-                    $"{stopSpec.Description} fehlgeschlagen (Code {stopResult.ExitCode}).",
+                    $"{stopSpec.Description} fehlgeschlagen.",
                     ScanLogStatus.Warning));
             }
             else
@@ -602,22 +583,7 @@ public sealed class SearchIndexResetRepair : RepairActionBase
                 entries.Add(CreateLog($"Suchindex-Verzeichnis wird bereinigt: {indexPath}", ScanLogStatus.InProgress));
                 try
                 {
-                    foreach (var entry in Directory.EnumerateFileSystemEntries(indexPath))
-                    {
-                        cancellationToken.ThrowIfCancellationRequested();
-                        try
-                        {
-                            if (Directory.Exists(entry))
-                                Directory.Delete(entry, recursive: true);
-                            else
-                                File.Delete(entry);
-                        }
-                        catch
-                        {
-                            // skip locked files
-                        }
-                    }
-
+                    DirectoryCleanupHelper.ClearDirectoryContents(indexPath, cancellationToken);
                     entries.Add(CreateLog("Suchindex-Verzeichnis bereinigt.", ScanLogStatus.Success));
                 }
                 catch (Exception ex)
@@ -631,11 +597,11 @@ public sealed class SearchIndexResetRepair : RepairActionBase
 
             var startSpec = RepairCommandBuilder.BuildStartWindowsSearchService();
             entries.Add(CreateLog(startSpec.Description + "...", ScanLogStatus.InProgress));
-            var startResult = await RepairProcessRunner.RunAsync(startSpec, cancellationToken);
+            var startResult = await _serviceController.StartAsync("WSearch", cancellationToken: cancellationToken);
             if (!startResult.Success)
             {
                 entries.Add(CreateLog(
-                    $"{startSpec.Description} fehlgeschlagen (Code {startResult.ExitCode}).",
+                    $"{startSpec.Description} fehlgeschlagen.",
                     ScanLogStatus.Error));
                 return entries;
             }

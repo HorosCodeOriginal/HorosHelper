@@ -7,6 +7,7 @@ public sealed class NetworkAdapterInfo
     public required string Description { get; init; }
     public bool IsConnected { get; init; }
     public string InterfaceType { get; init; } = "";
+    public string NetshInterfaceName { get; init; } = "";
     public IReadOnlyList<NetworkDetailInfo> Details { get; init; } = [];
 }
 

@@ -1,14 +1,22 @@
 using HorosHelp.Core.Models.Storage;
+using HorosHelp.Core.Services.ProblemScan;
 using Microsoft.Extensions.Logging;
 
 namespace HorosHelp.Core.Services.Storage;
 
 public sealed class StorageService : IStorageService
 {
+    private readonly ISmartDiskService _smartDiskService;
+    private readonly IDiskCleanupService _diskCleanupService;
     private readonly ILogger<StorageService> _logger;
 
-    public StorageService(ILogger<StorageService> logger)
+    public StorageService(
+        ISmartDiskService smartDiskService,
+        IDiskCleanupService diskCleanupService,
+        ILogger<StorageService> logger)
     {
+        _smartDiskService = smartDiskService;
+        _diskCleanupService = diskCleanupService;
         _logger = logger;
     }
 
@@ -22,7 +30,8 @@ public sealed class StorageService : IStorageService
                 return BuildMockSnapshot();
             }
 
-            var drives = ReadDrives();
+            var drives = ReadDrives().ToList();
+            ApplySmartHealth(drives);
             if (drives.Count == 0)
             {
                 _logger.LogWarning("No ready drives found; returning mock snapshot.");
@@ -254,12 +263,48 @@ public sealed class StorageService : IStorageService
             "Downloads");
         var downloadsBytes = SumDirectorySize(downloadsPath);
 
+        var wuCacheBytes = _diskCleanupService.EstimateWindowsUpdateCacheSize();
+        var browserCaches = _diskCleanupService.GetBrowserCaches();
+        var browserBytes = browserCaches.Sum(c => c.EstimatedSizeBytes);
+
         return new Dictionary<string, (string, long)>(StringComparer.OrdinalIgnoreCase)
         {
             ["temp"] = ("Temporäre Dateien", tempBytes),
             ["recycle"] = ("Papierkorb", recycleBytes),
             ["downloads"] = ("Downloads-Cache", downloadsBytes),
+            ["wucache"] = ("Windows-Update-Cache", wuCacheBytes),
+            ["browser"] = ("Browser-Cache", browserBytes),
         };
+    }
+
+    private void ApplySmartHealth(IList<DriveStorageInfo> drives)
+    {
+        var smartInfos = _smartDiskService.GetDriveHealth();
+
+        for (var i = 0; i < drives.Count; i++)
+        {
+            var drive = drives[i];
+            var smart = smartInfos.FirstOrDefault(s =>
+                string.Equals(s.DriveLetter.TrimEnd('\\'), drive.Letter.TrimEnd('\\'), StringComparison.OrdinalIgnoreCase));
+
+            if (smart is null)
+                continue;
+
+            drives[i] = new DriveStorageInfo
+            {
+                Letter = drive.Letter,
+                Label = drive.Label,
+                DriveType = drive.DriveType,
+                FileSystem = drive.FileSystem,
+                TotalBytes = drive.TotalBytes,
+                UsedBytes = drive.UsedBytes,
+                FreeBytes = drive.FreeBytes,
+                PercentUsed = drive.PercentUsed,
+                IsReady = drive.IsReady,
+                SmartStatus = smart.Status,
+                SmartStatusLabel = smart.StatusLabel,
+            };
+        }
     }
 
     private long EstimateRecycleBinSize(string driveRoot)
@@ -342,6 +387,8 @@ public sealed class StorageService : IStorageService
                 FreeBytes = (long)(88.0 * 1024 * 1024 * 1024),
                 PercentUsed = 71,
                 IsReady = true,
+                SmartStatus = SmartHealthStatus.Ok,
+                SmartStatusLabel = "OK",
             },
             new()
             {
@@ -354,6 +401,8 @@ public sealed class StorageService : IStorageService
                 FreeBytes = (long)(516.9 * 1024 * 1024 * 1024),
                 PercentUsed = 44,
                 IsReady = true,
+                SmartStatus = SmartHealthStatus.Ok,
+                SmartStatusLabel = "OK",
             },
         };
 

@@ -42,6 +42,15 @@
                     <TextBlock Text="{Binding Title}"
                                FontSize="14" FontWeight="SemiBold"
                                Foreground="{DynamicResource BrushTextPrimary}" />
+                    <Border Background="#1E293B"
+                            CornerRadius="10"
+                            Padding="8,4"
+                            HorizontalAlignment="Left"
+                            IsVisible="{Binding ShowSmartBadge}">
+                      <TextBlock Text="{Binding SmartStatusLabel}"
+                                 FontSize="10" FontWeight="SemiBold"
+                                 Foreground="{Binding SmartStatusBrush}" />
+                    </Border>
                     <TextBlock Text="{Binding MediaType}"
                                FontSize="11"
                                Foreground="{DynamicResource BrushTextSecondary}" />

@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -11,14 +12,17 @@ namespace HorosHelp.UI.ViewModels.Features;
 
 public sealed class DriveCardItem
 {
-    public string IconGlyph      { get; init; } = "💾";
-    public string Title          { get; init; } = "";
-    public string MediaType      { get; init; } = "";
-    public string UsedText       { get; init; } = "";
-    public string FreeText       { get; init; } = "";
-    public int    PercentUsed    { get; init; }
-    public string PercentText    { get; init; } = "";
-    public double ProgressValue  { get; init; }
+    public string IconGlyph       { get; init; } = "💾";
+    public string Title           { get; init; } = "";
+    public string MediaType       { get; init; } = "";
+    public string UsedText        { get; init; } = "";
+    public string FreeText        { get; init; } = "";
+    public int    PercentUsed     { get; init; }
+    public string PercentText     { get; init; } = "";
+    public double ProgressValue   { get; init; }
+    public string SmartStatusLabel { get; init; } = "Unbekannt";
+    public IBrush SmartStatusBrush { get; init; } = Brushes.Gray;
+    public bool   ShowSmartBadge  { get; init; } = true;
 }
 
 public sealed class StorageCategoryItem
@@ -48,6 +52,10 @@ public sealed class FolderTreeItem
 
 public sealed partial class SpeicherViewModel : ViewModelBase
 {
+    private static readonly IBrush BrushGreen = new SolidColorBrush(Color.Parse("#22C55E"));
+    private static readonly IBrush BrushAmber = new SolidColorBrush(Color.Parse("#F59E0B"));
+    private static readonly IBrush BrushGray  = new SolidColorBrush(Color.Parse("#64748B"));
+
     private readonly IStorageService _storageService;
     private readonly IDiskAnalyzerService _diskAnalyzerService;
     private readonly INavigationService _navigationService;
@@ -258,6 +266,9 @@ public sealed partial class SpeicherViewModel : ViewModelBase
                 PercentUsed = (int)drive.PercentUsed,
                 PercentText = StorageAnalyzer.FormatPercentText(drive.PercentUsed),
                 ProgressValue = drive.PercentUsed,
+                SmartStatusLabel = $"S.M.A.R.T. {drive.SmartStatusLabel}",
+                SmartStatusBrush = MapSmartBrush(drive.SmartStatus),
+                ShowSmartBadge = true,
             });
         }
 
@@ -305,4 +316,12 @@ public sealed partial class SpeicherViewModel : ViewModelBase
 
         return item;
     }
+
+    private static IBrush MapSmartBrush(SmartHealthStatus status) =>
+        status switch
+        {
+            SmartHealthStatus.Ok => BrushGreen,
+            SmartHealthStatus.Warning => BrushAmber,
+            _ => BrushGray,
+        };
 }

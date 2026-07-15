@@ -1,6 +1,7 @@
 using HorosHelp.Core.Models.ProblemScan;
 using HorosHelp.Core.Services.Admin;
 using HorosHelp.Core.Services.ProblemScan;
+using HorosHelp.Core.Services.Windows;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace HorosHelp.Tests;
@@ -73,14 +74,16 @@ public class ProblemScannerServiceTests
         var rollbackStore = new RollbackStore(NullLogger<RollbackStore>.Instance,
             Path.Combine(Path.GetTempPath(), "HorosHelper-ScannerTests", Guid.NewGuid().ToString("N")));
 
+        var serviceController = new WindowsServiceController(NullLogger<WindowsServiceController>.Instance);
+
         IRepairAction[] repairs =
         [
             new RegistryRepairAction(NullLogger<RegistryRepairAction>.Instance, rollbackStore),
             new DnsFlushRepair(NullLogger<DnsFlushRepair>.Instance),
             new WinsockResetRepair(NullLogger<WinsockResetRepair>.Instance),
-            new WindowsUpdateCacheRepair(NullLogger<WindowsUpdateCacheRepair>.Instance),
+            new WindowsUpdateCacheRepair(NullLogger<WindowsUpdateCacheRepair>.Instance, serviceController),
             new SfcDismRepair(NullLogger<SfcDismRepair>.Instance),
-            new SearchIndexResetRepair(NullLogger<SearchIndexResetRepair>.Instance, rollbackStore),
+            new SearchIndexResetRepair(NullLogger<SearchIndexResetRepair>.Instance, rollbackStore, serviceController),
         ];
 
         IProblemCheck[] checks =

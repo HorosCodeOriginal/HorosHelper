@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\HorosHelp.Core\HorosHelp.Core.csproj" />
+    <ProjectReference Include="..\..\src\HorosHelp.UI\HorosHelp.UI.csproj" />
   </ItemGroup>
 
   <ItemGroup>

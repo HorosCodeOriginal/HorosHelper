@@ -46,4 +46,19 @@ public static class RepairCommandBuilder
             "Microsoft",
             "Search",
             "Data");
+
+    public static RepairCommandSpec BuildDisableAdapter(string interfaceName) =>
+        new(
+            "netsh",
+            $"interface set interface name=\"{interfaceName}\" admin=disable",
+            $"Netzwerkadapter „{interfaceName}“ deaktivieren");
+
+    public static RepairCommandSpec BuildEnableAdapter(string interfaceName) =>
+        new(
+            "netsh",
+            $"interface set interface name=\"{interfaceName}\" admin=enable",
+            $"Netzwerkadapter „{interfaceName}“ aktivieren");
+
+    public static RepairCommandSpec BuildPingHost(string host, int count = 4) =>
+        new("ping", $"-n {count} {host}", $"Ping {host}");
 }

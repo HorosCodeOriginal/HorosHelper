@@ -74,6 +74,8 @@ public sealed class KnowledgeBaseService : IKnowledgeBaseService
             if (articles.Count < 50)
                 logger.LogWarning("Knowledge base contains only {Count} articles; expected at least 50.", articles.Count);
 
+            ValidateDeepLinks(logger, articles);
+
             return articles;
         }
         catch (Exception ex)
@@ -100,6 +102,19 @@ public sealed class KnowledgeBaseService : IKnowledgeBaseService
             return File.ReadAllText(filePath);
 
         throw new FileNotFoundException("Knowledge articles file not found.", filePath);
+    }
+
+    private static void ValidateDeepLinks(ILogger logger, IReadOnlyList<KnowledgeArticle> articles)
+    {
+        var results = DeepLinkValidator.ValidateArticles(articles);
+        foreach (var result in results.Where(r => !r.IsKnown))
+        {
+            logger.LogWarning(
+                "Unbekannter Deep-Link in Artikel {ArticleId}: {DeepLink} (Schema: {Scheme})",
+                result.ArticleId,
+                result.DeepLink,
+                result.Scheme);
+        }
     }
 
     private sealed class KnowledgeArticlesDocument

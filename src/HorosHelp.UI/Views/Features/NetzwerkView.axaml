@@ -176,6 +176,58 @@
               </StackPanel>
             </Grid>
           </Border>
+
+          <!-- Diagnose-Assistent -->
+          <Border Background="#0B1220"
+                  CornerRadius="{DynamicResource RadiusMd}"
+                  Padding="14,12">
+            <StackPanel Spacing="10">
+              <TextBlock Text="{Binding DiagnoseAssistantTitle}"
+                         FontSize="13" FontWeight="SemiBold"
+                         Foreground="{DynamicResource BrushTextPrimary}" />
+              <TextBlock Text="{Binding WizardStepDescription}"
+                         FontSize="12"
+                         TextWrapping="Wrap"
+                         Foreground="{DynamicResource BrushTextSecondary}" />
+              <TextBlock Text="{Binding WizardProgressText}"
+                         FontSize="11"
+                         Foreground="{DynamicResource BrushTextMuted}"
+                         IsVisible="{Binding IsWizardActive}" />
+              <TextBlock Text="{Binding WizardResultText}"
+                         FontSize="12"
+                         TextWrapping="Wrap"
+                         Foreground="{DynamicResource BrushAccentPrimary}"
+                         IsVisible="{Binding IsWizardActive}" />
+              <Button Content="Assistent starten"
+                      Command="{Binding StartDiagnosticWizardCommand}"
+                      HorizontalAlignment="Left"
+                      Padding="12,8"
+                      CornerRadius="{DynamicResource RadiusMd}" />
+            </StackPanel>
+          </Border>
+
+          <!-- Reparatur-Aktionen -->
+          <StackPanel Spacing="8">
+            <TextBlock Text="{Binding RepairActionsTitle}"
+                       FontSize="13" FontWeight="SemiBold"
+                       Foreground="{DynamicResource BrushTextPrimary}" />
+            <UniformGrid Rows="1" Columns="3">
+              <Button Content="DNS leeren"
+                      Command="{Binding FlushDnsCommand}"
+                      Margin="0,0,6,0"
+                      Padding="8,10"
+                      CornerRadius="{DynamicResource RadiusMd}" />
+              <Button Content="Winsock reset"
+                      Command="{Binding ResetWinsockCommand}"
+                      Margin="0,0,6,0"
+                      Padding="8,10"
+                      CornerRadius="{DynamicResource RadiusMd}" />
+              <Button Content="Adapter reset"
+                      Command="{Binding ToggleAdapterCommand}"
+                      Padding="8,10"
+                      CornerRadius="{DynamicResource RadiusMd}" />
+            </UniformGrid>
+          </StackPanel>
         </StackPanel>
       </Border>
 

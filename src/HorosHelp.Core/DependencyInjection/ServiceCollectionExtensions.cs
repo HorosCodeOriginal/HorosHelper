@@ -11,6 +11,7 @@ using HorosHelp.Core.Services.Security;
 using HorosHelp.Core.Services.Settings;
 using HorosHelp.Core.Services.Startup;
 using HorosHelp.Core.Services.Storage;
+using HorosHelp.Core.Services.Windows;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace HorosHelp.Core.DependencyInjection;
@@ -44,10 +45,14 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton<IFileSystemScanner, PhysicalFileSystemScanner>();
         services.AddSingleton<IDiskAnalyzerService, DiskAnalyzerService>();
+        services.AddSingleton<ISmartDiskService, SmartDiskService>();
+        services.AddSingleton<IWindowsServiceController, WindowsServiceController>();
+        services.AddSingleton<IDiskCleanupService, DiskCleanupService>();
         services.AddSingleton<IStorageService, StorageService>();
         services.AddSingleton<IProcessManagerService, ProcessManagerService>();
         services.AddSingleton<IStartupService, StartupService>();
         services.AddSingleton<INetworkService, NetworkService>();
+        services.AddSingleton<INetworkRepairService, NetworkRepairService>();
 
         services.AddSingleton<ISecurityService, SecurityService>();
         services.AddSingleton<IAppMaintenanceService, AppMaintenanceService>();
