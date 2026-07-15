@@ -31,17 +31,8 @@ public sealed class HttpLlmProvider : ILlmProvider
         HttpClient httpClient,
         ISettingsService settingsService,
         ISecureSecretStore secretStore,
-        ILogger<HttpLlmProvider> logger)
-        : this(httpClient, settingsService, secretStore, logger, LlmProviderType.OpenAiCompatible)
-    {
-    }
-
-    public HttpLlmProvider(
-        HttpClient httpClient,
-        ISettingsService settingsService,
-        ISecureSecretStore secretStore,
         ILogger<HttpLlmProvider> logger,
-        LlmProviderType providerType)
+        LlmProviderType providerType = LlmProviderType.OpenAiCompatible)
     {
         _httpClient = httpClient;
         _settingsService = settingsService;
