@@ -23,6 +23,7 @@ public partial class NavItemViewModel : ViewModelBase
         Route = route;
         Label = label;
         IconGeometry = iconGeometry;
+        IconPath = StreamGeometry.Parse(iconGeometry);
         _navigationService = navigationService;
         _onNavigate = onNavigate;
     }
@@ -33,12 +34,14 @@ public partial class NavItemViewModel : ViewModelBase
 
     public string IconGeometry { get; }
 
+    public Geometry IconPath { get; }
+
     [ObservableProperty]
     private bool _isActive;
 
-    public IBrush NavDotForeground => IsActive ? AccentBrush : MutedBrush;
+    public IBrush NavIconForeground => IsActive ? AccentBrush : MutedBrush;
 
-    partial void OnIsActiveChanged(bool value) => OnPropertyChanged(nameof(NavDotForeground));
+    partial void OnIsActiveChanged(bool value) => OnPropertyChanged(nameof(NavIconForeground));
 
     [RelayCommand]
     private void Navigate()

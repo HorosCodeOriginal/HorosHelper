@@ -30,11 +30,16 @@
                         Background="{DynamicResource BrushSurfaceElevated}"
                         BorderBrush="{DynamicResource BrushBorder}"
                         BorderThickness="1">
-                  <TextBlock Text="●"
-                             FontSize="8"
-                             HorizontalAlignment="Center"
-                             VerticalAlignment="Center"
-                             Foreground="{Binding NavDotForeground}" />
+                  <Viewbox Stretch="Uniform" Margin="3">
+                    <Path Data="{Binding IconPath}"
+                          Width="24"
+                          Height="24"
+                          Stroke="{Binding NavIconForeground}"
+                          Fill="Transparent"
+                          StrokeThickness="2"
+                          StrokeLineCap="Round"
+                          StrokeJoin="Round" />
+                  </Viewbox>
                 </Border>
                 <TextBlock Grid.Column="2"
                            Text="{Binding Label}"
