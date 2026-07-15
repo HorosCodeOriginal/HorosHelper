@@ -293,27 +293,27 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 - [x] Firewall-Status und Schnell-Toggle
 - [x] Windows Defender-Status und letzte Scan-Ergebnisse
 - [x] Privatsphäre-Einstellungen-Liste mit Erklärung und Toggle
-- [ ] Update-Status (ausstehende Sicherheitsupdates)
+- [x] Update-Status (ausstehende Sicherheitsupdates)
 
 #### Service / Backend
 - [x] `SecurityService` / `ISecurityService`
   - [x] Windows Defender Status via WMI `SecurityCenter2` + PowerShell-Fallback
   - [x] Firewall-Status via `netsh` + Registry
-  - [ ] UAC-Level prüfen
-  - [ ] Ausstehende Windows-Updates (WUA API oder PowerShell)
-- [ ] `PrivacyService`
-  - [ ] Telemetrie-Einstellungen lesen und schreiben (Registry)
-  - [ ] App-Berechtigungen (Kamera, Mikrofon, Standort) verwalten
-  - [ ] Cortana / Suchdaten-Einstellungen
+  - [x] UAC-Level prüfen
+  - [x] Ausstehende Windows-Updates (WUA API oder PowerShell)
+- [x] `PrivacyService`
+  - [x] Telemetrie-Einstellungen lesen und schreiben (Registry)
+  - [x] App-Berechtigungen (Kamera, Mikrofon, Standort) verwalten
+  - [x] Cortana / Suchdaten-Einstellungen
 
 #### Windows-API-Integration
 - [x] WMI `SecurityCenter2` Namespace
 - [x] Firewall via `netsh` / Registry
-- [ ] Windows Update Agent (WUA) API
+- [x] Windows Update Agent (WUA) API
 
 #### Tests
 - [x] Status-Check-Tests (`SecurityScoreCalculator`)
-- [ ] Privacy-Toggle-Tests (Registry Read/Write Mock)
+- [x] Privacy-Toggle-Tests (Registry Read/Write Mock)
 
 ---
 
@@ -430,10 +430,10 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 
 ### Logging & Fehlerbehandlung
 
-- [ ] Strukturiertes Logging mit Serilog (File + Console Sink)
-- [ ] Globaler Exception-Handler (unbehandelte Fehler abfangen, Log + Nutzer-Dialog)
-- [ ] Crash-Report-Funktion (optional: anonymisiertes Senden an Telemetrie-Endpunkt)
-- [ ] Log-Viewer-Seite in der App (letzte Fehler einsehbar)
+- [x] Strukturiertes Logging mit Serilog (File + Console Sink)
+- [x] Globaler Exception-Handler (unbehandelte Fehler abfangen, Log + Nutzer-Dialog)
+- [x] Crash-Report-Funktion (optional: anonymisiertes Senden an Telemetrie-Endpunkt)
+- [x] Log-Viewer-Seite in der App (letzte Fehler einsehbar)
 
 ### Admin-Rechte & UAC
 
@@ -493,7 +493,17 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 - Speicher: `SmartDiskService` / `SmartDiskMapper` (WMI Win32_DiskDrive), S.M.A.R.T.-Badge in `SpeicherView`, `DiskCleanupService` + `DiskCleanupPaths` (WU-Cache, Chrome/Edge/Firefox)
 - Phase 1: `WindowsServiceController` (wuauserv, WSearch) in Repairs; `DeepLinkValidator` + Warn-Log in `KnowledgeBaseService`; ViewModel-Binding-Tests
 - `start/` BAT-Skripte (build, test, publish, start-dev/release)
-- Unit-Tests: 143 gesamt (alle grün)
+- Unit-Tests: 153 gesamt (alle grün)
+
+**2026-07-15 (Phase 3 Sicherheit/Privacy + Logging)**
+
+- Feature 7: `PrivacyService` / `IPrivacyService` — Telemetrie, Cortana/Bing-Suche, App-Berechtigungen (Kamera/Mikro/Standort) via Registry; Bestätigung + UAC vor Schreibzugriffen
+- `WindowsUpdateService` / `IWindowsUpdateService` — WUA via PowerShell COM, ausstehende Security-Updates + letzte Prüfzeit; in `SecurityService` integriert
+- `SecurityService` erweitert: UAC-Level aus Registry, Windows-Update-Status in `SecuritySnapshot`
+- `SicherheitViewModel` + `SicherheitView`: UAC-Karte, Update-Details, Privatsphäre-Liste mit Umschalten + Bestätigung
+- Logging: Serilog File+Console nach `%LocalAppData%/HorosHelper/logs/`, `GlobalExceptionHandler`, `CrashReportService` (JSON in `logs/crashes/`), `ExceptionNotificationService`
+- Log-Viewer: Kategorie „Protokolle“ in Einstellungen — Dateiliste, Tail letzte 200 Zeilen, Aktualisieren
+- Unit-Tests: `PrivacyServiceTests`, `WindowsUpdateServiceTests`, `LogViewerServiceTests` (Mock-Registry, kein echtes Schreiben)
 
 **2026-07-15 (Phase 1 Abschluss + Phase 2 Startup/Speicher)**
 

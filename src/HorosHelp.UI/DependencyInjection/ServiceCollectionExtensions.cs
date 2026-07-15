@@ -11,6 +11,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddHorosHelpUi(this IServiceCollection services)
     {
         services.AddSingleton<IUacDialogService, UacDialogService>();
+        services.AddSingleton<IExceptionNotificationService, ExceptionNotificationService>();
 
         services.AddSingleton<DashboardViewModel>();
         services.AddSingleton<ProblemFixerViewModel>();

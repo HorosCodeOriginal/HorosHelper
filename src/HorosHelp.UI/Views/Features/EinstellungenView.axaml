@@ -379,6 +379,70 @@
               </Grid>
             </StackPanel>
 
+            <!-- Protokolle -->
+            <StackPanel IsVisible="{Binding ShowProtokolleForm}" Spacing="12">
+              <TextBlock Text="Letzte Protokolle und Fehlerprotokolle einsehen."
+                         FontSize="13" TextWrapping="Wrap"
+                         Foreground="{DynamicResource BrushTextSecondary}" />
+              <TextBlock Text="{Binding LogsDirectoryText}"
+                         FontSize="11"
+                         Foreground="{DynamicResource BrushTextMuted}" />
+              <Grid ColumnDefinitions="220,*" RowDefinitions="Auto,*">
+                <StackPanel Grid.RowSpan="2" Spacing="6" Margin="0,0,12,0">
+                  <Button Command="{Binding RefreshLogFilesCommand}"
+                          Content="Aktualisieren"
+                          FontSize="11"
+                          Padding="10,6"
+                          HorizontalAlignment="Stretch"
+                          CornerRadius="{DynamicResource RadiusSm}"
+                          Background="Transparent"
+                          BorderBrush="{DynamicResource BrushBorder}"
+                          BorderThickness="1" />
+                  <ListBox ItemsSource="{Binding LogFiles}"
+                           SelectedValue="{Binding SelectedLogFileName}"
+                           MinHeight="220">
+                    <ListBox.ItemTemplate>
+                      <DataTemplate x:DataType="vm:LogFileListItem">
+                        <Button Command="{Binding #Root.DataContext.SelectLogFileCommand}"
+                                CommandParameter="{Binding FileName}"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Stretch"
+                                Padding="4,6">
+                          <StackPanel Spacing="2">
+                            <TextBlock Text="{Binding FileName}"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource BrushTextPrimary}" />
+                            <TextBlock Text="{Binding LastModifiedLabel}"
+                                       FontSize="10"
+                                       Foreground="{DynamicResource BrushTextMuted}" />
+                          </StackPanel>
+                        </Button>
+                      </DataTemplate>
+                    </ListBox.ItemTemplate>
+                  </ListBox>
+                </StackPanel>
+                <TextBlock Grid.Column="1"
+                           Text="{Binding SelectedLogFileName}"
+                           FontSize="12" FontWeight="SemiBold"
+                           Foreground="{DynamicResource BrushTextPrimary}" />
+                <ScrollViewer Grid.Column="1" Grid.Row="1"
+                              VerticalScrollBarVisibility="Auto"
+                              Margin="0,8,0,0">
+                  <TextBox Text="{Binding LogTailText}"
+                           IsReadOnly="True"
+                           AcceptsReturn="True"
+                           TextWrapping="Wrap"
+                           FontFamily="Consolas,Courier New,monospace"
+                           FontSize="11"
+                           MinHeight="220"
+                           Background="#0F172A"
+                           BorderBrush="{DynamicResource BrushBorder}" />
+                </ScrollViewer>
+              </Grid>
+            </StackPanel>
+
             <!-- Über -->
             <StackPanel IsVisible="{Binding ShowUeberForm}" Spacing="12">
               <TextBlock Text="{Binding AppVersion}"

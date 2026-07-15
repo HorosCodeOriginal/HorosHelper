@@ -6,6 +6,8 @@ using HorosHelp.Core.Services.Health;
 using HorosHelp.Core.Services.Knowledge;
 using HorosHelp.Core.Services.Network;
 using HorosHelp.Core.Services.Processes;
+using HorosHelp.Core.Services.Logging;
+using HorosHelp.Core.Services.Privacy;
 using HorosHelp.Core.Services.ProblemScan;
 using HorosHelp.Core.Services.Security;
 using HorosHelp.Core.Services.Settings;
@@ -54,7 +56,16 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<INetworkService, NetworkService>();
         services.AddSingleton<INetworkRepairService, NetworkRepairService>();
 
+        services.AddSingleton<IRegistryAccessor, WindowsRegistryAccessor>();
+        services.AddSingleton<IPowerShellQuery, PowerShellQuery>();
+
+        services.AddSingleton<ICrashReportService, CrashReportService>();
+        services.AddSingleton<IGlobalExceptionHandler, GlobalExceptionHandler>();
+        services.AddSingleton<ILogViewerService, LogViewerService>();
+
+        services.AddSingleton<IWindowsUpdateService, WindowsUpdateService>();
         services.AddSingleton<ISecurityService, SecurityService>();
+        services.AddSingleton<IPrivacyService, PrivacyService>();
         services.AddSingleton<IAppMaintenanceService, AppMaintenanceService>();
         services.AddSingleton<IBackupService, BackupService>();
         services.AddSingleton<ICopilotService, CopilotService>();

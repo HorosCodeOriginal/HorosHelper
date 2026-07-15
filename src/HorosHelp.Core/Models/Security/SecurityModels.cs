@@ -27,6 +27,8 @@ public sealed class SecuritySnapshot
     public FirewallStatus Firewall { get; init; } = new();
     public DefenderStatus Defender { get; init; } = new();
     public bool SecurityUpdatesCurrent { get; init; }
+    public WindowsUpdateStatus WindowsUpdate { get; init; } = new();
+    public UacLevelInfo UacLevel { get; init; } = new();
     public IReadOnlyList<LiveProtectionFeatureInfo> LiveProtection { get; init; } = [];
     public bool RealTimeProtectionToggleWritable { get; init; }
     public bool IsRunningAsAdmin { get; init; }

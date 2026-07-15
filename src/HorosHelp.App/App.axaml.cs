@@ -3,6 +3,8 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
+using HorosHelp.Core.Services.Logging;
+using HorosHelp.UI.Services;
 using HorosHelp.UI.ViewModels.Shell;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -42,6 +44,28 @@ public partial class App : Application
     {
         var logger = Services.GetService<ILogger<App>>();
         logger?.LogError(e.Exception, "Unhandled UI thread exception");
+
+        try
+        {
+            var crashService = Services.GetService<ICrashReportService>();
+            var crashPath = crashService?.WriteCrashReport(e.Exception, "UIThread");
+
+            var notifier = Services.GetService<IExceptionNotificationService>();
+            var crashHint = string.IsNullOrWhiteSpace(crashPath)
+                ? ""
+                : $"\n\nCrash-Report: {crashPath}";
+
+            notifier?.ShowError(
+                "UI-Fehler",
+                "Ein Fehler ist in der Benutzeroberfläche aufgetreten. "
+                + "Details wurden ins Protokoll geschrieben."
+                + crashHint);
+        }
+        catch (Exception notifyEx)
+        {
+            logger?.LogError(notifyEx, "Failed to show UI exception notification");
+        }
+
         e.Handled = true;
     }
 }

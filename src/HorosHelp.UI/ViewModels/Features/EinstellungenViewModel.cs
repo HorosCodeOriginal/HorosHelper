@@ -3,6 +3,7 @@ using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HorosHelp.Core.Models.Settings;
+using HorosHelp.Core.Services.Logging;
 using HorosHelp.Core.Services.Settings;
 using Microsoft.Extensions.Logging;
 
@@ -33,6 +34,7 @@ public sealed class SettingsCategoryItem
 public sealed partial class EinstellungenViewModel : ViewModelBase
 {
     private readonly ISettingsService _settingsService;
+    private readonly ILogViewerService _logViewerService;
     private readonly ILogger<EinstellungenViewModel> _logger;
 
     public string Title => "Einstellungen";
@@ -46,6 +48,7 @@ public sealed partial class EinstellungenViewModel : ViewModelBase
         new SettingsCategoryItem { IconGlyph = "▣", Name = "Darstellung", Key = "darstellung", IsActive = false },
         new SettingsCategoryItem { IconGlyph = "⊙", Name = "Scans", Key = "scans", IsActive = false },
         new SettingsCategoryItem { IconGlyph = "🔒", Name = "Datenschutz", Key = "datenschutz", IsActive = false },
+        new SettingsCategoryItem { IconGlyph = "📋", Name = "Protokolle", Key = "protokolle", IsActive = false },
         new SettingsCategoryItem { IconGlyph = "ⓘ", Name = "Über", Key = "ueber", IsActive = false },
     };
 
@@ -61,6 +64,12 @@ public sealed partial class EinstellungenViewModel : ViewModelBase
 
     [ObservableProperty] private string _saveStatusText = "";
 
+    [ObservableProperty] private string _selectedLogFileName = "";
+    [ObservableProperty] private string _logTailText = "";
+    [ObservableProperty] private string _logsDirectoryText = "";
+
+    public ObservableCollection<LogFileListItem> LogFiles { get; } = [];
+
     public ObservableCollection<string> ThemeOptions { get; } = new() { "Dunkel", "Hell", "System" };
     public ObservableCollection<string> LanguageOptions { get; } = new() { "Deutsch", "English" };
 
@@ -69,6 +78,7 @@ public sealed partial class EinstellungenViewModel : ViewModelBase
         "darstellung" => "Darstellung",
         "scans" => "Scans",
         "datenschutz" => "Datenschutz",
+        "protokolle" => "Protokolle",
         "ueber" => "Über",
         _ => "Allgemein",
     };
@@ -77,6 +87,7 @@ public sealed partial class EinstellungenViewModel : ViewModelBase
     public bool ShowDarstellungForm => SelectedCategoryKey == "darstellung";
     public bool ShowScansForm => SelectedCategoryKey == "scans";
     public bool ShowDatenschutzForm => SelectedCategoryKey == "datenschutz";
+    public bool ShowProtokolleForm => SelectedCategoryKey == "protokolle";
     public bool ShowUeberForm => SelectedCategoryKey == "ueber";
 
     public string ScanIntervalText => $"Scan-Intervall: {ScanIntervalSeconds:0} Sekunden";
@@ -89,11 +100,15 @@ public sealed partial class EinstellungenViewModel : ViewModelBase
 
     public EinstellungenViewModel(
         ISettingsService settingsService,
+        ILogViewerService logViewerService,
         ILogger<EinstellungenViewModel> logger)
     {
         _settingsService = settingsService;
+        _logViewerService = logViewerService;
         _logger = logger;
+        LogsDirectoryText = _logViewerService.LogsDirectory;
         ApplySettings(_settingsService.Load());
+        RefreshLogFiles();
     }
 
     [RelayCommand]
@@ -121,7 +136,11 @@ public sealed partial class EinstellungenViewModel : ViewModelBase
         OnPropertyChanged(nameof(ShowDarstellungForm));
         OnPropertyChanged(nameof(ShowScansForm));
         OnPropertyChanged(nameof(ShowDatenschutzForm));
+        OnPropertyChanged(nameof(ShowProtokolleForm));
         OnPropertyChanged(nameof(ShowUeberForm));
+
+        if (key == "protokolle")
+            RefreshLogFiles();
     }
 
     partial void OnScanIntervalSecondsChanged(double value) =>
@@ -169,6 +188,42 @@ public sealed partial class EinstellungenViewModel : ViewModelBase
         }
     }
 
+    [RelayCommand]
+    private void RefreshLogFiles()
+    {
+        LogFiles.Clear();
+        foreach (var file in _logViewerService.GetRecentLogFiles())
+        {
+            LogFiles.Add(new LogFileListItem
+            {
+                FileName = file.FileName,
+                SizeLabel = file.SizeLabel,
+                LastModifiedLabel = file.LastModified.ToLocalTime().ToString("dd.MM.yyyy HH:mm"),
+            });
+        }
+
+        if (LogFiles.Count == 0)
+        {
+            SelectedLogFileName = "";
+            LogTailText = "Keine Protokolldateien gefunden.";
+            return;
+        }
+
+        if (string.IsNullOrEmpty(SelectedLogFileName)
+            || LogFiles.All(f => f.FileName != SelectedLogFileName))
+            SelectLogFile(LogFiles[0].FileName);
+    }
+
+    [RelayCommand]
+    private void SelectLogFile(string? fileName)
+    {
+        if (string.IsNullOrWhiteSpace(fileName))
+            return;
+
+        SelectedLogFileName = fileName;
+        LogTailText = _logViewerService.ReadTail(fileName, 200);
+    }
+
     private void ApplySettings(AppSettings settings)
     {
         OpenOnStartup = settings.OpenOnStartup;
@@ -181,4 +236,11 @@ public sealed partial class EinstellungenViewModel : ViewModelBase
         RamWarnPercent = settings.HealthThresholds.RamWarn;
         DiskWarnPercent = settings.HealthThresholds.DiskWarn;
     }
+}
+
+public sealed class LogFileListItem
+{
+    public string FileName { get; init; } = "";
+    public string SizeLabel { get; init; } = "";
+    public string LastModifiedLabel { get; init; } = "";
 }

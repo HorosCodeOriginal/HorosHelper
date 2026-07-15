@@ -3,8 +3,12 @@ using System.Globalization;
 using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using HorosHelp.Core.Navigation;
+using HorosHelp.Core.Services.Admin;
+using HorosHelp.Core.Services.Privacy;
 using HorosHelp.Core.Services.Security;
+using HorosHelp.UI.Services;
 using Microsoft.Extensions.Logging;
 
 namespace HorosHelp.UI.ViewModels.Features;
@@ -35,6 +39,18 @@ public sealed class LiveProtectionItem
     public IBrush StatusForeground { get; init; } = Brushes.White;
 }
 
+public sealed class PrivacySettingItem
+{
+    public string Id { get; init; } = "";
+    public string Name { get; init; } = "";
+    public string Description { get; init; } = "";
+    public bool IsEnabled { get; init; }
+    public string StatusLabel { get; init; } = "";
+    public bool RequiresAdmin { get; init; }
+    public bool ShowAdminShield { get; init; }
+    public bool IsAppPermission { get; init; }
+}
+
 public sealed partial class SicherheitViewModel : ViewModelBase, IDisposable
 {
     private static readonly IBrush BrushGreen     = new SolidColorBrush(Color.Parse("#22C55E"));
@@ -46,9 +62,13 @@ public sealed partial class SicherheitViewModel : ViewModelBase, IDisposable
     private static readonly IBrush BrushIconBlue  = new SolidColorBrush(Color.Parse("#1D4ED8"));
 
     private readonly ISecurityService _securityService;
+    private readonly IPrivacyService _privacyService;
+    private readonly IAdminElevationService _adminElevationService;
+    private readonly IUacDialogService _uacDialogService;
     private readonly INavigationService _navigationService;
     private readonly ILogger<SicherheitViewModel> _logger;
     private bool _disposed;
+    private bool _isBusy;
 
     public string Title              => "Sicherheits-Zentrale";
     public string Subtitle           => "Überwachen und schützen Sie Ihr System in Echtzeit.";
@@ -62,21 +82,36 @@ public sealed partial class SicherheitViewModel : ViewModelBase, IDisposable
     [ObservableProperty] private string _scoreStatusLabel = "";
     [ObservableProperty] private string _scoreStatusSub = "";
 
+    [ObservableProperty] private string _uacLevelLabel = "—";
+    [ObservableProperty] private string _uacLevelDescription = "";
+    [ObservableProperty] private string _windowsUpdateLabel = "—";
+    [ObservableProperty] private string _windowsUpdateDescription = "";
+    [ObservableProperty] private string _privacyStatusText = "";
+
     public string LiveProtectionTitle => "Echtzeit-Schutzfunktionen";
+    public string PrivacySectionTitle => "Privatsphäre-Einstellungen";
 
     public ObservableCollection<SecurityStatusCardItem> StatusCards { get; } = [];
     public ObservableCollection<LiveProtectionItem> LiveProtectionItems { get; } = [];
+    public ObservableCollection<PrivacySettingItem> PrivacySettings { get; } = [];
 
     public SicherheitViewModel(
         ISecurityService securityService,
+        IPrivacyService privacyService,
+        IAdminElevationService adminElevationService,
+        IUacDialogService uacDialogService,
         INavigationService navigationService,
         ILogger<SicherheitViewModel> logger)
     {
         _securityService = securityService;
+        _privacyService = privacyService;
+        _adminElevationService = adminElevationService;
+        _uacDialogService = uacDialogService;
         _navigationService = navigationService;
         _logger = logger;
 
         _navigationService.Navigated += OnNavigated;
+        _adminElevationService.AdminStatusChanged += OnAdminStatusChanged;
         Dispatcher.UIThread.Post(RefreshFromService);
     }
 
@@ -86,6 +121,7 @@ public sealed partial class SicherheitViewModel : ViewModelBase, IDisposable
             return;
 
         _navigationService.Navigated -= OnNavigated;
+        _adminElevationService.AdminStatusChanged -= OnAdminStatusChanged;
         _disposed = true;
     }
 
@@ -95,9 +131,74 @@ public sealed partial class SicherheitViewModel : ViewModelBase, IDisposable
             Dispatcher.UIThread.Post(RefreshFromService);
     }
 
+    private void OnAdminStatusChanged(object? sender, EventArgs e) =>
+        Dispatcher.UIThread.Post(RefreshFromService);
+
+    [RelayCommand]
+    private async Task Refresh()
+    {
+        if (_isBusy)
+            return;
+
+        _isBusy = true;
+        try
+        {
+            await Task.Run(RefreshFromService);
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task TogglePrivacySetting(PrivacySettingItem? item)
+    {
+        if (item is null || _isBusy)
+            return;
+
+        var newValue = !item.IsEnabled;
+        var action = newValue ? "aktivieren" : "deaktivieren";
+
+        var confirmed = await _uacDialogService.ConfirmAsync(
+            "Privatsphäre ändern",
+            $"Möchten Sie \"{item.Name}\" wirklich {action}?");
+
+        if (!confirmed)
+            return;
+
+        if (item.RequiresAdmin && !_adminElevationService.IsRunningAsAdmin)
+        {
+            var elevate = await _uacDialogService.ConfirmElevationAsync(
+                "Diese Einstellung erfordert Administratorrechte.",
+                "HorosHelper wird mit UAC neu gestartet, um die Änderung anzuwenden.");
+
+            if (elevate)
+                _adminElevationService.RequestElevation();
+
+            PrivacyStatusText = "Administratorrechte erforderlich.";
+            return;
+        }
+
+        _isBusy = true;
+        try
+        {
+            var result = await Task.Run(() => _privacyService.ApplySetting(item.Id, newValue));
+            PrivacyStatusText = result.Message;
+
+            if (result.Success)
+                RefreshFromService();
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+
     private void RefreshFromService()
     {
         var snapshot = _securityService.GetSnapshot();
+        var privacy = _privacyService.GetSnapshot();
 
         ScoreValue = snapshot.SecurityScore;
         ScoreText = snapshot.SecurityScore.ToString(CultureInfo.InvariantCulture);
@@ -111,6 +212,11 @@ public sealed partial class SicherheitViewModel : ViewModelBase, IDisposable
             ? "Alle Sicherheitssysteme aktiv"
             : "Einige Schutzkomponenten benötigen Aufmerksamkeit";
 
+        UacLevelLabel = snapshot.UacLevel.Label;
+        UacLevelDescription = snapshot.UacLevel.Description;
+        WindowsUpdateLabel = snapshot.WindowsUpdate.Label;
+        WindowsUpdateDescription = snapshot.WindowsUpdate.Description;
+
         StatusCards.Clear();
         StatusCards.Add(BuildFirewallCard(snapshot));
         StatusCards.Add(BuildDefenderCard(snapshot));
@@ -118,6 +224,7 @@ public sealed partial class SicherheitViewModel : ViewModelBase, IDisposable
         StatusCards.Add(BuildLastScanCard(snapshot));
         StatusCards.Add(BuildThreatsCard(snapshot));
         StatusCards.Add(BuildUpdatesCard(snapshot));
+        StatusCards.Add(BuildUacCard(snapshot));
 
         LiveProtectionItems.Clear();
         foreach (var feature in snapshot.LiveProtection)
@@ -130,7 +237,44 @@ public sealed partial class SicherheitViewModel : ViewModelBase, IDisposable
             });
         }
 
-        if (snapshot.IsMockData)
+        PrivacySettings.Clear();
+        foreach (var setting in privacy.Settings)
+        {
+            PrivacySettings.Add(new PrivacySettingItem
+            {
+                Id = setting.Id,
+                Name = setting.Name,
+                Description = setting.Description,
+                IsEnabled = setting.IsEnabled,
+                StatusLabel = setting.IsEnabled ? "Aktiv" : "Inaktiv",
+                RequiresAdmin = setting.RequiresAdmin,
+                ShowAdminShield = setting.RequiresAdmin && !snapshot.IsRunningAsAdmin,
+                IsAppPermission = false,
+            });
+        }
+
+        foreach (var permission in privacy.AppPermissions)
+        {
+            PrivacySettings.Add(new PrivacySettingItem
+            {
+                Id = permission.Kind switch
+                {
+                    "webcam" => PrivacySettingIds.Camera,
+                    "microphone" => PrivacySettingIds.Microphone,
+                    "location" => PrivacySettingIds.Location,
+                    _ => permission.Kind,
+                },
+                Name = permission.Name,
+                Description = $"App-Zugriff auf {permission.Name.ToLowerInvariant()}.",
+                IsEnabled = permission.IsAllowed,
+                StatusLabel = permission.Label,
+                RequiresAdmin = false,
+                ShowAdminShield = false,
+                IsAppPermission = true,
+            });
+        }
+
+        if (snapshot.IsMockData || privacy.IsMockData)
             _logger.LogDebug("Security view loaded mock snapshot.");
     }
 
@@ -224,17 +368,30 @@ public sealed partial class SicherheitViewModel : ViewModelBase, IDisposable
     private SecurityStatusCardItem BuildUpdatesCard(Core.Models.Security.SecuritySnapshot snapshot)
     {
         var current = snapshot.SecurityUpdatesCurrent;
+        var pending = snapshot.WindowsUpdate.PendingSecurityUpdates;
         return new SecurityStatusCardItem
         {
             IconGlyph = "↻",
             IconBackground = BrushIconAmber,
             Title = "Sicherheitsaktualisierungen",
-            StatusLabel = current ? "Aktuell" : "Ausstehend",
+            StatusLabel = snapshot.WindowsUpdate.Label,
             StatusForeground = current ? BrushGreen : BrushAmber,
-            Description = current
-                ? "Ihr System ist auf dem neuesten Stand."
-                : "Sicherheitsupdates sollten installiert werden.",
+            Description = pending > 0
+                ? $"{pending} ausstehende Sicherheitsupdate(s). {snapshot.WindowsUpdate.Description}"
+                : snapshot.WindowsUpdate.Description,
             ShowLed = true,
         };
     }
+
+    private SecurityStatusCardItem BuildUacCard(Core.Models.Security.SecuritySnapshot snapshot) =>
+        new()
+        {
+            IconGlyph = "🛡",
+            IconBackground = BrushIconBlue,
+            Title = "UAC-Stufe",
+            StatusLabel = snapshot.UacLevel.Label,
+            StatusForeground = snapshot.UacLevel.IsEnabled ? BrushGreen : BrushRed,
+            Description = snapshot.UacLevel.Description,
+            ShowLed = true,
+        };
 }

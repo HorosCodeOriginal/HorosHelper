@@ -15,11 +15,16 @@ public sealed partial class SecurityService : ISecurityService
 
     private readonly ILogger<SecurityService> _logger;
     private readonly IAdminElevationService _adminElevationService;
+    private readonly IWindowsUpdateService _windowsUpdateService;
 
-    public SecurityService(ILogger<SecurityService> logger, IAdminElevationService adminElevationService)
+    public SecurityService(
+        ILogger<SecurityService> logger,
+        IAdminElevationService adminElevationService,
+        IWindowsUpdateService windowsUpdateService)
     {
         _logger = logger;
         _adminElevationService = adminElevationService;
+        _windowsUpdateService = windowsUpdateService;
     }
 
     public SecuritySnapshot GetSnapshot()
@@ -35,7 +40,9 @@ public sealed partial class SecurityService : ISecurityService
             var isAdmin = _adminElevationService.IsRunningAsAdmin;
             var firewall = ReadFirewallStatus();
             var defender = ReadDefenderStatus();
-            var updatesCurrent = ReadSecurityUpdatesCurrent();
+            var windowsUpdate = _windowsUpdateService.GetStatus();
+            var updatesCurrent = windowsUpdate.IsCurrent;
+            var uacLevel = ReadUacLevel();
             var liveProtection = BuildLiveProtection(defender);
             var recentScan = SecurityScoreCalculator.HasRecentScan(defender.LastQuickScanTime);
 
@@ -54,6 +61,8 @@ public sealed partial class SecurityService : ISecurityService
                 Firewall = firewall,
                 Defender = defender,
                 SecurityUpdatesCurrent = updatesCurrent,
+                WindowsUpdate = windowsUpdate,
+                UacLevel = uacLevel,
                 LiveProtection = liveProtection,
                 RealTimeProtectionToggleWritable = isAdmin,
                 IsRunningAsAdmin = isAdmin,
@@ -257,26 +266,67 @@ public sealed partial class SecurityService : ISecurityService
         }
     }
 
-    private static bool ReadSecurityUpdatesCurrent()
+    private static UacLevelInfo ReadUacLevel()
     {
         try
         {
             using var key = Registry.LocalMachine.OpenSubKey(
-                @"SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\Results\Install");
+                @"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System");
 
-            var lastSuccess = key?.GetValue("LastSuccessTime")?.ToString();
-            if (string.IsNullOrWhiteSpace(lastSuccess))
-                return true;
+            var enableLua = key?.GetValue("EnableLUA");
+            var consent = key?.GetValue("ConsentPromptBehaviorAdmin");
 
-            if (DateTime.TryParse(lastSuccess, out var dt))
-                return dt >= DateTime.Now.AddDays(-30);
+            var luaEnabled = enableLua is not int luaVal || luaVal != 0;
+            var consentBehavior = consent is int consentVal ? consentVal : 5;
 
-            return true;
+            return new UacLevelInfo
+            {
+                IsEnabled = luaEnabled,
+                ConsentPromptBehavior = consentBehavior,
+                Label = GetUacLabel(luaEnabled, consentBehavior),
+                Description = GetUacDescription(luaEnabled, consentBehavior),
+            };
         }
         catch
         {
-            return true;
+            return new UacLevelInfo
+            {
+                IsEnabled = true,
+                ConsentPromptBehavior = 5,
+                Label = "Standard",
+                Description = "UAC-Status konnte nicht gelesen werden.",
+            };
         }
+    }
+
+    private static string GetUacLabel(bool enabled, int consentBehavior)
+    {
+        if (!enabled)
+            return "Deaktiviert";
+
+        return consentBehavior switch
+        {
+            0 => "Nie benachrichtigen",
+            1 => "Immer auffordern (Anmeldedaten)",
+            2 => "Immer benachrichtigen",
+            3 => "Standard mit sicherem Desktop",
+            4 => "Standard ohne sicheren Desktop",
+            5 => "Standard",
+            _ => "Benutzerdefiniert",
+        };
+    }
+
+    private static string GetUacDescription(bool enabled, int consentBehavior)
+    {
+        if (!enabled)
+            return "Benutzerkontensteuerung ist deaktiviert — Sicherheitsrisiko.";
+
+        return consentBehavior switch
+        {
+            0 => "Programme können ohne Aufforderung mit Administratorrechten starten.",
+            1 or 2 => "Sie werden bei jeder Administratoraktion benachrichtigt.",
+            _ => "Windows-Standard für Administratorgenehmigungen.",
+        };
     }
 
     private static IReadOnlyList<LiveProtectionFeatureInfo> BuildLiveProtection(DefenderStatus defender)
@@ -333,6 +383,20 @@ public sealed partial class SecurityService : ISecurityService
             Firewall = new FirewallStatus { IsEnabled = true, Label = "Aktiv" },
             Defender = defender,
             SecurityUpdatesCurrent = true,
+            WindowsUpdate = new WindowsUpdateStatus
+            {
+                PendingSecurityUpdates = 0,
+                IsCurrent = true,
+                Label = "Aktuell",
+                Description = "Keine ausstehenden Sicherheitsupdates (Mock).",
+            },
+            UacLevel = new UacLevelInfo
+            {
+                IsEnabled = true,
+                ConsentPromptBehavior = 5,
+                Label = "Standard",
+                Description = "Windows-Standard für Administratorgenehmigungen.",
+            },
             LiveProtection = BuildLiveProtection(defender),
             RealTimeProtectionToggleWritable = false,
             IsRunningAsAdmin = false,

@@ -3,8 +3,10 @@ using System.IO;
 using System.Threading.Tasks;
 using Avalonia;
 using HorosHelp.Core.DependencyInjection;
+using HorosHelp.Core.Services.Logging;
 using HorosHelp.Core.Services.Settings;
 using HorosHelp.UI.DependencyInjection;
+using HorosHelp.UI.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
@@ -16,10 +18,9 @@ internal static class Program
     [STAThread]
     public static void Main(string[] args)
     {
-        ConfigureGlobalExceptionHandlers();
-
         var logsDirectory = SettingsService.GetDefaultLogsDirectory();
         Directory.CreateDirectory(logsDirectory);
+        Directory.CreateDirectory(Path.Combine(logsDirectory, "crashes"));
 
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Information()
@@ -42,6 +43,10 @@ internal static class Program
             services.AddHorosHelpCore();
             services.AddHorosHelpUi();
             App.Services = services.BuildServiceProvider();
+
+            var globalHandler = App.Services.GetRequiredService<IGlobalExceptionHandler>();
+            globalHandler.Register();
+            globalHandler.UnhandledExceptionOccurred += OnUnhandledExceptionOccurred;
 
             var logger = App.Services.GetRequiredService<ILoggerFactory>().CreateLogger("HorosHelp.App");
             logger.LogInformation("HorosHelper starting");
@@ -69,18 +74,26 @@ internal static class Program
             .WithInterFont()
             .LogToTrace();
 
-    private static void ConfigureGlobalExceptionHandlers()
+    private static void OnUnhandledExceptionOccurred(object? sender, UnhandledExceptionNotification e)
     {
-        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
-        {
-            if (e.ExceptionObject is Exception ex)
-                Log.Fatal(ex, "Unhandled AppDomain exception");
-        };
+        Log.Fatal(e.Exception, "Unhandled exception from {Source}", e.Source);
 
-        TaskScheduler.UnobservedTaskException += (_, e) =>
+        try
         {
-            Log.Error(e.Exception, "Unobserved task exception");
-            e.SetObserved();
-        };
+            var notifier = App.Services?.GetService<IExceptionNotificationService>();
+            var crashHint = string.IsNullOrWhiteSpace(e.CrashReportPath)
+                ? ""
+                : $"\n\nCrash-Report: {e.CrashReportPath}";
+
+            notifier?.ShowError(
+                "Unerwarteter Fehler",
+                "HorosHelper ist auf ein unerwartetes Problem gestoßen. "
+                + "Details wurden ins Protokoll geschrieben."
+                + crashHint);
+        }
+        catch
+        {
+            // Last resort only — logging already happened.
+        }
     }
 }
