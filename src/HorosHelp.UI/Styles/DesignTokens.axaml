@@ -39,7 +39,7 @@
   <CornerRadius x:Key="RadiusMd">8</CornerRadius>
   <CornerRadius x:Key="RadiusLg">12</CornerRadius>
 
-  <x:Double x:Key="SidebarWidth">200</x:Double>
+  <x:Double x:Key="SidebarWidth">199</x:Double>
   <x:Double x:Key="TitleBarHeight">46</x:Double>
   <x:Double x:Key="StatusBarHeight">36</x:Double>
   <x:Double x:Key="NavItemHeight">40</x:Double>

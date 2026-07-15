@@ -379,6 +379,64 @@
               </Grid>
             </StackPanel>
 
+            <!-- Copilot -->
+            <StackPanel IsVisible="{Binding ShowCopilotForm}" Spacing="16">
+              <TextBlock Text="{Binding CopilotSettingsSubtitle}"
+                         FontSize="13" TextWrapping="Wrap"
+                         Foreground="{DynamicResource BrushTextSecondary}" />
+              <Grid ColumnDefinitions="Auto,*,Auto">
+                <Border Width="36" Height="36" CornerRadius="8" Background="#334155">
+                  <TextBlock Text="✦" FontSize="14"
+                             HorizontalAlignment="Center" VerticalAlignment="Center"
+                             Foreground="{DynamicResource BrushAccentPrimary}" />
+                </Border>
+                <TextBlock Grid.Column="1" Text="Provider"
+                           FontSize="13" Foreground="{DynamicResource BrushTextPrimary}"
+                           VerticalAlignment="Center" Margin="12,0,12,0" />
+                <ComboBox Grid.Column="2"
+                          ItemsSource="{Binding CopilotProviderOptions}"
+                          SelectedItem="{Binding CopilotProvider}"
+                          MinWidth="180" />
+              </Grid>
+              <StackPanel IsVisible="{Binding ShowCopilotHttpFields}" Spacing="12">
+                <Grid ColumnDefinitions="Auto,*">
+                  <Border Width="36" Height="36" CornerRadius="8" Background="#334155">
+                    <TextBlock Text="🔗" FontSize="14"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  </Border>
+                  <StackPanel Grid.Column="1" Margin="12,0,0,0" Spacing="6">
+                    <TextBlock Text="{Binding CopilotBaseUrlLabel}"
+                               FontSize="13" Foreground="{DynamicResource BrushTextPrimary}" />
+                    <TextBox Text="{Binding CopilotBaseUrl}"
+                             Watermark="https://api.openai.com oder http://localhost:11434" />
+                  </StackPanel>
+                </Grid>
+                <Grid ColumnDefinitions="Auto,*">
+                  <Border Width="36" Height="36" CornerRadius="8" Background="#334155">
+                    <TextBlock Text="M" FontSize="14" FontWeight="Bold"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Foreground="{DynamicResource BrushTextPrimary}" />
+                  </Border>
+                  <StackPanel Grid.Column="1" Margin="12,0,0,0" Spacing="6">
+                    <TextBlock Text="{Binding CopilotModelLabel}"
+                               FontSize="13" Foreground="{DynamicResource BrushTextPrimary}" />
+                    <TextBox Text="{Binding CopilotModel}"
+                             Watermark="gpt-4o-mini / llama3.2" />
+                  </StackPanel>
+                </Grid>
+              </StackPanel>
+              <StackPanel IsVisible="{Binding ShowCopilotApiKeyField}" Spacing="6">
+                <TextBlock Text="{Binding CopilotApiKeyLabel}"
+                           FontSize="13" Foreground="{DynamicResource BrushTextPrimary}" />
+                <TextBox Text="{Binding CopilotApiKey}"
+                         PasswordChar="•"
+                         Watermark="sk-… (optional)" />
+                <TextBlock Text="{Binding CopilotApiKeyHint}"
+                           FontSize="11" TextWrapping="Wrap"
+                           Foreground="{DynamicResource BrushTextMuted}" />
+              </StackPanel>
+            </StackPanel>
+
             <!-- Protokolle -->
             <StackPanel IsVisible="{Binding ShowProtokolleForm}" Spacing="12">
               <TextBlock Text="Letzte Protokolle und Fehlerprotokolle einsehen."

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Nav_Dashboard" xml:space="preserve"><value>Dashboard</value></data>
+  <data name="Nav_ProblemFixer" xml:space="preserve"><value>Problem Fixer</value></data>
+  <data name="Nav_Wissen" xml:space="preserve"><value>Knowledge</value></data>
+  <data name="Nav_Speicher" xml:space="preserve"><value>Storage</value></data>
+  <data name="Nav_Startup" xml:space="preserve"><value>Startup</value></data>
+  <data name="Nav_Netzwerk" xml:space="preserve"><value>Network</value></data>
+  <data name="Nav_Sicherheit" xml:space="preserve"><value>Security</value></data>
+  <data name="Nav_Apps" xml:space="preserve"><value>Apps</value></data>
+  <data name="Nav_Backup" xml:space="preserve"><value>Backup</value></data>
+  <data name="Nav_Copilot" xml:space="preserve"><value>Copilot</value></data>
+  <data name="Nav_Einstellungen" xml:space="preserve"><value>Settings</value></data>
+  <data name="Copilot_Provider_Offline" xml:space="preserve"><value>Offline (rule-based)</value></data>
+  <data name="Copilot_Provider_OpenAi" xml:space="preserve"><value>OpenAI-compatible</value></data>
+  <data name="Copilot_Provider_Ollama" xml:space="preserve"><value>Ollama (local)</value></data>
+  <data name="Copilot_Settings_Title" xml:space="preserve"><value>Copilot</value></data>
+  <data name="Copilot_Settings_Subtitle" xml:space="preserve"><value>Configure AI provider and endpoint</value></data>
+  <data name="Copilot_BaseUrl" xml:space="preserve"><value>Base URL</value></data>
+  <data name="Copilot_Model" xml:space="preserve"><value>Model</value></data>
+  <data name="Copilot_ApiKey" xml:space="preserve"><value>API key</value></data>
+  <data name="Copilot_ApiKey_Hint" xml:space="preserve"><value>Stored locally via DPAPI — never in plain settings.json.</value></data>
+</root>

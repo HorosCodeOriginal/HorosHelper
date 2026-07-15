@@ -10,6 +10,7 @@ using HorosHelp.Core.Services.Logging;
 using HorosHelp.Core.Services.Privacy;
 using HorosHelp.Core.Services.ProblemScan;
 using HorosHelp.Core.Services.Security;
+using System.Net.Http;
 using HorosHelp.Core.Services.Settings;
 using HorosHelp.Core.Services.Startup;
 using HorosHelp.Core.Services.Storage;
@@ -75,7 +76,16 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IBackupSchedulerService, BackupSchedulerService>();
         services.AddSingleton<IRestorePointService, RestorePointService>();
         services.AddSingleton<IBackupService, BackupService>();
+        services.AddSingleton<ISecureSecretStore, DpapiSecretStore>();
+        services.AddSingleton<RuleBasedCopilotProvider>();
+        services.AddHttpClient<HttpLlmProvider>(client =>
+        {
+            client.Timeout = TimeSpan.FromMinutes(2);
+        });
+        services.AddSingleton<ILlmProviderFactory, LlmProviderFactory>();
+        services.AddSingleton<ICopilotToolExecutor, CopilotToolExecutor>();
         services.AddSingleton<ICopilotService, CopilotService>();
+        services.AddSingleton<ICopilotScanMemory>(sp => sp.GetRequiredService<ICopilotService>());
 
         return services;
     }

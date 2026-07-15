@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 using Avalonia;
 using HorosHelp.Core.DependencyInjection;
+using HorosHelp.Core.Models.Settings;
 using HorosHelp.Core.Services.Backup;
 using HorosHelp.Core.Services.Logging;
 using HorosHelp.Core.Services.Settings;
 using HorosHelp.UI.DependencyInjection;
+using HorosHelp.UI.Resources;
 using HorosHelp.UI.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -34,6 +37,8 @@ internal static class Program
 
         try
         {
+            ApplyStartupCulture();
+
             var services = new ServiceCollection();
             services.AddLogging(builder =>
             {
@@ -97,6 +102,32 @@ internal static class Program
 
         Environment.Exit(result.Success ? 0 : 1);
         return true;
+    }
+
+    private static void ApplyStartupCulture()
+    {
+        var culture = new CultureInfo("de-DE");
+        try
+        {
+            var settingsPath = SettingsService.GetDefaultSettingsPath();
+            if (File.Exists(settingsPath))
+            {
+                var json = File.ReadAllText(settingsPath);
+                var settings = System.Text.Json.JsonSerializer.Deserialize<AppSettings>(
+                    json,
+                    new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                if (settings is not null)
+                    UiStrings.ApplyCulture(settings.Language);
+                return;
+            }
+        }
+        catch
+        {
+            // Default German culture on any read failure.
+        }
+
+        CultureInfo.DefaultThreadCurrentCulture = culture;
+        CultureInfo.DefaultThreadCurrentUICulture = culture;
     }
 
     private static void OnUnhandledExceptionOccurred(object? sender, UnhandledExceptionNotification e)

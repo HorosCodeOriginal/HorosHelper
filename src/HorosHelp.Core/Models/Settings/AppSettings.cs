@@ -10,5 +10,7 @@ public sealed class AppSettings
     public bool NotificationsEnabled { get; set; } = true;
     public HealthThresholdSettings HealthThresholds { get; set; } = new();
     public List<string> FavoriteArticleIds { get; set; } = [];
+
+    public CopilotSettings Copilot { get; set; } = new();
 }
 

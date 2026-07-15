@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Text;
 using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -11,13 +12,13 @@ using Microsoft.Extensions.Logging;
 
 namespace HorosHelp.UI.ViewModels.Features;
 
-public sealed class ChatMessageItem
+public sealed partial class ChatMessageItem : ObservableObject
 {
     private static readonly IBrush UserBubbleBg = new SolidColorBrush(Color.Parse("#1E3A5F"));
     private static readonly IBrush AssistantBubbleBg = new SolidColorBrush(Color.Parse("#1E293B"));
 
     public bool IsUser { get; init; }
-    public string Text { get; init; } = "";
+    [ObservableProperty] private string _text = "";
     public string Time { get; init; } = "";
     public bool ShowReadReceipt { get; init; }
 
@@ -50,8 +51,6 @@ public sealed class SystemContextCardItem
 
 public sealed partial class CopilotViewModel : ViewModelBase, IDisposable
 {
-    private const int TypingDelayMs = 600;
-
     private static readonly IBrush BrushGreen = new SolidColorBrush(Color.Parse("#22C55E"));
     private static readonly IBrush BrushAmber = new SolidColorBrush(Color.Parse("#F59E0B"));
 
@@ -66,6 +65,7 @@ public sealed partial class CopilotViewModel : ViewModelBase, IDisposable
 
     [ObservableProperty] private string _inputText = "";
     [ObservableProperty] private bool _isTyping;
+    [ObservableProperty] private bool _isDiagnosticMode;
 
     public ObservableCollection<ChatMessageItem> Messages { get; } = [];
     public ObservableCollection<ActionCardItem> ActionCards { get; } = [];
@@ -116,20 +116,22 @@ public sealed partial class CopilotViewModel : ViewModelBase, IDisposable
         IsTyping = true;
         try
         {
-            await Task.Delay(TypingDelayMs);
-
-            var context = _copilotService.BuildContext();
-            var response = _copilotService.GenerateResponse(userText, context);
-
-            Messages.Add(new ChatMessageItem
+            var diagnosticState = _copilotService.GetDiagnosticState();
+            if (diagnosticState is not null || IsDiagnosticMode)
             {
-                IsUser = false,
-                Text = response.Message,
-                Time = DateTime.Now.ToString("HH:mm"),
-            });
+                await HandleDiagnosticOrWizardAsync(userText);
+                return;
+            }
 
-            ApplyActionCards(response.Actions);
-            RefreshContext();
+            if (ContainsDiagnosticTrigger(userText))
+            {
+                _copilotService.StartDiagnosticMode();
+                IsDiagnosticMode = true;
+                await HandleDiagnosticOrWizardAsync(userText);
+                return;
+            }
+
+            await StreamAssistantReplyAsync(userText);
         }
         catch (Exception ex)
         {
@@ -144,7 +146,34 @@ public sealed partial class CopilotViewModel : ViewModelBase, IDisposable
         finally
         {
             IsTyping = false;
+            IsDiagnosticMode = _copilotService.GetDiagnosticState() is not null;
         }
+    }
+
+    [RelayCommand]
+    private void StartDiagnostic()
+    {
+        _copilotService.StartDiagnosticMode();
+        IsDiagnosticMode = true;
+        Messages.Add(new ChatMessageItem
+        {
+            IsUser = false,
+            Text = "Diagnose-Modus gestartet. Beschreiben Sie kurz Ihr Problem.",
+            Time = DateTime.Now.ToString("HH:mm"),
+        });
+    }
+
+    [RelayCommand]
+    private void CancelDiagnostic()
+    {
+        _copilotService.CancelDiagnosticMode();
+        IsDiagnosticMode = false;
+        Messages.Add(new ChatMessageItem
+        {
+            IsUser = false,
+            Text = "Diagnose-Modus beendet.",
+            Time = DateTime.Now.ToString("HH:mm"),
+        });
     }
 
     [RelayCommand]
@@ -174,6 +203,51 @@ public sealed partial class CopilotViewModel : ViewModelBase, IDisposable
 
         if (route is not null)
             _navigationService.NavigateTo(route);
+    }
+
+    private async Task HandleDiagnosticOrWizardAsync(string userText)
+    {
+        var response = await _copilotService.ProcessMessageAsync(userText);
+        Messages.Add(new ChatMessageItem
+        {
+            IsUser = false,
+            Text = response.Message,
+            Time = DateTime.Now.ToString("HH:mm"),
+        });
+        ApplyActionCards(response.Actions);
+        RefreshContext();
+    }
+
+    private async Task StreamAssistantReplyAsync(string userText)
+    {
+        var assistantMessage = new ChatMessageItem
+        {
+            IsUser = false,
+            Text = "",
+            Time = DateTime.Now.ToString("HH:mm"),
+        };
+        Messages.Add(assistantMessage);
+
+        var builder = new StringBuilder();
+        var context = _copilotService.BuildContext();
+
+        await foreach (var chunk in _copilotService.StreamResponseAsync(userText, context))
+        {
+            builder.Append(chunk);
+            assistantMessage.Text = builder.ToString();
+        }
+
+        var response = _copilotService.GenerateResponse(userText, context);
+        ApplyActionCards(response.Actions);
+        RefreshContext();
+    }
+
+    private static bool ContainsDiagnosticTrigger(string text)
+    {
+        var lower = text.ToLowerInvariant();
+        return lower.Contains("diagnose", StringComparison.Ordinal)
+            || lower.Contains("diagnostik", StringComparison.Ordinal)
+            || lower.Contains("hilf mir", StringComparison.Ordinal);
     }
 
     private void OnNavigated(object? sender, EventArgs e)

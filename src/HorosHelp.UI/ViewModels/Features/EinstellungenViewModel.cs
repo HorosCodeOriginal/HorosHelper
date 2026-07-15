@@ -4,7 +4,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HorosHelp.Core.Models.Settings;
 using HorosHelp.Core.Services.Logging;
+using HorosHelp.Core.Services.Security;
 using HorosHelp.Core.Services.Settings;
+using HorosHelp.UI.Resources;
 using Microsoft.Extensions.Logging;
 
 namespace HorosHelp.UI.ViewModels.Features;
@@ -34,6 +36,7 @@ public sealed class SettingsCategoryItem
 public sealed partial class EinstellungenViewModel : ViewModelBase
 {
     private readonly ISettingsService _settingsService;
+    private readonly ISecureSecretStore _secretStore;
     private readonly ILogViewerService _logViewerService;
     private readonly ILogger<EinstellungenViewModel> _logger;
 
@@ -48,6 +51,7 @@ public sealed partial class EinstellungenViewModel : ViewModelBase
         new SettingsCategoryItem { IconGlyph = "▣", Name = "Darstellung", Key = "darstellung", IsActive = false },
         new SettingsCategoryItem { IconGlyph = "⊙", Name = "Scans", Key = "scans", IsActive = false },
         new SettingsCategoryItem { IconGlyph = "🔒", Name = "Datenschutz", Key = "datenschutz", IsActive = false },
+        new SettingsCategoryItem { IconGlyph = "✦", Name = "Copilot", Key = "copilot", IsActive = false },
         new SettingsCategoryItem { IconGlyph = "📋", Name = "Protokolle", Key = "protokolle", IsActive = false },
         new SettingsCategoryItem { IconGlyph = "ⓘ", Name = "Über", Key = "ueber", IsActive = false },
     };
@@ -62,6 +66,11 @@ public sealed partial class EinstellungenViewModel : ViewModelBase
     [ObservableProperty] private double _ramWarnPercent = 80;
     [ObservableProperty] private double _diskWarnPercent = 85;
 
+    [ObservableProperty] private string _copilotProvider = "Offline";
+    [ObservableProperty] private string _copilotBaseUrl = "";
+    [ObservableProperty] private string _copilotModel = "";
+    [ObservableProperty] private string _copilotApiKey = "";
+
     [ObservableProperty] private string _saveStatusText = "";
 
     [ObservableProperty] private string _selectedLogFileName = "";
@@ -69,6 +78,29 @@ public sealed partial class EinstellungenViewModel : ViewModelBase
     [ObservableProperty] private string _logsDirectoryText = "";
 
     public ObservableCollection<LogFileListItem> LogFiles { get; } = [];
+
+    public ObservableCollection<string> CopilotProviderOptions { get; } = new()
+    {
+        "Offline",
+        "OpenAiCompatible",
+        "Ollama",
+    };
+
+    public string CopilotProviderDisplay => CopilotProvider switch
+    {
+        "OpenAiCompatible" => UiStrings.CopilotProviderOpenAi,
+        "Ollama" => UiStrings.CopilotProviderOllama,
+        _ => UiStrings.CopilotProviderOffline,
+    };
+
+    public string CopilotSettingsTitle => UiStrings.CopilotSettingsTitle;
+    public string CopilotSettingsSubtitle => UiStrings.CopilotSettingsSubtitle;
+    public string CopilotBaseUrlLabel => UiStrings.CopilotBaseUrl;
+    public string CopilotModelLabel => UiStrings.CopilotModel;
+    public string CopilotApiKeyLabel => UiStrings.CopilotApiKey;
+    public string CopilotApiKeyHint => UiStrings.CopilotApiKeyHint;
+    public bool ShowCopilotHttpFields => CopilotProvider is "OpenAiCompatible" or "Ollama";
+    public bool ShowCopilotApiKeyField => CopilotProvider == "OpenAiCompatible";
 
     public ObservableCollection<string> ThemeOptions { get; } = new() { "Dunkel", "Hell", "System" };
     public ObservableCollection<string> LanguageOptions { get; } = new() { "Deutsch", "English" };
@@ -78,6 +110,7 @@ public sealed partial class EinstellungenViewModel : ViewModelBase
         "darstellung" => "Darstellung",
         "scans" => "Scans",
         "datenschutz" => "Datenschutz",
+        "copilot" => CopilotSettingsTitle,
         "protokolle" => "Protokolle",
         "ueber" => "Über",
         _ => "Allgemein",
@@ -87,6 +120,7 @@ public sealed partial class EinstellungenViewModel : ViewModelBase
     public bool ShowDarstellungForm => SelectedCategoryKey == "darstellung";
     public bool ShowScansForm => SelectedCategoryKey == "scans";
     public bool ShowDatenschutzForm => SelectedCategoryKey == "datenschutz";
+    public bool ShowCopilotForm => SelectedCategoryKey == "copilot";
     public bool ShowProtokolleForm => SelectedCategoryKey == "protokolle";
     public bool ShowUeberForm => SelectedCategoryKey == "ueber";
 
@@ -100,10 +134,12 @@ public sealed partial class EinstellungenViewModel : ViewModelBase
 
     public EinstellungenViewModel(
         ISettingsService settingsService,
+        ISecureSecretStore secretStore,
         ILogViewerService logViewerService,
         ILogger<EinstellungenViewModel> logger)
     {
         _settingsService = settingsService;
+        _secretStore = secretStore;
         _logViewerService = logViewerService;
         _logger = logger;
         LogsDirectoryText = _logViewerService.LogsDirectory;
@@ -136,6 +172,7 @@ public sealed partial class EinstellungenViewModel : ViewModelBase
         OnPropertyChanged(nameof(ShowDarstellungForm));
         OnPropertyChanged(nameof(ShowScansForm));
         OnPropertyChanged(nameof(ShowDatenschutzForm));
+        OnPropertyChanged(nameof(ShowCopilotForm));
         OnPropertyChanged(nameof(ShowProtokolleForm));
         OnPropertyChanged(nameof(ShowUeberForm));
 
@@ -154,6 +191,13 @@ public sealed partial class EinstellungenViewModel : ViewModelBase
 
     partial void OnDiskWarnPercentChanged(double value) =>
         OnPropertyChanged(nameof(DiskWarnText));
+
+    partial void OnCopilotProviderChanged(string value)
+    {
+        OnPropertyChanged(nameof(CopilotProviderDisplay));
+        OnPropertyChanged(nameof(ShowCopilotHttpFields));
+        OnPropertyChanged(nameof(ShowCopilotApiKeyField));
+    }
 
     [RelayCommand]
     private void Save()
@@ -175,9 +219,21 @@ public sealed partial class EinstellungenViewModel : ViewModelBase
                     DiskWarn = DiskWarnPercent,
                 },
                 FavoriteArticleIds = _settingsService.Current.FavoriteArticleIds,
+                Copilot = new CopilotSettings
+                {
+                    Provider = CopilotProvider,
+                    BaseUrl = CopilotBaseUrl.Trim(),
+                    Model = CopilotModel.Trim(),
+                },
             };
 
+            if (!string.IsNullOrWhiteSpace(CopilotApiKey))
+                _secretStore.SetSecret(DpapiSecretStore.CopilotApiKeySecretName, CopilotApiKey.Trim());
+            else if (CopilotProvider == "Offline")
+                _secretStore.SetSecret(DpapiSecretStore.CopilotApiKeySecretName, null);
+
             _settingsService.Save(settings);
+            UiStrings.ApplyCulture(settings.Language);
             SaveStatusText = "Einstellungen gespeichert.";
             _logger.LogInformation("Settings saved via EinstellungenViewModel");
         }
@@ -235,6 +291,12 @@ public sealed partial class EinstellungenViewModel : ViewModelBase
         CpuWarnPercent = settings.HealthThresholds.CpuWarn;
         RamWarnPercent = settings.HealthThresholds.RamWarn;
         DiskWarnPercent = settings.HealthThresholds.DiskWarn;
+        CopilotProvider = settings.Copilot.Provider;
+        CopilotBaseUrl = settings.Copilot.BaseUrl;
+        CopilotModel = settings.Copilot.Model;
+        CopilotApiKey = _secretStore.TryGetSecret(DpapiSecretStore.CopilotApiKeySecretName, out var key) && !string.IsNullOrEmpty(key)
+            ? "********"
+            : "";
     }
 }
 

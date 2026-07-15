@@ -18,4 +18,10 @@
     <ProjectReference Include="..\HorosHelp.Core\HorosHelp.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\Strings.resx" />
+    <EmbeddedResource Update="Resources\Strings.de-DE.resx" />
+    <EmbeddedResource Update="Resources\Strings.en.resx" />
+  </ItemGroup>
+
 </Project>

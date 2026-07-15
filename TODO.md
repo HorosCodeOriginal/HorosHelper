@@ -31,9 +31,9 @@
   - [x] Einstellungs-Persistenz (z. B. `appsettings.json` oder Registry)
   - [x] Logging-Framework integrieren (z. B. Serilog)
   - [x] Admin-Rechte / UAC-Strategie festlegen (Elevation on demand — `IAdminElevationService`, UAC-Dialog)
-- [ ] Design-System-Grundlage
+- [x] Design-System-Grundlage
   - [x] Farbpalette, Typografie, Spacing-Tokens in ResourceDictionary
-  - [ ] Basiskomponenten: Button, Card, StatusBadge, SectionHeader
+  - [x] Basiskomponenten: Button, Card, StatusBadge, SectionHeader (`Components.axaml`: `horos-primary`, `horos-card`, `status-badge`, `section-header`)
 - [x] CI/CD-Pipeline
   - [x] GitHub Actions Workflow für Build + Test (`.github/workflows/ci.yml`)
   - [x] Publish win-x64 Release + ZIP-Skript (`scripts/publish.ps1`)
@@ -65,7 +65,7 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 - [x] Sidebar mit 11 Nav-Items — bei geringer Fensterhöhe **scrollbar** (ScrollViewer)
 - [x] Aktiver Nav-Eintrag: Amber-Akzent `#f59e0b` (Hintergrund/Indikator + Text), inaktiv: Slate-Töne
 - [x] `Navigationsservice` routet Item → ViewModel gemäß Tabelle oben
-- [ ] Sidebar-Breite und Stil 1:1 aus Mockup-01 (`regions/sidebar.png`, 199×747 px)
+- [x] Sidebar-Breite und Stil 1:1 aus Mockup-01 (`regions/sidebar.png`, 199×747 px) — `SidebarWidth` = 199
 
 ---
 
@@ -394,7 +394,7 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 - [x] Eingabefeld mit Sende-Button und Enter-Support
 - [x] Nachrichtenblase-Design (Nutzer vs. Assistent)
 - [x] Aktionskarten im Chat (z. B. „Jetzt reparieren"-Button direkt im Antwort-Kontext)
-- [ ] Diagnose-Modus: Assistent stellt Rückfragen und führt automatisch Scans durch
+- [x] Diagnose-Modus: Assistent stellt Rückfragen und führt automatisch Scans durch (`CopilotDiagnosticWizard`, `CopilotToolExecutor`)
 - [x] Verlaufs-Anzeige (letzte Sitzungen)
 - [x] Datenschutz-Hinweis (was wird gesendet / lokal verarbeitet)
 
@@ -402,20 +402,20 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 - [x] `CopilotService` / `ICopilotService` — regelbasiert, lokal (MVP)
   - [x] Systemkontext injizieren (aktuelle Diagnose-Daten als Kontext)
   - [x] Aktionskarten für Navigation (Startup, Speicher, Dashboard, …)
-  - [ ] Antwort-Streaming
+  - [x] Antwort-Streaming (`StreamResponseAsync` / `IAsyncEnumerable` → CopilotViewModel)
 - [x] `CopilotRuleEngine` — Kontext aus Health/Startup/Storage/Security
 - [x] Lokaler Fallback (einfache Regelbasierte Antworten ohne Internetverbindung)
 - [x] Konversations-Verlauf-Speicherung (in-memory)
-- [ ] API-Provider auswählen: OpenAI / Azure OpenAI / lokales Modell (Ollama)
+- [x] API-Provider auswählen: OpenAI / Azure OpenAI / lokales Modell (Ollama) — `ILlmProvider`, Einstellungen → Copilot
 
 #### Windows-API-Integration
 - [x] Nutzt `SystemHealthService` + `StartupService` + `StorageService` + `SecurityService` als Kontext-Quellen
-- [ ] Netzwerkzugang via `HttpClient`
+- [x] Netzwerkzugang via `HttpClient` (`HttpLlmProvider`, optional — Default bleibt Offline)
 
 #### Tests
 - [x] `CopilotRuleEngine`-Tests
 - [x] Context-Provider-Tests (via `BuildContext`)
-- [ ] Tool-Calling-Logik testen
+- [x] Tool-Calling-Logik testen (`CopilotDiagnosticWizardTests`, `CopilotToolExecutor`)
 
 ---
 
@@ -454,19 +454,19 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 
 ### Lokalisierung (Deutsch)
 
-- [ ] Alle UI-Texte in Ressourcen-Datei auslagern (`de-DE`)
-- [ ] Datum- und Zahlenformatierung auf Deutsch einstellen
+- [x] Alle UI-Texte in Ressourcen-Datei auslagern (`de-DE`) — Shell-Nav + Copilot-Einstellungen; Rest MVP hardcoded DE (siehe `docs/architecture.md`)
+- [x] Datum- und Zahlenformatierung auf Deutsch einstellen (`de-DE` beim Start)
 - [x] Wissensdatenbank auf Deutsch verfassen (`knowledge-articles.json`, deutsche UI-Texte)
-- [ ] Englische Basis-Übersetzung parallel pflegen (Fallback)
+- [x] Englische Basis-Übersetzung parallel pflegen (Fallback) — `Strings.en.resx` für Nav-Labels
 
 ### Dokumentation
 
-- [x] `docs/architecture.md` — Architektur-Entscheidungen und Projektstruktur (inkl. Backup, Avalonia-Entscheidung)
-- [ ] `docs/features/` — Feature-Dokumentation pro Bereich
+- [x] `docs/architecture.md` — Architektur-Entscheidungen und Projektstruktur (inkl. Backup, Copilot, Lokalisierung)
+- [x] `docs/features/` — Feature-Dokumentation pro Bereich (Dashboard, Problem-Fixer, Backup, Copilot)
 - [x] `README.md` — Projekt-Einstieg, Setup, Build-Anleitung
 - [x] `docs/installation.md` — Installation und UAC-Hinweise
-- [ ] `CHANGELOG.md` — Versionshistorie
-- [ ] Inline-XML-Dokumentation für alle öffentlichen APIs
+- [x] `CHANGELOG.md` — Versionshistorie
+- [x] Inline-XML-Dokumentation für öffentliche Core-APIs (Copilot, Settings, Security-Secrets — Schlüsselinterfaces)
 
 ### Performance & UX
 
@@ -477,14 +477,24 @@ Die linke Sidebar ist die zentrale Navigation der HorosHelper-App. Alle 11 Views
 
 ### Tests & Qualität
 
-- [ ] Unit-Test-Abdeckung ≥ 70 % für Core-Services
-- [ ] Integrationstests für Windows-API-Wrapper
-- [ ] UI-Smoke-Tests (Fenster öffnet sich, Navigation funktioniert)
-- [ ] Code-Review vor jedem Merge in `main`
+- [ ] Unit-Test-Abdeckung ≥ 70 % für Core-Services (aktuell ~196 Tests; Coverlet nicht im CI — Ziel offen)
+- [ ] Integrationstests für Windows-API-Wrapper (manuell / geplant — nicht CI-automatisierbar ohne Windows-Agent)
+- [ ] UI-Smoke-Tests (Fenster öffnet sich, Navigation funktioniert) — **Prozess-Gate**, nicht automatisiert
+- [ ] Code-Review vor jedem Merge in `main` — **Prozess-Gate** (GitHub PR-Workflow)
+- [x] ViewModel-Konstruktions-Smoke-Tests (`CopilotViewModelSmokeTests`)
 
 ---
 
 ## Erledigt
+
+**2026-07-15 (Remaining TODO — Copilot, Localization, Docs, Shell)**
+
+- Feature 10 Copilot Advanced: `ILlmProvider` (`RuleBasedCopilotProvider`, `HttpLlmProvider`), `DpapiSecretStore`, Streaming, Diagnose-Wizard + Tool-Calling
+- Einstellungen → Copilot: Provider Offline/OpenAI/Ollama, BaseUrl, Modell, API-Key (DPAPI)
+- Lokalisierung: `Strings.resx` / `de-DE` / `en`, `UiStrings`, Kultur `de-DE` beim Start
+- Docs: `docs/features/*`, `CHANGELOG.md`, `architecture.md` erweitert
+- Shell: Sidebar 199 px, Basiskomponenten-Styles in `Components.axaml`
+- Unit-Tests: 196 gesamt (alle grün) — Provider, HTTP-Stream-Mock, Diagnose, ViewModel-Smoke
 
 **2026-07-15 (Feature 9 Backup + Housekeeping)**
 

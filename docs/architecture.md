@@ -159,9 +159,31 @@ Zentrale Definition: `src/HorosHelp.UI/Styles/DesignTokens.axaml` (Mockup-01).
 | `ColorBorder` / `ColorBorderFocus` | `#334155` / `#F59E0B` | Rahmen, Fokusring |
 | `ColorStatusOk` | `#22C55E` | Gesundheits-OK |
 
-Layout-Konstanten: `SidebarWidth` 200, `TitleBarHeight` 46, `StatusBarHeight` 36, `NavItemHeight` 40. Spacing `Spacing1`–`Spacing6` (4–24 px), Radius `RadiusSm`/`Md`/`Lg`.
+Layout-Konstanten: `SidebarWidth` **199** (Mockup-01), `TitleBarHeight` 46, `StatusBarHeight` 36, `NavItemHeight` 40. Spacing `Spacing1`–`Spacing6` (4–24 px), Radius `RadiusSm`/`Md`/`Lg`.
 
-Komponenten-Styles in `Components.axaml` referenzieren ausschließlich diese Tokens — keine Hardcoded-Farben in Feature-Views.
+Komponenten-Styles in `Components.axaml`: `nav-item`, `horos-card`, `horos-primary`, `status-badge`, `section-header` — referenzieren Design-Tokens.
+
+## Feature 10 — Copilot
+
+**Services:** `ICopilotService`, `ILlmProvider`, `ILlmProviderFactory`, `ICopilotToolExecutor`
+
+| Modus | Verhalten |
+|-------|-----------|
+| Offline (Default) | `RuleBasedCopilotProvider` — `CopilotRuleEngine`, kein Netzwerk |
+| OpenAI-kompatibel | `HttpLlmProvider` → `/v1/chat/completions`, SSE-Streaming |
+| Ollama | `HttpLlmProvider` → `/api/chat`, NDJSON-Streaming |
+
+**Secrets:** `ISecureSecretStore` / `DpapiSecretStore` — API-Key nie in `settings.json`.
+
+**Diagnose:** `CopilotDiagnosticWizard` stellt Rückfragen; bei Zustimmung `RunProblemScan` / `RunNetworkPing`.
+
+**UI:** `CopilotViewModel` streamt Tokens; Einstellungen → Copilot-Kategorie.
+
+## Lokalisierung
+
+- Ressourcen: `HorosHelp.UI/Resources/Strings.resx` (Default DE), `Strings.de-DE.resx`, `Strings.en.resx`
+- `UiStrings` + `Program.ApplyStartupCulture()` — `de-DE` Standard, Englisch für Nav-Labels
+- **MVP:** Restliche UI-Texte bewusst hardcoded auf Deutsch; schrittweise Auslagerung möglich
 
 ## Abhängigkeitsrichtung
 
